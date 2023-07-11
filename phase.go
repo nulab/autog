@@ -1,8 +1,8 @@
 package autog
 
-import "github.com/vibridi/autog/graph"
+import "github.com/vibridi/autog/internal/graph"
 
 type phase interface {
-	Process(*graph.Graph)
+	Process(g *graph.DGraph)
 	Cleanup()
 }

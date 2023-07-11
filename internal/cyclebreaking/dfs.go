@@ -17,7 +17,7 @@ var DepthFirst = &depthFirst{}
 // The ELK code is based on the following resource:
 // "Emden R. Gansner, Eleftherios Koutsofios, Stephen C. North, Kiem-Phong Vo, A technique for
 // drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
-func (p *depthFirst) Process(g *graph.Graph) {
+func (p *depthFirst) Process(g *graph.DGraph) {
 	nodeCount := len(g.Nodes)
 	p.visited = make(graph.NodeSet)
 	p.active = make(graph.NodeSet)
@@ -38,7 +38,7 @@ func (p *depthFirst) Process(g *graph.Graph) {
 
 	for _, e := range p.reversable {
 		e.Reverse()
-		g.IsCyclic = true
+		// g.IsCyclic = true
 	}
 }
 

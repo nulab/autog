@@ -7,11 +7,10 @@ import (
 
 type nodeCoords int8 // placeholder type
 
-// the arg is a graph descriptor, that clients can generate
-func Layout(graph *graph.Graph) nodeCoords {
+func Layout(graph *graph.DGraph) nodeCoords {
 
 	pipeline := [5]phase{
-		cyclebreaking.DepthFirst,
+		cyclebreaking.Greedy,
 		// todo: restore reverted edges if necessary
 	}
 

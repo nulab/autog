@@ -1,7 +1,7 @@
 package graph
 
 type Node struct {
-	ID      int
+	ID      string
 	In, Out []*Edge // this could also be list of nodes
 }
 
