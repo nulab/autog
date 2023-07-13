@@ -38,6 +38,8 @@ func FromAdjacencyList(list map[string][]string) *DGraph {
 	}
 }
 
+// todo: sources and sinks don't yet account for isolated nodes with a self-loop
+
 // Sources returns a list of nodes with no incoming edges
 func (g *DGraph) Sources() []*Node {
 	var sources []*Node

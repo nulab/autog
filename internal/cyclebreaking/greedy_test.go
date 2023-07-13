@@ -1,7 +1,6 @@
 package cyclebreaking
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,29 +8,17 @@ import (
 	"github.com/vibridi/autog/internal/testutils"
 )
 
-func TestDepthFirst(t *testing.T) {
+func TestGreedy(t *testing.T) {
 	testgs := testutils.ReadTestDir("../testutils/elk/cyclic")
-	for _, g := range testgs {
+	for _, g := range testgs[:1] {
 		t.Run(g.Name, func(t *testing.T) {
 			dg := graph.FromAdjacencyList(g.AdjacencyList())
 
-			DepthFirst.Process(dg)
-			DepthFirst.Cleanup()
+			Greedy.Process(dg)
+			Greedy.Cleanup()
 
 			assert.False(t, graph.HasCycles(dg))
-			// printReversedEdges(dg)
+			printReversedEdges(dg)
 		})
-	}
-}
-
-func printReversedEdges(g *graph.DGraph) {
-	for _, n := range g.Nodes {
-		for _, e := range n.Edges() {
-			if e.IsReversed() {
-				e.Reverse()
-				fmt.Println(e)
-				e.Reverse()
-			}
-		}
 	}
 }

@@ -7,6 +7,7 @@ import (
 
 type nodeCoords int8 // placeholder type
 
+// todo: if DGraph is internal, nobody can actually construct instances
 func Layout(graph *graph.DGraph) nodeCoords {
 
 	pipeline := [5]phase{
