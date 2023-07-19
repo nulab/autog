@@ -3,6 +3,7 @@ package autog
 import (
 	"github.com/vibridi/autog/internal/cyclebreaking"
 	"github.com/vibridi/autog/internal/graph"
+	"github.com/vibridi/autog/internal/layering"
 )
 
 type nodeCoords int8 // placeholder type
@@ -11,7 +12,8 @@ type nodeCoords int8 // placeholder type
 func Layout(graph *graph.DGraph) nodeCoords {
 
 	pipeline := [5]phase{
-		cyclebreaking.Greedy,
+		cyclebreaking.Greedy, // cycle break (input: directed graph, output: directed acyclic graph)
+		layering.NetworkSimplex,
 		// todo: restore reverted edges if necessary
 	}
 
@@ -19,8 +21,6 @@ func Layout(graph *graph.DGraph) nodeCoords {
 		p.Process(graph)
 		p.Cleanup()
 	}
-
-	// cycle break (input: directed graph, output: acyclic)
 
 	// layering (input: DAG, output: layered graph)
 

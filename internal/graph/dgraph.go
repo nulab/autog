@@ -8,12 +8,14 @@ import (
 
 type DGraph struct {
 	Nodes []*Node
+	Edges []*Edge
 	// IsCyclic bool
 }
 
 // todo: this can probably become generic, to allow arbitrary ID types
 func FromAdjacencyList(list map[string][]string) *DGraph {
 	nodeMap := map[string]*Node{}
+	edgeList := []*Edge{}
 	for sourceId, targetIds := range list {
 		n := nodeMap[sourceId]
 		if n == nil {
@@ -25,6 +27,7 @@ func FromAdjacencyList(list map[string][]string) *DGraph {
 				m = &Node{ID: targetId}
 			}
 			e := &Edge{From: n, To: m}
+			edgeList = append(edgeList, e)
 
 			m.In = append(m.In, e)
 			n.Out = append(n.Out, e)
@@ -34,7 +37,8 @@ func FromAdjacencyList(list map[string][]string) *DGraph {
 		nodeMap[sourceId] = n
 	}
 	return &DGraph{
-		Nodes: maps.Values(nodeMap),
+		Nodes: maps.Values(nodeMap), // todo: non-deterministic
+		Edges: edgeList,
 	}
 }
 

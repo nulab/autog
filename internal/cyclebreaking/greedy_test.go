@@ -10,7 +10,7 @@ import (
 
 func TestGreedy(t *testing.T) {
 	testgs := testutils.ReadTestDir("../testutils/elk/cyclic")
-	for _, g := range testgs[:1] {
+	for _, g := range testgs {
 		t.Run(g.Name, func(t *testing.T) {
 			dg := graph.FromAdjacencyList(g.AdjacencyList())
 

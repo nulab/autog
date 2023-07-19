@@ -27,7 +27,7 @@ func TestDepthFirst(t *testing.T) {
 func printReversedEdges(g *graph.DGraph) {
 	for _, n := range g.Nodes {
 		for _, e := range n.Edges() {
-			if e.IsReversed() {
+			if e.IsReversed {
 				e.Reverse()
 				fmt.Println(e)
 				e.Reverse()

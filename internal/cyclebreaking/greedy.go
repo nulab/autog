@@ -58,7 +58,7 @@ var Greedy = &greedy{}
 //     Graph Drawing: Algorithms for the Visualization of Graphs, Prentice Hall, New Jersey, 1999 (Section 9.4).
 //
 // The algorithm arranges the nodes of G in an arc diagram, with source nodes to the right and sink nodes to the left.
-// Then it reverses edges that point left.
+// Then it reverses edges that point right.
 func (p *greedy) Process(g *graph.DGraph) {
 	p.rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 	p.arcdiag = nodemap{}
