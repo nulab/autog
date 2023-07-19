@@ -9,7 +9,9 @@ import (
 type DGraph struct {
 	Nodes []*Node
 	Edges []*Edge
-	// IsCyclic bool
+
+	// unexported
+	isCyclic *bool
 }
 
 // todo: this can probably become generic, to allow arbitrary ID types

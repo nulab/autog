@@ -1,28 +1,30 @@
-package testutils
+package testfiles
 
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/vibridi/autog/internal/elk"
 )
 
-func ReadTestDir(dir string) []*Graph {
+func ReadTestDir(dir string) []*elk.Graph {
 	fs, err := os.ReadDir(dir)
 	if err != nil {
 		panic(err)
 	}
-	graphs := make([]*Graph, len(fs))
+	graphs := make([]*elk.Graph, len(fs))
 	for i, f := range fs {
 		graphs[i] = ReadTestFile(dir, f.Name())
 	}
 	return graphs
 }
 
-func ReadTestFile(dir, name string) *Graph {
+func ReadTestFile(dir, name string) *elk.Graph {
 	b, err := os.ReadFile(dir + "/" + name)
 	if err != nil {
 		panic(err)
 	}
-	g := Graph{
+	g := elk.Graph{
 		Name: name,
 	}
 	err = json.Unmarshal(b, &g)

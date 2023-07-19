@@ -1,12 +1,11 @@
 package graph
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vibridi/autog/internal/testutils"
+	"github.com/vibridi/autog/internal/testfiles"
 )
 
 func TestConnectedComponents(t *testing.T) {
@@ -24,16 +23,14 @@ func TestConnectedComponents(t *testing.T) {
 		},
 		{
 			"gt_diningphilosophers_DiningPhilosophers.json",
-			[][]string{{"N1", "N11"}, {"N20"}, {"N21"}, {}, {}},
+			[][]string{{"N1", "N11"}, {"N20", "N21"}, {"N5", "N6", "N7", "N4", "N3", "N8", "N2", "N10", "N9"}, {"N16", "N13", "N14", "N17", "N19", "N18", "N12", "N15"}, {"N22", "N23", "N24", "N25", "N26", "N27", "N28", "N29", "N30", "N31"}},
 		},
 	}
 
 	for _, c := range tests {
 		t.Run(c.filename, func(t *testing.T) {
-			g := testutils.ReadTestFile("../testutils/elk/cyclic", c.filename)
+			g := testfiles.ReadTestFile("../internal/testfiles/elk_original", c.filename)
 			dg := FromAdjacencyList(g.AdjacencyList())
-			fmt.Printf("%q\n", nodeIds(dg))
-
 			subgs := dg.ConnectedComponents()
 			assertComponents(t, subgs, c.want)
 		})

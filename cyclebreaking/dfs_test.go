@@ -6,18 +6,18 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vibridi/autog/graph"
-	"github.com/vibridi/autog/internal/testutils"
+	"github.com/vibridi/autog/internal/testfiles"
 )
 
 func TestDepthFirst(t *testing.T) {
-	testgs := testutils.ReadTestDir("../internal/testutils/elk/cyclic")
+	testgs := testfiles.ReadTestDir("../internal/testfiles/elk_original")
 	for _, g := range testgs {
 		t.Run(g.Name, func(t *testing.T) {
 			dg := graph.FromAdjacencyList(g.AdjacencyList())
 
 			execDepthFirst(dg)
 
-			assert.False(t, graph.HasCycles(dg))
+			assert.False(t, dg.HasCycles())
 			// printReversedEdges(dg)
 		})
 	}

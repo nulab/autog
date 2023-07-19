@@ -1,0 +1,508 @@
+{
+	"id": "G1",
+	"children": [
+		{
+			"id": "N1",
+			"ports": [
+				{
+					"id": "P1",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L1",
+					"text": "N1",
+					"width": 74,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 41,
+			"height": 41
+		},
+		{
+			"id": "N2",
+			"ports": [
+				{
+					"id": "P2",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P3",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L2",
+					"text": "N2",
+					"width": 59,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 66,
+			"height": 29
+		},
+		{
+			"id": "N3",
+			"ports": [
+				{
+					"id": "P4",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P5",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "-1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L3",
+					"text": "N3",
+					"width": 80,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 41,
+			"height": 41
+		},
+		{
+			"id": "N4",
+			"ports": [
+				{
+					"id": "P6",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P7",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L4",
+					"text": "N4",
+					"width": 112,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 31,
+			"height": 31
+		},
+		{
+			"id": "N5",
+			"ports": [
+				{
+					"id": "P8",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P9",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "-1"
+					}
+				},
+				{
+					"id": "P10",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "2"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L5",
+					"text": "N5",
+					"width": 40,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 60,
+			"height": 40
+		},
+		{
+			"id": "N6",
+			"ports": [
+				{
+					"id": "P11",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P12",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "-1"
+					}
+				},
+				{
+					"id": "P13",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "2"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L6",
+					"text": "N6",
+					"width": 72,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 41,
+			"height": 41
+		},
+		{
+			"id": "N7",
+			"ports": [
+				{
+					"id": "P14",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P15",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "-1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L7",
+					"text": "N7",
+					"width": 42,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 18,
+			"height": 25
+		},
+		{
+			"id": "N8",
+			"ports": [
+				{
+					"id": "P16",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P17",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L8",
+					"text": "N8",
+					"width": 87,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 18,
+			"height": 25
+		},
+		{
+			"id": "N9",
+			"ports": [
+				{
+					"id": "P18",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P19",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				},
+				{
+					"id": "P20",
+					"properties": {
+						"port.side": "SOUTH",
+						"port.index": "-2"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L9",
+					"text": "N9",
+					"width": 35,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 66,
+			"height": 46
+		},
+		{
+			"id": "N10",
+			"ports": [
+				{
+					"id": "P21",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P22",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "-1"
+					}
+				},
+				{
+					"id": "P23",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "2"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L10",
+					"text": "N10",
+					"width": 75,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 61,
+			"height": 31
+		},
+		{
+			"id": "N11",
+			"ports": [
+				{
+					"id": "P24",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P25",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "-1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L11",
+					"text": "N11",
+					"width": 42,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 18,
+			"height": 25
+		}
+	],
+	"edges": [
+		{
+			"id": "E1",
+			"sources": [
+				"P3"
+			],
+			"targets": [
+				"P8"
+			]
+		},
+		{
+			"id": "E2",
+			"sources": [
+				"P4"
+			],
+			"targets": [
+				"P2"
+			]
+		},
+		{
+			"id": "E3",
+			"sources": [
+				"P4"
+			],
+			"targets": [
+				"P6"
+			]
+		},
+		{
+			"id": "E4",
+			"sources": [
+				"P7"
+			],
+			"targets": [
+				"P1"
+			]
+		},
+		{
+			"id": "E5",
+			"sources": [
+				"P10"
+			],
+			"targets": [
+				"P16"
+			]
+		},
+		{
+			"id": "E6",
+			"sources": [
+				"P10"
+			],
+			"targets": [
+				"P18"
+			]
+		},
+		{
+			"id": "E7",
+			"sources": [
+				"P10"
+			],
+			"targets": [
+				"P21"
+			]
+		},
+		{
+			"id": "E8",
+			"sources": [
+				"P13"
+			],
+			"targets": [
+				"P9"
+			]
+		},
+		{
+			"id": "E9",
+			"sources": [
+				"P14"
+			],
+			"targets": [
+				"P12"
+			]
+		},
+		{
+			"id": "E10",
+			"sources": [
+				"P17"
+			],
+			"targets": [
+				"P11"
+			]
+		},
+		{
+			"id": "E11",
+			"sources": [
+				"P19"
+			],
+			"targets": [
+				"P1"
+			]
+		},
+		{
+			"id": "E12",
+			"sources": [
+				"P23"
+			],
+			"targets": [
+				"P20"
+			]
+		},
+		{
+			"id": "E13",
+			"sources": [
+				"P24"
+			],
+			"targets": [
+				"P22"
+			]
+		}
+	]
+}

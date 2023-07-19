@@ -5,15 +5,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vibridi/autog/internal/cyclebreaking"
-	"github.com/vibridi/autog/internal/graph"
-	"github.com/vibridi/autog/internal/testutils"
+	"github.com/vibridi/autog/cyclebreaking"
+	"github.com/vibridi/autog/graph"
+	"github.com/vibridi/autog/internal/testfiles"
 )
 
 func TestA(t *testing.T) {
-	g := testutils.ReadTestFile("../testutils/elk_constructed", "simple_acyclic.json")
+	g := testfiles.ReadTestFile("../testfiles/elk_constructed", "simple_acyclic.json")
 	dg := graph.FromAdjacencyList(g.AdjacencyList())
-	assert.False(t, graph.HasCycles(dg))
+	assert.False(t, dg.HasCycles())
 
 	s := dg.SpanningTree()
 	fmt.Println(s)
@@ -25,31 +25,29 @@ func TestA(t *testing.T) {
 }
 
 func TestB(t *testing.T) {
-	g := testutils.ReadTestFile("../testutils/elk_constructed", "simple_acyclic.json")
+	g := testfiles.ReadTestFile("../testfiles/elk_constructed", "simple_acyclic.json")
 	dg := graph.FromAdjacencyList(g.AdjacencyList())
-	assert.False(t, graph.HasCycles(dg))
+	assert.False(t, dg.HasCycles())
 
-	ns := &networkSimplexProcessor{}
-	ns.Process(dg)
+	execNetworkSimplex(dg)
 	for _, n := range dg.Nodes {
 		fmt.Println(n.ID, n.Layer)
 	}
 }
 
 func TestLayering(t *testing.T) {
-	testgs := testutils.ReadTestDir("../testutils/elk/cyclic")
+	testgs := testfiles.ReadTestDir("../internal/testfiles/elk_original")
 	for _, g := range testgs {
 		dg := graph.FromAdjacencyList(g.AdjacencyList())
-		if graph.HasCycles(dg) {
-			cyclebreaking.DepthFirst.Process(dg)
-			cyclebreaking.DepthFirst.Cleanup()
+		if dg.HasCycles() {
+			cyclebreaking.DEPTH_FIRST.Process(dg)
 		}
 		t.Run(g.Name, func(t *testing.T) {
-			NetworkSimplex.Process(dg)
-			NetworkSimplex.Cleanup()
-
-			for _, e := range dg.Edges {
-				assert.True(t, e.From.Layer < e.To.Layer)
+			for _, subg := range dg.ConnectedComponents() {
+				execNetworkSimplex(subg)
+				for _, e := range subg.Edges {
+					assert.True(t, e.From.Layer < e.To.Layer)
+				}
 			}
 		})
 	}

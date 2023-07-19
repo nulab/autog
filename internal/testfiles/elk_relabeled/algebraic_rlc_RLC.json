@@ -1,0 +1,557 @@
+{
+	"id": "G1",
+	"children": [
+		{
+			"id": "N1",
+			"ports": [
+				{
+					"id": "P1",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P2",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L1",
+					"text": "N1",
+					"width": 83,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 66,
+			"height": 46
+		},
+		{
+			"id": "N2",
+			"ports": [
+				{
+					"id": "P3",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P4",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L2",
+					"text": "N2",
+					"width": 56,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 60,
+			"height": 40
+		},
+		{
+			"id": "N3",
+			"ports": [
+				{
+					"id": "P5",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L3",
+					"text": "N3",
+					"width": 74,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 41,
+			"height": 41
+		},
+		{
+			"id": "N4",
+			"ports": [
+				{
+					"id": "P6",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "0"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L4",
+					"text": "N4",
+					"width": 85,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 66,
+			"height": 46
+		},
+		{
+			"id": "N5",
+			"ports": [
+				{
+					"id": "P7",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "0"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L5",
+					"text": "N5",
+					"width": 92,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 66,
+			"height": 46
+		},
+		{
+			"id": "N6",
+			"ports": [
+				{
+					"id": "P8",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P9",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L6",
+					"text": "N6",
+					"width": 37,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 21,
+			"height": 41
+		},
+		{
+			"id": "N7",
+			"ports": [
+				{
+					"id": "P10",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P11",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L7",
+					"text": "N7",
+					"width": 47,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 60,
+			"height": 40
+		},
+		{
+			"id": "N8",
+			"ports": [
+				{
+					"id": "P12",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P13",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L8",
+					"text": "N8",
+					"width": 74,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 66,
+			"height": 46
+		},
+		{
+			"id": "N9",
+			"ports": [
+				{
+					"id": "P14",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L9",
+					"text": "N9",
+					"width": 81,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 41,
+			"height": 41
+		},
+		{
+			"id": "N10",
+			"ports": [
+				{
+					"id": "P15",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P16",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L10",
+					"text": "N10",
+					"width": 73,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 66,
+			"height": 46
+		},
+		{
+			"id": "N11",
+			"ports": [
+				{
+					"id": "P17",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P18",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "-1"
+					}
+				},
+				{
+					"id": "P19",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "2"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L11",
+					"text": "N11",
+					"width": 72,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 41,
+			"height": 41
+		},
+		{
+			"id": "N12",
+			"ports": [
+				{
+					"id": "P20",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P21",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "-1"
+					}
+				},
+				{
+					"id": "P22",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "2"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L12",
+					"text": "N12",
+					"width": 80,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 41,
+			"height": 41
+		},
+		{
+			"id": "N13",
+			"ports": [
+				{
+					"id": "P23",
+					"properties": {
+						"port.side": "WEST",
+						"port.index": "0"
+					}
+				},
+				{
+					"id": "P24",
+					"properties": {
+						"port.side": "EAST",
+						"port.index": "1"
+					}
+				}
+			],
+			"labels": [
+				{
+					"id": "L13",
+					"text": "N13",
+					"width": 73,
+					"height": 15
+				}
+			],
+			"properties": {
+				"portConstraints": "FIXED_ORDER",
+				"nodeLabels.placement": "[H_LEFT, V_TOP, OUTSIDE]"
+			},
+			"width": 66,
+			"height": 46
+		}
+	],
+	"edges": [
+		{
+			"id": "E1",
+			"sources": [
+				"P2"
+			],
+			"targets": [
+				"P3"
+			]
+		},
+		{
+			"id": "E2",
+			"sources": [
+				"P4"
+			],
+			"targets": [
+				"P5"
+			]
+		},
+		{
+			"id": "E3",
+			"sources": [
+				"P4"
+			],
+			"targets": [
+				"P18"
+			]
+		},
+		{
+			"id": "E4",
+			"sources": [
+				"P6"
+			],
+			"targets": [
+				"P8"
+			]
+		},
+		{
+			"id": "E5",
+			"sources": [
+				"P7"
+			],
+			"targets": [
+				"P8"
+			]
+		},
+		{
+			"id": "E6",
+			"sources": [
+				"P9"
+			],
+			"targets": [
+				"P17"
+			]
+		},
+		{
+			"id": "E7",
+			"sources": [
+				"P11"
+			],
+			"targets": [
+				"P14"
+			]
+		},
+		{
+			"id": "E8",
+			"sources": [
+				"P11"
+			],
+			"targets": [
+				"P20"
+			]
+		},
+		{
+			"id": "E9",
+			"sources": [
+				"P13"
+			],
+			"targets": [
+				"P10"
+			]
+		},
+		{
+			"id": "E10",
+			"sources": [
+				"P16"
+			],
+			"targets": [
+				"P20"
+			]
+		},
+		{
+			"id": "E11",
+			"sources": [
+				"P19"
+			],
+			"targets": [
+				"P15"
+			]
+		},
+		{
+			"id": "E12",
+			"sources": [
+				"P19"
+			],
+			"targets": [
+				"P12"
+			]
+		},
+		{
+			"id": "E13",
+			"sources": [
+				"P22"
+			],
+			"targets": [
+				"P23"
+			]
+		},
+		{
+			"id": "E14",
+			"sources": [
+				"P22"
+			],
+			"targets": [
+				"P1"
+			]
+		},
+		{
+			"id": "E15",
+			"sources": [
+				"P24"
+			],
+			"targets": [
+				"P18"
+			]
+		}
+	]
+}

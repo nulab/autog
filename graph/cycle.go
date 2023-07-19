@@ -6,16 +6,16 @@ type cycleDetector struct {
 	isCyclic bool
 }
 
-func HasCycles(g *DGraph) bool {
-	detector := cycleDetector{
+func (g *DGraph) HasCycles() bool {
+	if g.isCyclic != nil {
+		return *g.isCyclic
+	}
+	d := cycleDetector{
 		visited:  make(NodeSet),
 		finished: make(NodeSet),
 	}
-	detector.run(g)
-	return detector.isCyclic
-}
+	g.isCyclic = new(bool)
 
-func (d *cycleDetector) run(g *DGraph) {
 	for _, n := range g.Nodes {
 		if !d.visited[n] && !d.finished[n] {
 			d.visit(n)
@@ -24,6 +24,8 @@ func (d *cycleDetector) run(g *DGraph) {
 			}
 		}
 	}
+	*g.isCyclic = d.isCyclic
+	return *g.isCyclic
 }
 
 func (d *cycleDetector) visit(n *Node) {
