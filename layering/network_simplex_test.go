@@ -17,7 +17,7 @@ func TestA(t *testing.T) {
 
 	s := dg.SpanningTree()
 	fmt.Println(s)
-	ns := &networkSimplex{}
+	ns := &networkSimplexProcessor{}
 	ns.initLayers(dg)
 	for _, n := range dg.Nodes {
 		fmt.Println(n.ID, n.Layer)
@@ -29,7 +29,7 @@ func TestB(t *testing.T) {
 	dg := graph.FromAdjacencyList(g.AdjacencyList())
 	assert.False(t, graph.HasCycles(dg))
 
-	ns := &networkSimplex{}
+	ns := &networkSimplexProcessor{}
 	ns.Process(dg)
 	for _, n := range dg.Nodes {
 		fmt.Println(n.ID, n.Layer)

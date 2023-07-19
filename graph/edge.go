@@ -10,6 +10,10 @@ type Edge struct {
 	CutValue         int
 }
 
+func (e *Edge) SelfLoops() bool {
+	return e.From == e.To
+}
+
 func (e *Edge) Reverse() {
 	n := e.From
 	e.From = e.To

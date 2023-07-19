@@ -3,49 +3,17 @@ package cyclebreaking
 import (
 	"math"
 	"math/rand"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/vibridi/autog/internal/graph"
-	"golang.org/x/exp/slices"
+	"github.com/vibridi/autog/graph"
 )
 
-// todo: refactor somehow
-type nodemap map[*graph.Node]int
-
-func (m nodemap) String() string {
-	type pair struct {
-		n *graph.Node
-		i int
-	}
-	var kvPairs []pair
-	for k, v := range m {
-		kvPairs = append(kvPairs, pair{k, v})
-	}
-	slices.SortFunc(kvPairs, func(a, b pair) bool {
-		return a.i > b.i
-	})
-	bld := strings.Builder{}
-	for _, p := range kvPairs {
-		bld.WriteRune('[')
-		bld.WriteString(p.n.ID)
-		bld.WriteRune(':')
-		bld.WriteString(strconv.Itoa(p.i))
-		bld.WriteRune(']')
-		bld.WriteRune(' ')
-	}
-	return bld.String()
-}
-
-type greedy struct {
+type greedyProcessor struct {
 	rnd     *rand.Rand
-	arcdiag nodemap
-	outdeg  nodemap
-	indeg   nodemap
+	arcdiag graph.NodeMap
+	outdeg  graph.NodeMap
+	indeg   graph.NodeMap
 }
-
-var Greedy = &greedy{}
 
 // Process implements a greedy cycle breaker.
 // This is a port of ELK Java code, slightly modified to adapt to Go data structures and coding practices.
@@ -59,11 +27,13 @@ var Greedy = &greedy{}
 //
 // The algorithm arranges the nodes of G in an arc diagram, with source nodes to the right and sink nodes to the left.
 // Then it reverses edges that point right.
-func (p *greedy) Process(g *graph.DGraph) {
-	p.rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
-	p.arcdiag = nodemap{}
-	p.outdeg = nodemap{}
-	p.indeg = nodemap{}
+func execGreedy(g *graph.DGraph) {
+	p := greedyProcessor{
+		rnd:     rand.New(rand.NewSource(time.Now().UnixNano())),
+		arcdiag: make(graph.NodeMap),
+		outdeg:  make(graph.NodeMap),
+		indeg:   make(graph.NodeMap),
+	}
 
 	nodeCount := len(g.Nodes)
 
@@ -153,18 +123,18 @@ func (p *greedy) Process(g *graph.DGraph) {
 	}
 }
 
-func (p *greedy) pickRandom(nodes []*graph.Node) *graph.Node {
+func (p *greedyProcessor) pickRandom(nodes []*graph.Node) *graph.Node {
 	return nodes[p.rnd.Intn(len(nodes))]
 }
 
 // Updates indegree and outdegree values of the neighbors of the given node,
 // simulating its removal from the graph. the sources and sinks lists are also updated.
-func (p *greedy) updateNeighbors(n *graph.Node, sources, sinks *[]*graph.Node) {
+func (p *greedyProcessor) updateNeighbors(n *graph.Node, sources, sinks *[]*graph.Node) {
 	for _, e := range n.In {
-		src := e.From
-		if src == n /* self-loop */ {
+		if e.SelfLoops() {
 			continue
 		}
+		src := e.From
 		if _, ok := p.arcdiag[src]; ok {
 			// already processed
 			continue
@@ -175,10 +145,10 @@ func (p *greedy) updateNeighbors(n *graph.Node, sources, sinks *[]*graph.Node) {
 		}
 	}
 	for _, e := range n.Out {
-		tgt := e.To
-		if tgt == n /* self-loop */ {
+		if e.SelfLoops() {
 			continue
 		}
+		tgt := e.To
 		if _, ok := p.arcdiag[tgt]; ok {
 			// already processed
 			continue
@@ -188,11 +158,4 @@ func (p *greedy) updateNeighbors(n *graph.Node, sources, sinks *[]*graph.Node) {
 			*sources = append(*sources, tgt)
 		}
 	}
-}
-
-func (p *greedy) Cleanup() {
-	p.rnd = nil
-	p.arcdiag = nil
-	p.outdeg = nil
-	p.indeg = nil
 }

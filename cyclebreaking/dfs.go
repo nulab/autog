@@ -1,26 +1,25 @@
 package cyclebreaking
 
-import "github.com/vibridi/autog/internal/graph"
+import "github.com/vibridi/autog/graph"
 
-type depthFirst struct {
+type depthFirstProcessor struct {
 	visited    graph.NodeSet
 	active     graph.NodeSet
 	reversable []*graph.Edge
 }
 
-var DepthFirst = &depthFirst{}
-
-// Process implements a depth-first cycle breaker.
+// Depth-first cycle breaker.
 // This is a port of ELK Java code, slightly modified to adapt to Go data structures and coding practices.
 // https://github.com/eclipse/elk/blob/master/plugins/org.eclipse.elk.alg.layered/src/org/eclipse/elk/alg/layered/p1cycles/DepthFirstCycleBreaker.java
 //
 // The ELK code is based on the following resource:
 // "Emden R. Gansner, Eleftherios Koutsofios, Stephen C. North, Kiem-Phong Vo, A technique for
 // drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
-func (p *depthFirst) Process(g *graph.DGraph) {
-	nodeCount := len(g.Nodes)
-	p.visited = make(graph.NodeSet)
-	p.active = make(graph.NodeSet)
+func execDepthFirst(g *graph.DGraph) {
+	p := &depthFirstProcessor{
+		visited: make(graph.NodeSet),
+		active:  make(graph.NodeSet),
+	}
 
 	// get list of source nodes (nodes with no incoming edge)
 	sources := g.Sources()
@@ -29,6 +28,7 @@ func (p *depthFirst) Process(g *graph.DGraph) {
 		p.visit(node)
 	}
 
+	nodeCount := len(g.Nodes)
 	for i := 0; i < nodeCount; i++ {
 		node := g.Nodes[i]
 		if !p.visited[node] {
@@ -42,7 +42,7 @@ func (p *depthFirst) Process(g *graph.DGraph) {
 	}
 }
 
-func (p *depthFirst) visit(node *graph.Node) {
+func (p *depthFirstProcessor) visit(node *graph.Node) {
 	if p.visited[node] {
 		return
 	}
@@ -50,8 +50,7 @@ func (p *depthFirst) visit(node *graph.Node) {
 	p.active[node] = true
 
 	for _, e := range node.Out {
-		// self-loop (might abstract into method)
-		if e.To == node {
+		if e.SelfLoops() {
 			continue
 		}
 		// Original ELK comment:
@@ -67,7 +66,7 @@ func (p *depthFirst) visit(node *graph.Node) {
 	p.active[node] = false
 }
 
-func (p *depthFirst) Cleanup() {
+func (p *depthFirstProcessor) Cleanup() {
 	p.visited = nil
 	p.active = nil
 	p.reversable = nil

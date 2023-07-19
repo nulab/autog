@@ -4,34 +4,32 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/vibridi/autog/internal/graph"
+	"github.com/vibridi/autog/graph"
 )
-
-type nodemap map[*graph.Node]int // todo: tidy up, also used in greedy cyclebreaker
-type edgemap map[*graph.Edge]int
 
 const (
 	delta  = 1
 	maxitr = 25
 )
 
-type networkSimplex struct {
-	// visited   graph.NodeSet
+type networkSimplexProcessor struct {
 	postOrder int
-	lim       nodemap // Emden et al.: number from a root node in spanning tree postorder traversal
-	low       nodemap // Emden et al.: lowest postorder traversal number among nodes reachable from the input node
+	lim       graph.NodeMap // Emden et al.: number from a root node in spanning tree postorder traversal
+	low       graph.NodeMap // Emden et al.: lowest postorder traversal number among nodes reachable from the input node
 }
 
-var NetworkSimplex = &networkSimplex{}
+var NetworkSimplex = &networkSimplexProcessor{}
 
 // Process implements a graph node layering algorithm, based on:
 //   - "Emden R. Gansner, Eleftherios Koutsofios, Stephen C. North, Kiem-Phong Vo, A technique for
 //     drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
 //     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
 //   - ELK Java code at https://github.com/eclipse/elk/blob/master/plugins/org.eclipse.elk.alg.layered/src/org/eclipse/elk/alg/layered/p2layers/NetworkSimplexLayerer.java
-func (p *networkSimplex) Process(g *graph.DGraph) {
-	p.lim = nodemap{}
-	p.low = nodemap{}
+func execNetworkSimplex(g *graph.DGraph) {
+	p := &networkSimplexProcessor{
+		lim: make(graph.NodeMap),
+		low: make(graph.NodeMap),
+	}
 
 	p.feasibleTree(g)
 	fmt.Println(graph.EdgeList(g.Edges))
@@ -46,7 +44,7 @@ func (p *networkSimplex) Process(g *graph.DGraph) {
 	// balance()
 }
 
-func (p *networkSimplex) feasibleTree(g *graph.DGraph) {
+func (p *networkSimplexProcessor) feasibleTree(g *graph.DGraph) {
 	fmt.Println("init layers")
 	p.initLayers(g)
 	// todo improve readability
@@ -101,7 +99,7 @@ func negCutValueTreeEdge(t graph.EdgeList) *graph.Edge {
 // This is done by breaking the tree into head and tail components around the edge e,
 // then picking the non-tree edge with minimum slack that goes from head to tail.
 // Note that the argument t is the spanning tree but contains also non-tree edges marked as such.
-func (p *networkSimplex) minSlackNonTreeEdge(t graph.EdgeList, e *graph.Edge) *graph.Edge {
+func (p *networkSimplexProcessor) minSlackNonTreeEdge(t graph.EdgeList, e *graph.Edge) *graph.Edge {
 	var minSlack = math.MaxInt
 	var replaceCandidate *graph.Edge
 	for _, f := range t {
@@ -122,7 +120,7 @@ func (p *networkSimplex) minSlackNonTreeEdge(t graph.EdgeList, e *graph.Edge) *g
 
 // "non-tree edge incident on the tree with min amount of slack"
 // incident means that the tree node could be either the edge's source or target
-func (p *networkSimplex) adjacentNonTreeEdge(treeNodes graph.NodeSet) *graph.Edge {
+func (p *networkSimplexProcessor) adjacentNonTreeEdge(treeNodes graph.NodeSet) *graph.Edge {
 	// This finds an edge to a nontree node that is adjacent
 	// to the tree
 	minSlack := math.MaxInt
@@ -146,7 +144,7 @@ func (p *networkSimplex) adjacentNonTreeEdge(treeNodes graph.NodeSet) *graph.Edg
 	return candidate
 }
 
-func (p *networkSimplex) inHeadComponent(n *graph.Node, e *graph.Edge) bool {
+func (p *networkSimplexProcessor) inHeadComponent(n *graph.Node, e *graph.Edge) bool {
 	if !e.IsInSpanningTree {
 		panic("network simplex: breaking tree around non-tree edge")
 	}
@@ -159,7 +157,7 @@ func (p *networkSimplex) inHeadComponent(n *graph.Node, e *graph.Edge) bool {
 
 // The edges are exchanged, updating the tree and its cut
 // values.
-func (p *networkSimplex) exchange(e, f *graph.Edge, g *graph.DGraph) {
+func (p *networkSimplexProcessor) exchange(e, f *graph.Edge, g *graph.DGraph) {
 	if !e.IsInSpanningTree {
 		panic("exchange: tree-edge not in spanning tree")
 	}
@@ -193,7 +191,7 @@ func (p *networkSimplex) exchange(e, f *graph.Edge, g *graph.DGraph) {
 // starting from the farthest child from the root n and proceeding in DFS order.
 // low(n) is the lowest postorder number in the subtree rooted in n.
 // The root node will have low(n) = 1 and lim(n) = |V|; leaf nodes will have lim(n) = low(n).
-func (p *networkSimplex) postOrderTraversal(n *graph.Node, visited graph.EdgeSet) int {
+func (p *networkSimplexProcessor) postOrderTraversal(n *graph.Node, visited graph.EdgeSet) int {
 	lowest := math.MaxInt
 	for _, e := range n.Edges() {
 		if e.IsInSpanningTree && !visited[e] {
@@ -235,9 +233,9 @@ func balance() {
 // Starting from the graph source nodes (no incoming edges), this method assigns an initial layer
 // to each node n based on the maximum layer of nodes connected to them via incoming edges.
 // Source nodes have no incoming edges, so are processed first.
-func (p *networkSimplex) initLayers(g *graph.DGraph) {
+func (p *networkSimplexProcessor) initLayers(g *graph.DGraph) {
 	// initialize the count of incoming edges for all nodes
-	unseenInEdges := nodemap{}
+	unseenInEdges := make(graph.NodeMap)
 	for _, n := range g.Nodes {
 		unseenInEdges[n] = n.Indeg()
 	}
@@ -312,7 +310,7 @@ func tightTree(n *graph.Node, visitedEdges graph.EdgeSet, visitedNodes graph.Nod
 // "For each tree edge, [the cut value] is computed by marking the nodes as belonging to the head or tail component,
 // and then performing the sum of the signed weights of all edges whose [source] and [target] nodes are in different components,
 // the sign [of the weight] being negative for those edges going from the head to the tail component."
-func (p *networkSimplex) setCutValues(g *graph.DGraph) {
+func (p *networkSimplexProcessor) setCutValues(g *graph.DGraph) {
 	// todo naive implementation, optimize
 
 	// The cut value is the
@@ -364,7 +362,7 @@ func slack(e *graph.Edge) int {
 //
 // Now, a node u is in the tail component of e if lim(u) < lim(v)
 // so among the *graph.Edge x and y poles, u is whichever of the two has a lower lim()
-func (p *networkSimplex) postorderOf(e *graph.Edge) (tailNode, headNode *graph.Node) {
+func (p *networkSimplexProcessor) postorderOf(e *graph.Edge) (tailNode, headNode *graph.Node) {
 	x, y := e.From, e.To
 	if p.lim[x] < p.lim[y] {
 		return x, y
@@ -376,7 +374,7 @@ func tight(e *graph.Edge) bool {
 	return slack(e) == 0
 }
 
-func (p *networkSimplex) Cleanup() {
+func (p *networkSimplexProcessor) Cleanup() {
 	p.lim = nil
 	p.low = nil
 	p.postOrder = 0
