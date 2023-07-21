@@ -35,6 +35,22 @@ func TestB(t *testing.T) {
 	}
 }
 
+func TestPostorderTraversal(t *testing.T) {
+	p := &networkSimplexProcessor{
+		poIndex: 1,
+		lim:     make(graph.NodeMap),
+		low:     make(graph.NodeMap),
+	}
+	g := testfiles.ReadTestFile("../internal/testfiles/elk_constructed", "simple_acyclic.json")
+	dg := graph.FromAdjacencyList(g.AdjacencyList())
+	dg.SpanningTree()
+	fmt.Println(dg.Edges)
+	fmt.Println("root", dg.Nodes[0])
+	p.postOrderTraversal(dg.Nodes[0], graph.EdgeSet{})
+	fmt.Println(p.lim)
+	fmt.Println(p.low)
+}
+
 func TestLayering(t *testing.T) {
 	testgs := testfiles.ReadTestDir("../internal/testfiles/elk_original")
 	for _, g := range testgs {
@@ -44,10 +60,13 @@ func TestLayering(t *testing.T) {
 		}
 		t.Run(g.Name, func(t *testing.T) {
 			for _, subg := range dg.ConnectedComponents() {
-				execNetworkSimplex(subg)
-				for _, e := range subg.Edges {
-					assert.True(t, e.From.Layer < e.To.Layer)
-				}
+				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
+					execNetworkSimplex(subg)
+					for _, e := range subg.Edges {
+						assert.True(t, e.From.Layer < e.To.Layer)
+					}
+				})
+
 			}
 		})
 	}

@@ -6,6 +6,10 @@ type Node struct {
 	Layer   int     // todo: this probably shouldn't be visible outside
 }
 
+func (n *Node) String() string {
+	return n.ID
+}
+
 // Number of incoming edges
 func (n *Node) Indeg() int {
 	return len(n.In)
