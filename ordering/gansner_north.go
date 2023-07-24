@@ -233,6 +233,7 @@ func (p *gansnerNorthProcessor) sortLayer(layer []*graph.Node, medians map[*grap
 // appears to the left of w in their rank
 func (p *gansnerNorthProcessor) transpose() {
 	// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
+	// todo: without max itr this may loop forever, fix it
 	for improved, itr := true, 0; improved && itr < 20; itr++ {
 		improved = false
 		for L := p.minL; L <= p.maxL; L++ {
@@ -276,6 +277,7 @@ func (p *gansnerNorthProcessor) layerCrossings(l int, v, w *graph.Node) int {
 // order aren't counted.
 // given that long edges have been broken by inserting virtual nodes, and that all edges
 // connect nodes only one layer apart, crossings are determined purely by node order.
+// todo: very inefficient, improve
 func (p *gansnerNorthProcessor) crossingsOf(l int, v, w *graph.Node) int {
 	nodes := p.layers[l]
 	// swap order
