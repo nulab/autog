@@ -11,8 +11,8 @@ type options struct {
 }
 
 var defaultOptions = options{
-	p1: cyclebreaking.GREEDY,
-	p2: layering.NETWORK_SIMPLEX,
+	p1: cyclebreaking.Greedy,
+	p2: layering.NetworkSimplex,
 }
 
 type option func(*options)

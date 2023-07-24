@@ -5,7 +5,7 @@ import "github.com/vibridi/autog/graph"
 type Alg uint8
 
 const (
-	NETWORK_SIMPLEX Alg = iota
+	NetworkSimplex Alg = iota
 	_endAlg
 )
 
@@ -15,7 +15,7 @@ func (alg Alg) IsValid() bool {
 
 func (alg Alg) Process(g *graph.DGraph) {
 	switch alg {
-	case NETWORK_SIMPLEX:
+	case NetworkSimplex:
 		execNetworkSimplex(g)
 	default:
 		panic("layering: unknown enum value")

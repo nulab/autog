@@ -1,9 +1,11 @@
 package graph
 
 type Node struct {
-	ID      string
-	In, Out []*Edge // this could also be list of nodes
-	Layer   int     // todo: this probably shouldn't be visible outside
+	ID        string
+	In, Out   []*Edge // this could also be list of nodes
+	Layer     int     // todo: this probably shouldn't be visible outside
+	LayerIdx  int
+	IsVirtual bool
 }
 
 func (n *Node) String() string {

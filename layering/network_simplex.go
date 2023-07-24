@@ -13,8 +13,8 @@ const (
 
 type networkSimplexProcessor struct {
 	poIndex int           // node post-order traversal index
-	lim     graph.NodeMap // Emden et al.: number from a root node in spanning tree postorder traversal
-	low     graph.NodeMap // Emden et al.: lowest postorder traversal number among nodes reachable from the input node
+	lim     graph.NodeMap // Gansner et al.: number from a root node in spanning tree postorder traversal
+	low     graph.NodeMap // Gansner et al.: lowest postorder traversal number among nodes reachable from the input node
 }
 
 // todo: exec alg on single connected components?
@@ -256,23 +256,7 @@ func (p *networkSimplexProcessor) postOrderTraversal(n *graph.Node, visited grap
 	return p.low[n]
 }
 
-// todo: remove after go 1.21
-func min(x, y int) int {
-	if x < y {
-		return x
-	}
-	return y
-}
-
-// todo: remove after go 1.21
-func max(x, y int) int {
-	if x > y {
-		return x
-	}
-	return y
-}
-
-// Emden et al.:
+// Gansner et al.:
 // "For each tree edge, [the cut value] is computed by marking the nodes as belonging to the head or tail component,
 // and then performing the sum of the signed weights of all edges whose [source] and [target] nodes are in different components,
 // the sign [of the weight] being negative for those edges going from the head to the tail component."
@@ -316,12 +300,12 @@ func slack(e *graph.Edge) int {
 	return e.To.Layer - e.From.Layer - delta
 }
 
-// The definition of head and tail in Emden et al.'s paper are relative to the root of the postorder traversal:
+// The definition of head and tail in Gansner et al.'s paper are relative to the root of the postorder traversal:
 // after "deleting" the edge e, the head component is the one that contains the root of the tree.
 // Therefore, the direction of the *graph.Edge (From->To) in the source graph doesn't necessarily
 // reflect the direction of the edge in postorder traversal.
 // The postorder direction depends on direction of the inequality between lim(a) and lim(b).
-// Emden et al. p.219: "For example, if e = (u,v) is a tree edge and vroot is in the head component of the edge (i.e., lim(u) < lim(v)),
+// Gansner et al. p.219: "For example, if e = (u,v) is a tree edge and vroot is in the head component of the edge (i.e., lim(u) < lim(v)),
 // then a node w is in the tail component of e if and only if low(u) <= lim(w) <= lim(u)".
 //
 // Also, the quote above intuitively means that w is in the tail component if it has u as ancestor in postorder direction.

@@ -51,12 +51,12 @@ func TestPostorderTraversal(t *testing.T) {
 	fmt.Println(p.low)
 }
 
-func TestLayering(t *testing.T) {
+func TestNetworkSimplexLayering(t *testing.T) {
 	testgs := testfiles.ReadTestDir("../internal/testfiles/elk_original")
 	for _, g := range testgs {
 		dg := graph.FromAdjacencyList(g.AdjacencyList())
 		if dg.HasCycles() {
-			cyclebreaking.DEPTH_FIRST.Process(dg)
+			cyclebreaking.DepthFirst.Process(dg)
 		}
 		t.Run(g.Name, func(t *testing.T) {
 			for _, subg := range dg.ConnectedComponents() {

@@ -1,12 +1,11 @@
-package cyclebreaking
+package ordering
 
 import "github.com/vibridi/autog/graph"
 
 type Alg uint8
 
 const (
-	GREEDY Alg = iota
-	DEPTH_FIRST
+	GansnerNorth Alg = iota
 	_endAlg
 )
 
@@ -16,11 +15,9 @@ func (alg Alg) IsValid() bool {
 
 func (alg Alg) Process(g *graph.DGraph) {
 	switch alg {
-	case GREEDY:
-		execGreedy(g)
-	case DEPTH_FIRST:
-		execDepthFirst(g)
+	case GansnerNorth:
+		execGansnerNorth(g)
 	default:
-		panic("cyclebreaking: unknown enum value")
+		panic("layering: unknown enum value")
 	}
 }
