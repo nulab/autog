@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/vibridi/autog/graph"
+	"github.com/nulab/autog/graph"
 )
 
 const (

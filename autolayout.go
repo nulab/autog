@@ -1,8 +1,8 @@
 package autog
 
 import (
-	"github.com/vibridi/autog/cyclebreaking"
-	"github.com/vibridi/autog/graph"
+	"github.com/nulab/autog/cyclebreaking"
+	"github.com/nulab/autog/graph"
 )
 
 func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {

@@ -3,8 +3,8 @@ package graph
 import (
 	"testing"
 
+	"github.com/nulab/autog/internal/testfiles"
 	"github.com/stretchr/testify/assert"
-	"github.com/vibridi/autog/internal/testfiles"
 )
 
 func TestHasCycles(t *testing.T) {

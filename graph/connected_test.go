@@ -3,9 +3,9 @@ package graph
 import (
 	"testing"
 
+	"github.com/nulab/autog/internal/testfiles"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/vibridi/autog/internal/testfiles"
 )
 
 func TestConnectedComponents(t *testing.T) {

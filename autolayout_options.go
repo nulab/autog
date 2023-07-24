@@ -1,9 +1,9 @@
 package autog
 
 import (
-	"github.com/vibridi/autog/cyclebreaking"
-	"github.com/vibridi/autog/layering"
-	"github.com/vibridi/autog/ordering"
+	"github.com/nulab/autog/cyclebreaking"
+	"github.com/nulab/autog/layering"
+	"github.com/nulab/autog/ordering"
 )
 
 type options struct {

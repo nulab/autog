@@ -1,6 +1,6 @@
 package ordering
 
-import "github.com/vibridi/autog/graph"
+import "github.com/nulab/autog/graph"
 
 type Alg uint8
 

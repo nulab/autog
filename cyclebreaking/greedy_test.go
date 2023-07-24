@@ -3,9 +3,9 @@ package cyclebreaking
 import (
 	"testing"
 
+	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/internal/testfiles"
 	"github.com/stretchr/testify/assert"
-	"github.com/vibridi/autog/graph"
-	"github.com/vibridi/autog/internal/testfiles"
 )
 
 func TestGreedy(t *testing.T) {

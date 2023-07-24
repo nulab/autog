@@ -6,11 +6,11 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/nulab/autog/cyclebreaking"
+	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/internal/testfiles"
+	"github.com/nulab/autog/layering"
 	"github.com/stretchr/testify/assert"
-	"github.com/vibridi/autog/cyclebreaking"
-	"github.com/vibridi/autog/graph"
-	"github.com/vibridi/autog/internal/testfiles"
-	"github.com/vibridi/autog/layering"
 )
 
 func TestVirtualNodes(t *testing.T) {

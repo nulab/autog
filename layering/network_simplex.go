@@ -3,7 +3,7 @@ package layering
 import (
 	"math"
 
-	"github.com/vibridi/autog/graph"
+	"github.com/nulab/autog/graph"
 )
 
 const (

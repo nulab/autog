@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/vibridi/autog/internal/elk"
+	"github.com/nulab/autog/internal/elk"
 )
 
 func ReadTestDir(dir string) []*elk.Graph {

@@ -1,6 +1,6 @@
 package cyclebreaking
 
-import "github.com/vibridi/autog/graph"
+import "github.com/nulab/autog/graph"
 
 type postProcessor uint8
 

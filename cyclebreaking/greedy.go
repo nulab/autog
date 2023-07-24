@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/vibridi/autog/graph"
+	"github.com/nulab/autog/graph"
 )
 
 type greedyProcessor struct {

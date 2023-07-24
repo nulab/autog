@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/vibridi/autog/internal/testfiles"
+	"github.com/nulab/autog/internal/testfiles"
 )
 
 func main() {
