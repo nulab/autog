@@ -2,6 +2,7 @@ package ordering
 
 import (
 	"fmt"
+	"slices"
 	"sort"
 	"testing"
 
@@ -10,7 +11,6 @@ import (
 	"github.com/vibridi/autog/graph"
 	"github.com/vibridi/autog/internal/testfiles"
 	"github.com/vibridi/autog/layering"
-	"golang.org/x/exp/slices"
 )
 
 func TestVirtualNodes(t *testing.T) {
@@ -145,11 +145,11 @@ func edgeStrings(g *graph.DGraph) []string {
 }
 
 func printNodeOrders(g *graph.DGraph) {
-	slices.SortFunc(g.Nodes, func(a, b *graph.Node) bool {
+	slices.SortFunc(g.Nodes, func(a, b *graph.Node) int {
 		if a.Layer != b.Layer {
-			return a.Layer < b.Layer
+			return a.Layer - b.Layer
 		}
-		return a.LayerIdx < b.LayerIdx
+		return a.LayerIdx - b.LayerIdx
 	})
 	for _, n := range g.Nodes {
 		fmt.Printf("%s L:%d I:%d\n", n.ID, n.Layer, n.LayerIdx)

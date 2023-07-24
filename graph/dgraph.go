@@ -1,9 +1,8 @@
 package graph
 
 import (
+	"maps"
 	"strings"
-
-	"golang.org/x/exp/maps"
 )
 
 type DGraph struct {

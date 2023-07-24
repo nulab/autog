@@ -1,6 +1,6 @@
 package graph
 
-import "golang.org/x/exp/maps"
+import "maps"
 
 type set[T any] map[*T]bool
 

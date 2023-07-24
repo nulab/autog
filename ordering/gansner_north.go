@@ -2,11 +2,11 @@ package ordering
 
 import (
 	"math"
+	"slices"
 	"sort"
 	"strconv"
 
 	"github.com/vibridi/autog/graph"
-	"golang.org/x/exp/slices"
 )
 
 const (
@@ -50,11 +50,11 @@ func execGansnerNorth(g *graph.DGraph) {
 		p.initOrder(n, visited, indices)
 	}
 	for _, layer := range p.layers {
-		slices.SortFunc(layer, func(a, b *graph.Node) bool {
+		slices.SortFunc(layer, func(a, b *graph.Node) int {
 			if a.Layer != b.Layer {
 				panic("same-layer nodes have different layers")
 			}
-			return p.orders[a] < p.orders[b]
+			return p.orders[a] - p.orders[b]
 		})
 	}
 
@@ -211,10 +211,13 @@ func (p *gansnerNorthProcessor) adjacentNodesPositions(n *graph.Node, edges []*g
 }
 
 func (p *gansnerNorthProcessor) sortLayer(layer []*graph.Node, medians map[*graph.Node]float64) {
-	slices.SortFunc(layer, func(a, b *graph.Node) bool {
+	slices.SortFunc(layer, func(a, b *graph.Node) int {
 		afixed := medians[a] == -1 && p.orders[a] < p.orders[b]
 		bfixed := medians[b] == -1 && p.orders[b] < p.orders[a]
-		return afixed || bfixed || medians[a] < medians[b]
+		if afixed || bfixed || medians[a] < medians[b] {
+			return -1
+		}
+		return 1
 	})
 	for i, n := range layer {
 		p.orders[n] = i
