@@ -6,6 +6,7 @@ type Node struct {
 	Layer     int     // todo: this probably shouldn't be visible outside
 	LayerIdx  int
 	IsVirtual bool
+	Size
 }
 
 func (n *Node) String() string {

@@ -18,6 +18,12 @@ func (alg Alg) Process(g *graph.DGraph) {
 	case NetworkSimplex:
 		execNetworkSimplex(g)
 	default:
-		panic("layering: unknown enum value")
+		panic("layering: unknown alg value")
 	}
+
+	m := map[int][]*graph.Node{}
+	for _, n := range g.Nodes {
+		m[n.Layer] = append(m[n.Layer], n)
+	}
+	g.Layers = m
 }

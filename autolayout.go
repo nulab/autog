@@ -5,6 +5,9 @@ import (
 	"github.com/nulab/autog/graph"
 )
 
+// todo: to decrease coupling between client code and the graph types used here, the layout could take as params
+// a simple adjacency list and a struct or map with the node properties (width, height, etc.)
+// then the graph package could become internal
 func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
@@ -15,8 +18,8 @@ func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
 		layoutOpts.p1, // cycle breaking
 		layoutOpts.p2, // layering
 		layoutOpts.p3, // ordering
-		// node positioning (input: ???, output: layered graph with node coordinates)
-		// edge routing
+		layoutOpts.p4, // positioning
+		// todo: edge routing
 		cyclebreaking.UndoRevertEdges,
 	}
 

@@ -35,6 +35,7 @@ func execGansnerNorth(g *graph.DGraph) {
 		maxL:   math.MinInt,
 	}
 
+	// todo: here we might use the Layers field in graph.DGraph
 	for _, n := range g.Nodes {
 		p.layers[n.Layer] = append(p.layers[n.Layer], n)
 		p.minL = min(p.minL, n.Layer)
@@ -46,7 +47,7 @@ func execGansnerNorth(g *graph.DGraph) {
 
 	visited := graph.NodeSet{}
 	indices := map[int]int{}
-	for _, n := range g.Nodes {
+	for _, n := range g.Sources() /* this shouldn't require an additional loop if the graph is connected */ {
 		p.initOrder(n, visited, indices)
 	}
 	for _, layer := range p.layers {

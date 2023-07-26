@@ -18,6 +18,6 @@ func (alg Alg) Process(g *graph.DGraph) {
 	case GansnerNorth:
 		execGansnerNorth(g)
 	default:
-		panic("layering: unknown enum value")
+		panic("ordering: unknown alg value")
 	}
 }

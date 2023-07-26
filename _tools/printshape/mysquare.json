@@ -1,0 +1,178 @@
+{
+  "target": "shapes",
+  "sheetId": "A97FC",
+  "shapes": [
+    {
+      "type": 3,
+      "uid": "",
+      "bounds": {
+        "top": 0,
+        "bottom": 100,
+        "left": 0,
+        "right": 100
+      },
+      "locked": false,
+      "shapes": [
+        {
+          "type": 1,
+          "uid": "_square",
+          "bounds": {
+            "top": 0,
+            "bottom": 100,
+            "left": 0,
+            "right": 100
+          },
+          "connectionPoints": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              25
+            ],
+            [
+              0,
+              50
+            ],
+            [
+              0,
+              75
+            ],
+            [
+              0,
+              100
+            ],
+            [
+              25,
+              0
+            ],
+            [
+              25,
+              100
+            ],
+            [
+              50,
+              0
+            ],
+            [
+              50,
+              100
+            ],
+            [
+              75,
+              0
+            ],
+            [
+              75,
+              100
+            ],
+            [
+              100,
+              0
+            ],
+            [
+              100,
+              25
+            ],
+            [
+              100,
+              50
+            ],
+            [
+              100,
+              75
+            ],
+            [
+              100,
+              100
+            ]
+          ],
+          "attr": [
+            {
+              "name": "stencil-id",
+              "value": "250F0"
+            }
+          ],
+          "categoryName": "basic",
+          "locked": false,
+          "lineInfo": {
+            "enabled": true,
+            "thickness": 2,
+            "color": "4A4A4A"
+          },
+          "drawInfo": {
+            "enabled": true,
+            "fillRule": "nonzero",
+            "gradientColors": [
+              {
+                "color": "FFFFFF",
+                "offset": 0
+              },
+              {
+                "color": "000000",
+                "offset": 100
+              }
+            ]
+          },
+          "paths": [
+            {
+              "closed": true,
+              "points": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  100
+                ],
+                [
+                  100,
+                  100
+                ],
+                [
+                  100,
+                  0
+                ]
+              ]
+            }
+          ],
+          "shapes": [
+            {
+              "type": 5,
+              "uid": "_text",
+              "bounds": {
+                "top": 1,
+                "bottom": -2,
+                "left": 1,
+                "right": -2,
+                "leftFixed": 2,
+                "rightFixed": 3,
+                "bottomFixed": 1
+              },
+              "locked": false,
+              "text": "N2",
+              "leading": 2,
+              "halign": 1,
+              "valign": 1,
+              "styles": [
+                {
+                  "index": 0,
+                  "font": "Open Sans",
+                  "size": 15,
+                  "color": "000000",
+                  "bold": false,
+                  "italic": false,
+                  "underline": false,
+                  "strikeThrough": false,
+                  "backgroundColor": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

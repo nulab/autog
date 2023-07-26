@@ -21,6 +21,6 @@ func (alg Alg) Process(g *graph.DGraph) {
 	case DepthFirst:
 		execDepthFirst(g)
 	default:
-		panic("cyclebreaking: unknown enum value")
+		panic("cyclebreaking: unknown alg value")
 	}
 }

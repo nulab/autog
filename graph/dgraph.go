@@ -6,10 +6,10 @@ import (
 )
 
 type DGraph struct {
-	Nodes []*Node
-	Edges []*Edge
-
-	// unexported
+	Nodes    []*Node
+	Edges    []*Edge
+	Layers   map[int][]*Node
+	LayersX  map[int]*Layer
 	isCyclic *bool
 }
 
