@@ -14,7 +14,7 @@ const (
 )
 
 const (
-	defaultLayerSpacing = 60
+	defaultLayerSpacing = 150
 )
 
 func (alg Alg) IsValid() bool {

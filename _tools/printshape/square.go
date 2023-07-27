@@ -76,7 +76,7 @@ func NewText(text string) *Shape {
 			{
 				Index: 0,
 				Font:  "Open Sans",
-				Size:  15,
+				Size:  25,
 				Color: "000000",
 			},
 		},
