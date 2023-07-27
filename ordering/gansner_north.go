@@ -50,6 +50,7 @@ func execGansnerNorth(g *graph.DGraph) {
 	for _, n := range g.Sources() /* this shouldn't require an additional loop if the graph is connected */ {
 		p.initOrder(n, visited, indices)
 	}
+
 	for _, layer := range p.layers {
 		slices.SortFunc(layer, func(a, b *graph.Node) int {
 			if a.Layer != b.Layer {

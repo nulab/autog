@@ -32,6 +32,24 @@ func (e *Edge) ConnectedNode(n *Node) *Node {
 	return e.From
 }
 
+// Type returns the edge type as follows:
+//   - 0: both of e's adjacent nodes are concrete nodes
+//   - 1: exactly one of e's adjacent nodes is virtual
+//   - 2: both of e's adjacent nodes are virtual
+func (e *Edge) Type() int {
+	// todo: might return an enum instead
+	if !e.From.IsVirtual && !e.To.IsVirtual {
+		return 0
+	}
+	if e.From.IsVirtual != e.To.IsVirtual {
+		return 1
+	}
+	if e.From.IsVirtual && e.To.IsVirtual {
+		return 2
+	}
+	panic("edge type cases aren't exhaustive")
+}
+
 func (e *Edge) String() string {
 	s := e.From.ID + " -> " + e.To.ID
 	if e.IsReversed {

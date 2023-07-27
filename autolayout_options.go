@@ -2,6 +2,7 @@ package autog
 
 import (
 	"github.com/nulab/autog/cyclebreaking"
+	"github.com/nulab/autog/edgerouting"
 	"github.com/nulab/autog/layering"
 	"github.com/nulab/autog/ordering"
 	"github.com/nulab/autog/positioning"
@@ -12,6 +13,7 @@ type options struct {
 	p2 layering.Alg
 	p3 ordering.Alg
 	p4 positioning.Alg
+	p5 edgerouting.Alg
 }
 
 var defaultOptions = options{
@@ -19,6 +21,7 @@ var defaultOptions = options{
 	p2: layering.NetworkSimplex,
 	p3: ordering.GansnerNorth,
 	p4: positioning.VerticalAlign,
+	p5: edgerouting.NoRouting,
 }
 
 type option func(*options)
