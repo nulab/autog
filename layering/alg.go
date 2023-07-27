@@ -21,9 +21,26 @@ func (alg Alg) Process(g *graph.DGraph) {
 		panic("layering: unknown alg value")
 	}
 
-	m := map[int][]*graph.Node{}
+	m := map[int]*graph.Layer{}
 	for _, n := range g.Nodes {
-		m[n.Layer] = append(m[n.Layer], n)
+		layer := m[n.Layer]
+		if layer == nil {
+			layer = &graph.Layer{Index: n.Layer}
+		}
+		layer.Nodes = append(layer.Nodes, n)
+		m[n.Layer] = layer
 	}
 	g.Layers = m
+
+	// loop := true
+	// for loop {
+	// 	loop = false
+	// 	for _, e := range g.Edges {
+	// 		if e.From.Layer == e.To.Layer {
+	// 			e.To.Layer++
+	// 			loop = true
+	// 			break
+	// 		}
+	// 	}
+	// }
 }

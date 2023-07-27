@@ -1,6 +1,7 @@
 package ordering
 
 import (
+	"fmt"
 	"math"
 	"slices"
 	"sort"
@@ -50,6 +51,7 @@ func execGansnerNorth(g *graph.DGraph) {
 	for _, n := range g.Sources() /* this shouldn't require an additional loop if the graph is connected */ {
 		p.initOrder(n, visited, indices)
 	}
+	fmt.Println("G initial orders", p.orders)
 
 	for _, layer := range p.layers {
 		slices.SortFunc(layer, func(a, b *graph.Node) int {
@@ -69,7 +71,7 @@ func execGansnerNorth(g *graph.DGraph) {
 		if i%2 == 0 {
 			p.wmedianTopBottom()
 		} else {
-			p.wmedianBottomTop()
+			// p.wmedianBottomTop()
 		}
 		p.transpose()
 		crossings := p.allCrossings()
@@ -116,6 +118,7 @@ loop:
 			// update the graph's node and edge lists
 			g.Edges = append(g.Edges, f)
 			g.Nodes = append(g.Nodes, virtualNode)
+			g.Layers[virtualNode.Layer].Nodes = append(g.Layers[virtualNode.Layer].Nodes, virtualNode)
 			// restart loop
 			goto loop
 		}
@@ -300,6 +303,8 @@ func (p *gansnerNorthProcessor) crossingsOf(l int, v, w *graph.Node) int {
 				upperLayer := p.layers[l-1]
 				for i := p.orders[n]; i < len(upperLayer); i++ {
 					for _, f := range upperLayer[i].Out {
+						// todo: using bitmask here might give a false positive when there are two edges
+						// 	one from N to M and one from M to N (one of them was probably reversed during phase1)
 						if f == e || visited[p.bitmask(e, f)] {
 							continue
 						}

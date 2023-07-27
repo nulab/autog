@@ -13,8 +13,8 @@ const exampleDiagram = "ci_router_ComplexRouter.json"
 
 // todo: very ugly code used to set up a quick POC, eventually refactor this into its own project
 func main() {
-	elkg := testfiles.ReadTestFile("internal/testfiles/elk_relabeled", exampleDiagram)
-	// elkg := testfiles.ReadTestFile("internal/testfiles/elk_constructed", "simple_long_edge.json")
+	// elkg := testfiles.ReadTestFile("internal/testfiles/elk_relabeled", exampleDiagram)
+	elkg := testfiles.ReadTestFile("internal/testfiles/elk_constructed", "simple_long_edge.json")
 
 	dg := graph.FromAdjacencyList(elkg.AdjacencyList())
 	for _, n := range dg.Nodes {

@@ -19,7 +19,7 @@ func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
 		layoutOpts.p2, // layering
 		layoutOpts.p3, // ordering
 		layoutOpts.p4, // positioning
-		layoutOpts.p5, // edge routing
+		// layoutOpts.p5, // edge routing
 		cyclebreaking.UndoRevertEdges,
 	}
 

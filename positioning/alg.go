@@ -22,14 +22,6 @@ func (alg Alg) IsValid() bool {
 }
 
 func (alg Alg) Process(g *graph.DGraph) {
-	g.LayersX = make(map[int]*graph.Layer)
-	for k, nodes := range g.Layers {
-		g.LayersX[k] = &graph.Layer{
-			Nodes: nodes,
-			Index: k,
-		}
-	}
-
 	switch alg {
 	case VerticalAlign:
 		execVerticalAlign(g)
@@ -45,10 +37,10 @@ func (alg Alg) Process(g *graph.DGraph) {
 
 func assignYCoords(g *graph.DGraph) {
 	y := 0.0
-	for i := 0; i < len(g.LayersX); i++ {
-		for _, n := range g.LayersX[i].Nodes {
+	for i := 0; i < len(g.Layers); i++ {
+		for _, n := range g.Layers[i].Nodes {
 			n.Y = y
 		}
-		y += g.LayersX[i].H + defaultLayerSpacing
+		y += g.Layers[i].H + defaultLayerSpacing
 	}
 }

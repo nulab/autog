@@ -8,8 +8,7 @@ import (
 type DGraph struct {
 	Nodes    []*Node
 	Edges    []*Edge
-	Layers   map[int][]*Node
-	LayersX  map[int]*Layer
+	Layers   map[int]*Layer
 	isCyclic *bool
 }
 
