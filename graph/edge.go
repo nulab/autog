@@ -1,6 +1,10 @@
 package graph
 
+import "github.com/nulab/autog/internal/pragma"
+
 type Edge struct {
+	pragma.NotCopiable
+
 	ID       string
 	From, To *Node
 

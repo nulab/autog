@@ -1,6 +1,10 @@
 package graph
 
+import "github.com/nulab/autog/internal/pragma"
+
 type Node struct {
+	pragma.NotCopiable
+
 	ID        string
 	In, Out   []*Edge // this could also be list of nodes
 	Layer     int     // todo: this probably shouldn't be visible outside
