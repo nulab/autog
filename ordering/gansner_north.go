@@ -239,17 +239,14 @@ func (p *gansnerNorthProcessor) sortLayer(nodes []*graph.Node, medians map[*grap
 	}
 }
 
-// 3-15: This is the main loop that iterates as long as the number of edge crossings can be reduced by
-// transpositions. As in the loop in the ordering function, an adaptive strategy could be applied
-// here to terminate the loop once the improvement is a sufficiently small fraction of the number of
-// crossings.
-// 7-12: Each adjacent pair of vertices is examined. Their order is switched if this reduces the number of
-// crossings. The function crossing(v,w) simply counts the number of edge crossings if v
-// appears to the left of w in their rank
+// transpose sweeps through layers in order and swaps pairs of adjacent nodes in the same layer;
+// it counts the number of crossings between L, L-1 and L+1, if there's an improvement it keeps looping
+// until no improvement is found.
 func (p *gansnerNorthProcessor) transpose(layers map[int]*graph.Layer) {
 	// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
 	// todo: without max itr this may loop forever, fix it
-	for improved, itr := true, 0; improved && itr < 20; itr++ {
+	improved := true
+	for improved {
 		improved = false
 		for L := 0; L < len(layers); L++ {
 			for i := 0; i < len(layers[L].Nodes)-2; i++ {
@@ -260,7 +257,7 @@ func (p *gansnerNorthProcessor) transpose(layers map[int]*graph.Layer) {
 				p.swap(v, w)
 				newX := crossingsAround(L, layers)
 
-				if curX < newX {
+				if curX <= newX {
 					// no improvement, restore order
 					p.swap(v, w)
 				} else {
