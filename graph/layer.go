@@ -30,14 +30,11 @@ func (layer *Layer) CountCrossings() int {
 	}
 	edges := []*Edge{}
 	for _, n := range layer.Nodes {
-		visit, next := n.AllEdges()
-		for next {
-			next = visit(func(e *Edge) {
-				if e.ConnectedNode(n).Layer < n.Layer {
-					edges = append(edges, e)
-				}
-			})
-		}
+		n.VisitEdges(func(e *Edge) {
+			if e.ConnectedNode(n).Layer < n.Layer {
+				edges = append(edges, e)
+			}
+		})
 	}
 	return countCrossings(edges)
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNode_EdgeIter(t *testing.T) {
+func TestVisitEdges(t *testing.T) {
 	ids := strings.Split("abcde", "")
 	es := []*Edge{}
 	for _, id := range ids {
@@ -19,11 +19,10 @@ func TestNode_EdgeIter(t *testing.T) {
 		Out: es[3:],
 	}
 
-	itr := n.EdgeIter()
-	for i := 0; itr.HasNext(); i++ {
-		e := itr.Next()
+	i := 0
+	n.VisitEdges(func(e *Edge) {
 		assert.Equal(t, ids[i], e.ID)
-	}
-	assert.False(t, itr.HasNext())
-	assert.Equal(t, 5, itr.i)
+		i++
+	})
+	assert.Equal(t, 5, i)
 }

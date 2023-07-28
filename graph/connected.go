@@ -20,14 +20,13 @@ func connectedSubgraph(n *Node, visited NodeSet) []*Node {
 	visited[n] = true
 
 	subg := []*Node{n}
-	for itr := n.EdgeIter(); itr.HasNext(); {
-		e := itr.Next()
+	n.VisitEdges(func(e *Edge) {
 		if e.ConnectedNode(n) == n {
-			continue // self-loop
+			return // self-loop
 		}
 		ns := connectedSubgraph(e.ConnectedNode(n), visited)
 		subg = append(subg, ns...)
-	}
+	})
 	return subg
 }
 
@@ -42,13 +41,12 @@ func edgesOf(nodes []*Node) []*Edge {
 
 func collectEdges(n *Node, visited EdgeSet) []*Edge {
 	var res []*Edge
-	for itr := n.EdgeIter(); itr.HasNext(); {
-		e := itr.Next()
+	n.VisitEdges(func(e *Edge) {
 		if visited[e] {
-			continue
+			return
 		}
 		visited[e] = true
 		res = append(res, e)
-	}
+	})
 	return res
 }

@@ -146,9 +146,7 @@ func (p *networkSimplexProcessor) initLayers(g *graph.DGraph) {
 // It returns visitedNodes which contains the nodes that belong to this spanning tree.
 func tightTree(n *graph.Node, visitedEdges graph.EdgeSet, visitedNodes graph.NodeSet) graph.NodeSet {
 	visitedNodes[n] = true
-	for itr := n.EdgeIter(); itr.HasNext(); {
-		e := itr.Next()
-
+	n.VisitEdges(func(e *graph.Edge) {
 		if !visitedEdges[e] {
 			visitedEdges[e] = true
 			m := e.ConnectedNode(n)
@@ -160,8 +158,7 @@ func tightTree(n *graph.Node, visitedEdges graph.EdgeSet, visitedNodes graph.Nod
 				tightTree(m, visitedEdges, visitedNodes)
 			}
 		}
-
-	}
+	})
 	return visitedNodes
 }
 
@@ -171,20 +168,19 @@ func (p *networkSimplexProcessor) incidentNonTreeEdge(treeNodes graph.NodeSet) *
 	var minSlack = math.MaxInt
 	var candidate *graph.Edge
 	for n := range treeNodes {
-		for itr := n.EdgeIter(); itr.HasNext(); {
-			e := itr.Next()
+		n.VisitEdges(func(e *graph.Edge) {
 			if e.ConnectedNode(n) == n {
-				continue // avoid self-loops
+				return // avoid self-loops
 			}
 			if e.IsInSpanningTree || treeNodes[e.ConnectedNode(n)] {
-				continue
+				return
 			}
 			slack := slack(e)
 			if slack < minSlack {
 				minSlack = slack
 				candidate = e
 			}
-		}
+		})
 	}
 	if candidate == nil {
 		panic("network simplex: did not find adjacent non-tree edge with min slack")
