@@ -98,8 +98,8 @@ func TestGansnerNorthOrdering(t *testing.T) {
 							m = map[int]bool{}
 							indices[n.Layer] = m
 						}
-						assert.False(t, m[n.LayerIdx])
-						m[n.LayerIdx] = true
+						assert.False(t, m[n.LayerPos])
+						m[n.LayerPos] = true
 					}
 					// printNodeOrders(subg)
 				})
@@ -149,9 +149,9 @@ func printNodeOrders(g *graph.DGraph) {
 		if a.Layer != b.Layer {
 			return a.Layer - b.Layer
 		}
-		return a.LayerIdx - b.LayerIdx
+		return a.LayerPos - b.LayerPos
 	})
 	for _, n := range g.Nodes {
-		fmt.Printf("%s L:%d I:%d\n", n.ID, n.Layer, n.LayerIdx)
+		fmt.Printf("%s L:%d I:%d\n", n.ID, n.Layer, n.LayerPos)
 	}
 }

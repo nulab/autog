@@ -41,8 +41,8 @@ func (e *Edge) Crosses(f *Edge) bool {
 	if f.To.Layer > f.From.Layer {
 		ftop, fbtm = f.To, f.From
 	}
-	return (etop.LayerIdx < ftop.LayerIdx && ebtm.LayerIdx > fbtm.LayerIdx) ||
-		(etop.LayerIdx > ftop.LayerIdx && ebtm.LayerIdx < fbtm.LayerIdx)
+	return (etop.LayerPos < ftop.LayerPos && ebtm.LayerPos > fbtm.LayerPos) ||
+		(etop.LayerPos > ftop.LayerPos && ebtm.LayerPos < fbtm.LayerPos)
 }
 
 // Type returns the edge type as follows:

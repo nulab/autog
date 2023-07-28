@@ -35,10 +35,10 @@ func execGansnerNorth(g *graph.DGraph) {
 
 	// node order is maintained in three different places:
 	// 	- in g.Layers.Nodes, which is a slice
-	// 	- in each node.LayerIdx field
+	// 	- in each node.LayerPos field
 	// 	- in p.positions
 	// at each iteration, this algorithm will update the node positions in all three places
-	// a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerIdx
+	// a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerPos
 
 	// initialize positions
 	visited := graph.NodeSet{}
@@ -92,11 +92,11 @@ func execGansnerNorth(g *graph.DGraph) {
 
 	// reset the best node positions using the saved bestp
 	for _, n := range g.Nodes {
-		n.LayerIdx = bestp[n]
+		n.LayerPos = bestp[n]
 	}
 	for _, l := range g.Layers {
 		sort.Slice(l.Nodes, func(i, j int) bool {
-			return l.Nodes[i].LayerIdx < l.Nodes[j].LayerIdx
+			return l.Nodes[i].LayerPos < l.Nodes[j].LayerPos
 		})
 	}
 }
@@ -305,7 +305,7 @@ func (p *gansnerNorthProcessor) swap(v, w *graph.Node) {
 
 func (p *gansnerNorthProcessor) getPos(n *graph.Node) int {
 	pos := p.positions[n]
-	if pos != n.LayerIdx {
+	if pos != n.LayerPos {
 		panic("gansner-north orderer: corrupted state: node in-layer position mismatch")
 	}
 	return pos
@@ -313,5 +313,5 @@ func (p *gansnerNorthProcessor) getPos(n *graph.Node) int {
 
 func (p *gansnerNorthProcessor) setPos(n *graph.Node, pos int) {
 	p.positions[n] = pos
-	n.LayerIdx = pos
+	n.LayerPos = pos
 }
