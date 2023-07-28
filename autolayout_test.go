@@ -26,7 +26,7 @@ func TestGansnerNorthOrdering(t *testing.T) {
 			for _, subg := range dg.ConnectedComponents() {
 				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
 					layering.NetworkSimplex.Process(subg)
-					ordering.GansnerNorth.Process(subg)
+					ordering.GraphvizDot.Process(subg)
 					positioning.VerticalAlign.Process(subg)
 
 				})

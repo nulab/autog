@@ -19,7 +19,7 @@ type options struct {
 var defaultOptions = options{
 	p1: cyclebreaking.Greedy,
 	p2: layering.NetworkSimplex,
-	p3: ordering.GansnerNorth,
+	p3: ordering.GraphvizDot,
 	p4: positioning.VerticalAlign,
 	p5: edgerouting.NoRouting,
 }

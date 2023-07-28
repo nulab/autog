@@ -5,7 +5,7 @@ import "github.com/nulab/autog/graph"
 type Alg uint8
 
 const (
-	GansnerNorth Alg = iota
+	GraphvizDot Alg = iota
 	_endAlg
 )
 
@@ -15,8 +15,8 @@ func (alg Alg) IsValid() bool {
 
 func (alg Alg) Process(g *graph.DGraph) {
 	switch alg {
-	case GansnerNorth:
-		execGansnerNorth(g)
+	case GraphvizDot:
+		execGraphvizDot(g)
 	default:
 		panic("ordering: unknown alg value")
 	}

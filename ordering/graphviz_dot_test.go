@@ -46,7 +46,7 @@ func TestCrossings(t *testing.T) {
 		return nodes[i].ID < nodes[j].ID
 	})
 
-	p := &gansnerNorthProcessor{
+	p := &graphvizDotProcessor{
 		layers: map[int][]*graph.Node{
 			0: {nodes[0], nodes[1], nodes[2], nodes[3]},
 			1: {nodes[4], nodes[5], nodes[6], nodes[7]},
@@ -89,7 +89,7 @@ func TestGansnerNorthOrdering(t *testing.T) {
 			for _, subg := range dg.ConnectedComponents() {
 				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
 					layering.NetworkSimplex.Process(subg)
-					execGansnerNorth(subg)
+					execGraphvizDot(subg)
 
 					indices := map[int]map[int]bool{}
 					for _, n := range subg.Nodes {

@@ -11,15 +11,17 @@ const (
 	maxiter = 24
 )
 
-type gansnerNorthProcessor struct {
+type graphvizDotProcessor struct {
 	positions graph.NodeMap
 }
 
-// // this implements a layered graph node ordering algorithm, based on:
-// //   - "Emden R. Gansner, Eleftherios Koutsofios, Stephen C. North, Kiem-Phong Vo, A technique for
-// //     drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
-// //     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
-func execGansnerNorth(g *graph.DGraph) {
+// Ordering algorithm used in Graphviz Dot and described in:
+//   - "Emden R. Gansner, Eleftherios Koutsofios, Stephen C. North, Kiem-Phong Vo, A technique for
+//     drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
+//     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
+//
+// Note that ELK's implementation is based on the original algorithm proposed by Sugiyama et al. instead of Graphviz.
+func execGraphvizDot(g *graph.DGraph) {
 	if len(g.Layers) == 1 {
 		// no crossings to reduce
 		return
@@ -28,7 +30,7 @@ func execGansnerNorth(g *graph.DGraph) {
 	// insert virtual nodes so that edges with length >1 have length 1
 	breakLongEdges(g)
 
-	p := &gansnerNorthProcessor{
+	p := &graphvizDotProcessor{
 		positions: graph.NodeMap{},
 	}
 
@@ -141,7 +143,7 @@ loop:
 // breadth-first search starting with vertices of minimum rank. Vertices are assigned positions in
 // their ranks in left-to-right order as the search progresses. This strategy ensures that the initial
 // ordering of a tree has no crossings. This is important because such crossings are obvious, easily avoided ‘‘mistakes.’’
-func (p *gansnerNorthProcessor) initOrder(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
+func (p *graphvizDotProcessor) initOrder(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
 	if visited[n] {
 		return
 	}
@@ -158,7 +160,7 @@ func (p *gansnerNorthProcessor) initOrder(n *graph.Node, visited graph.NodeSet, 
 // what to do with vertices that have no adjacent vertices on the previous rank. In our
 // implementation such vertices are left fixed in their current positions with non-fixed vertices sorted
 // into the remaining positions.
-func (p *gansnerNorthProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
+func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 	medians := map[*graph.Node]float64{}
 	for r := 1; r < len(layers); r++ {
 		for _, v := range layers[r].Nodes {
@@ -168,7 +170,7 @@ func (p *gansnerNorthProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 	}
 }
 
-func (p *gansnerNorthProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
+func (p *graphvizDotProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
 	medians := map[*graph.Node]float64{}
 	for r := len(layers) - 1; r >= 0; r-- {
 		for _, v := range layers[r].Nodes {
@@ -182,7 +184,7 @@ func (p *gansnerNorthProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
 // is uniquely defined. Otherwise, it is interpolated between the two median positions using a
 // measure of tightness. Generally, the weighted median is biased toward the side where vertices are
 // more closely packed.
-func (p *gansnerNorthProcessor) medianOf(adpos []int) float64 {
+func (p *graphvizDotProcessor) medianOf(adpos []int) float64 {
 	// convert positions to float64 to simplify arithmetic ops
 	fpos := make([]float64, len(adpos))
 	for i, x := range adpos {
@@ -212,7 +214,7 @@ func (p *gansnerNorthProcessor) medianOf(adpos []int) float64 {
 
 // returns an ordered array of the present positions of the nodes
 // adjacent to v in the given adjacent rank.
-func (p *gansnerNorthProcessor) adjacentNodesPositions(n *graph.Node, edges []*graph.Edge, adjLayer int) []int {
+func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*graph.Edge, adjLayer int) []int {
 	res := []int{}
 	for _, e := range edges {
 		if e.SelfLoops() {
@@ -227,7 +229,7 @@ func (p *gansnerNorthProcessor) adjacentNodesPositions(n *graph.Node, edges []*g
 	return res
 }
 
-func (p *gansnerNorthProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64) {
+func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64) {
 	sort.Slice(nodes, func(i, j int) bool {
 		a, b := nodes[i], nodes[j]
 		afixed := medians[a] == -1 && p.getPos(a) < p.getPos(b)
@@ -242,7 +244,7 @@ func (p *gansnerNorthProcessor) sortLayer(nodes []*graph.Node, medians map[*grap
 // transpose sweeps through layers in order and swaps pairs of adjacent nodes in the same layer;
 // it counts the number of crossings between L, L-1 and L+1, if there's an improvement it keeps looping
 // until no improvement is found.
-func (p *gansnerNorthProcessor) transpose(layers map[int]*graph.Layer) {
+func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
 	// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
 	// todo: without max itr this may loop forever, fix it
 	improved := true
@@ -289,14 +291,14 @@ func crossingsAround(l int, layers map[int]*graph.Layer) int {
 	return layers[l].CountCrossings() + layers[l+1].CountCrossings()
 }
 
-func (p *gansnerNorthProcessor) swap(v, w *graph.Node) {
+func (p *graphvizDotProcessor) swap(v, w *graph.Node) {
 	iv := p.getPos(v)
 	iw := p.getPos(w)
 	p.setPos(v, iw)
 	p.setPos(w, iv)
 }
 
-func (p *gansnerNorthProcessor) getPos(n *graph.Node) int {
+func (p *graphvizDotProcessor) getPos(n *graph.Node) int {
 	pos := p.positions[n]
 	if pos != n.LayerPos {
 		panic("gansner-north orderer: corrupted state: node in-layer position mismatch")
@@ -304,7 +306,7 @@ func (p *gansnerNorthProcessor) getPos(n *graph.Node) int {
 	return pos
 }
 
-func (p *gansnerNorthProcessor) setPos(n *graph.Node, pos int) {
+func (p *graphvizDotProcessor) setPos(n *graph.Node, pos int) {
 	p.positions[n] = pos
 	n.LayerPos = pos
 }
