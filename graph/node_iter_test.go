@@ -11,7 +11,7 @@ func TestNode_EdgeIter(t *testing.T) {
 	ids := strings.Split("abcde", "")
 	es := []*Edge{}
 	for _, id := range ids {
-		es = append(es, &Edge{ID: id})
+		es = append(es, &Edge{edge: edge{ID: id}})
 	}
 
 	n := &Node{

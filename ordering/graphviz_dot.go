@@ -120,7 +120,7 @@ loop:
 			// add e to virtual node incoming edges
 			virtualNode.In = append(virtualNode.In, e)
 			// create new edge from virtual to e's former target
-			f := &graph.Edge{From: virtualNode, To: to}
+			f := graph.NewEdge(virtualNode, to, 1)
 			// add f to virtual node outgoing edges
 			virtualNode.Out = []*graph.Edge{f}
 			// replace e with f in e's former target incoming edges

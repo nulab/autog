@@ -26,7 +26,7 @@ func FromAdjacencyList(list map[string][]string) *DGraph {
 			if m == nil {
 				m = &Node{ID: targetId}
 			}
-			e := &Edge{From: n, To: m}
+			e := NewEdge(n, m, 1)
 			edgeList = append(edgeList, e)
 
 			m.In = append(m.In, e)

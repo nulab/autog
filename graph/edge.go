@@ -4,14 +4,28 @@ import "github.com/nulab/autog/internal/pragma"
 
 type Edge struct {
 	pragma.NotCopiable
+	edge
+}
 
+type edge struct {
 	ID       string
 	From, To *Node
+	Weight   int // could be a float instead
 
 	// variables not relevant to the final output
 	IsInSpanningTree bool
 	IsReversed       bool
 	CutValue         int
+}
+
+func NewEdge(from, to *Node, weight int) *Edge {
+	return &Edge{
+		edge: edge{
+			From:   from,
+			To:     to,
+			Weight: weight,
+		},
+	}
 }
 
 func (e *Edge) SelfLoops() bool {
