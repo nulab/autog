@@ -1,6 +1,8 @@
 package layering
 
-import "github.com/nulab/autog/graph"
+import (
+	"github.com/nulab/autog/graph"
+)
 
 type Alg uint8
 
@@ -32,15 +34,26 @@ func (alg Alg) Process(g *graph.DGraph) {
 	}
 	g.Layers = m
 
-	// loop := true
-	// for loop {
-	// 	loop = false
-	// 	for _, e := range g.Edges {
-	// 		if e.From.Layer == e.To.Layer {
-	// 			e.To.Layer++
-	// 			loop = true
-	// 			break
+	// todo: it might be interesting to test whether forcing no flat edges empirically improves the layout
+	// 	however right now this code (apparently) breaks the final cacoo/shape JSON output.
+	// loop:
+	// 	loop := true
+	// 	for loop {
+	// 		loop = false
+	// 		for _, e := range g.Edges {
+	// 			if e.From.Layer == e.To.Layer {
+	//
+	// 				g.Layers[e.To.Layer].RemoveNode(e.To)
+	// 				e.To.Layer++
+	// 				nextl := g.Layers[e.To.Layer]
+	// 				if nextl == nil {
+	// 					nextl = &graph.Layer{Index: e.To.Layer}
+	// 				}
+	// 				nextl.Nodes = append(nextl.Nodes, e.To)
+	// 				g.Layers[e.To.Layer] = nextl
+	//
+	// 				goto loop
+	// 			}
 	// 		}
 	// 	}
-	// }
 }

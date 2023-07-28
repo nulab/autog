@@ -1,7 +1,6 @@
 package ordering
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
 
@@ -49,7 +48,6 @@ func execGansnerNorth(g *graph.DGraph) {
 	for _, n := range g.Nodes {
 		p.initOrder(n, visited, indices)
 	}
-	fmt.Println("G initial bestp", p.positions)
 
 	layers := g.Layers // shallow copy
 
@@ -66,8 +64,8 @@ func execGansnerNorth(g *graph.DGraph) {
 
 	bestx := crossings(layers)
 	bestp := p.positions.Clone()
-	fmt.Println("initial bestx and q", bestx, bestp)
 
+	// TODO: these sorting routines don't yet account for flat edges (same-layer edges)
 	for i := 0; i < maxiter; i++ {
 		// Depending on the parity of the current iteration
 		// number, the ranks are traversed from top to bottom or from bottom to top.
@@ -81,14 +79,11 @@ func execGansnerNorth(g *graph.DGraph) {
 		if x := crossings(layers); x < bestx {
 			bestx = x
 			bestp = p.positions.Clone()
-			fmt.Println("saved bestx and q", bestx, bestp)
 		}
 		if bestx == 0 {
 			break
 		}
 	}
-	fmt.Println("final ordering", bestp, "with crossings", bestx)
-	fmt.Println("recalc crossings", crossings(layers))
 
 	// reset the best node positions using the saved bestp
 	for _, n := range g.Nodes {
@@ -115,6 +110,7 @@ loop:
 				ID:        "V" + strconv.Itoa(v),
 				Layer:     from.Layer + 1,
 				IsVirtual: true,
+				Size:      graph.Size{H: 100.0, W: 100.0}, // todo: eventually this doesn't belong here
 			}
 			v++
 			// set e's target to the virtual node

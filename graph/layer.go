@@ -1,10 +1,27 @@
 package graph
 
+import "fmt"
+
 type Layer struct {
 	Nodes []*Node
 	Index int
 	Size
 }
+
+func (layer *Layer) String() string {
+	return fmt.Sprint(layer.Nodes)
+}
+
+// func (layer *Layer) RemoveNode(n *Node) {
+// 	i := 0
+// 	for j, m := range layer.Nodes {
+// 		if m == n {
+// 			i = j
+// 			break
+// 		}
+// 	}
+// 	layer.Nodes = append(layer.Nodes[:i], layer.Nodes[i+1:]...)
+// }
 
 // CountCrossings returns the number of edge crossings between this layer and the layer above.
 func (layer *Layer) CountCrossings() int {
