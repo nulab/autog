@@ -2,8 +2,6 @@ package ordering
 
 import (
 	"fmt"
-	"math"
-	"slices"
 	"sort"
 	"strconv"
 
@@ -12,14 +10,10 @@ import (
 
 const (
 	maxiter = 24
-	improv  = 0.02
 )
 
 type gansnerNorthProcessor struct {
-	layers     map[int][]*graph.Node
-	orders     graph.NodeMap
-	minL, maxL int
-	crossings  int
+	positions graph.NodeMap
 }
 
 // // this implements a layered graph node ordering algorithm, based on:
@@ -27,61 +21,83 @@ type gansnerNorthProcessor struct {
 // //     drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
 // //     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
 func execGansnerNorth(g *graph.DGraph) {
-	// insert virtual nodes so that edges with length >1 have length 1
-	breakLongEdges(g)
-	p := &gansnerNorthProcessor{
-		layers: map[int][]*graph.Node{},
-		orders: graph.NodeMap{},
-		minL:   math.MaxInt,
-		maxL:   math.MinInt,
-	}
-
-	// todo: here we might use the Layers field in graph.DGraph
-	for _, n := range g.Nodes {
-		p.layers[n.Layer] = append(p.layers[n.Layer], n)
-		p.minL = min(p.minL, n.Layer)
-		p.maxL = max(p.maxL, n.Layer)
-	}
-	if len(p.layers) == 1 {
+	if len(g.Layers) == 1 {
+		// no crossings to reduce
 		return
 	}
 
+	// insert virtual nodes so that edges with length >1 have length 1
+	breakLongEdges(g)
+
+	p := &gansnerNorthProcessor{
+		positions: graph.NodeMap{},
+	}
+
+	// node order is maintained in three different places:
+	// 	- in g.Layers.Nodes, which is a slice
+	// 	- in each node.LayerIdx field
+	// 	- in p.positions
+	// at each iteration, this algorithm will update the node positions in all three places
+	// a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerIdx
+
+	// initialize positions
 	visited := graph.NodeSet{}
 	indices := map[int]int{}
-	for _, n := range g.Sources() /* this shouldn't require an additional loop if the graph is connected */ {
+	for _, n := range g.Sources() {
 		p.initOrder(n, visited, indices)
 	}
-	fmt.Println("G initial orders", p.orders)
+	for _, n := range g.Nodes {
+		p.initOrder(n, visited, indices)
+	}
+	fmt.Println("G initial bestp", p.positions)
 
-	for _, layer := range p.layers {
-		slices.SortFunc(layer, func(a, b *graph.Node) int {
+	layers := g.Layers // shallow copy
+
+	// propagate initial order to g.Layers.Nodes slice order
+	for _, layer := range layers {
+		sort.Slice(layer.Nodes, func(i, j int) bool {
+			a, b := layer.Nodes[i], layer.Nodes[j]
 			if a.Layer != b.Layer {
 				panic("same-layer nodes have different layers")
 			}
-			return p.orders[a] - p.orders[b]
+			return p.positions[a] < p.positions[b]
 		})
 	}
 
-	best := p.allCrossings()
-	q := p.clone()
+	bestx := crossings(layers)
+	bestp := p.positions.Clone()
+	fmt.Println("initial bestx and q", bestx, bestp)
 
 	for i := 0; i < maxiter; i++ {
 		// Depending on the parity of the current iteration
 		// number, the ranks are traversed from top to bottom or from bottom to top.
 		if i%2 == 0 {
-			p.wmedianTopBottom()
+			p.wmedianTopBottom(layers)
 		} else {
-			// p.wmedianBottomTop()
+			p.wmedianBottomTop(layers)
 		}
-		p.transpose()
-		crossings := p.allCrossings()
-		if crossings < best {
-			q = p.clone()
-			best = crossings
+		p.transpose(layers)
+
+		if x := crossings(layers); x < bestx {
+			bestx = x
+			bestp = p.positions.Clone()
+			fmt.Println("saved bestx and q", bestx, bestp)
+		}
+		if bestx == 0 {
+			break
 		}
 	}
+	fmt.Println("final ordering", bestp, "with crossings", bestx)
+	fmt.Println("recalc crossings", crossings(layers))
+
+	// reset the best node positions using the saved bestp
 	for _, n := range g.Nodes {
-		n.LayerIdx = q.orders[n]
+		n.LayerIdx = bestp[n]
+	}
+	for _, l := range g.Layers {
+		sort.Slice(l.Nodes, func(i, j int) bool {
+			return l.Nodes[i].LayerIdx < l.Nodes[j].LayerIdx
+		})
 	}
 }
 
@@ -134,7 +150,7 @@ func (p *gansnerNorthProcessor) initOrder(n *graph.Node, visited graph.NodeSet, 
 		return
 	}
 	visited[n] = true
-	p.orders[n] = indices[n.Layer]
+	p.setPos(n, indices[n.Layer])
 	indices[n.Layer]++
 	for _, e := range n.Out {
 		p.initOrder(e.To, visited, indices)
@@ -146,23 +162,23 @@ func (p *gansnerNorthProcessor) initOrder(n *graph.Node, visited graph.NodeSet, 
 // what to do with vertices that have no adjacent vertices on the previous rank. In our
 // implementation such vertices are left fixed in their current positions with non-fixed vertices sorted
 // into the remaining positions.
-func (p *gansnerNorthProcessor) wmedianTopBottom() {
+func (p *gansnerNorthProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 	medians := map[*graph.Node]float64{}
-	for r := p.minL + 1; r < p.maxL; r++ {
-		for _, v := range p.layers[r] {
+	for r := 1; r < len(layers); r++ {
+		for _, v := range layers[r].Nodes {
 			medians[v] = p.medianOf(p.adjacentNodesPositions(v, v.In, r-1))
 		}
-		p.sortLayer(p.layers[r], medians)
+		p.sortLayer(layers[r].Nodes, medians)
 	}
 }
 
-func (p *gansnerNorthProcessor) wmedianBottomTop() {
+func (p *gansnerNorthProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
 	medians := map[*graph.Node]float64{}
-	for r := p.maxL - 1; r >= p.minL; r-- {
-		for _, v := range p.layers[r] {
+	for r := len(layers) - 1; r >= 0; r-- {
+		for _, v := range layers[r].Nodes {
 			medians[v] = p.medianOf(p.adjacentNodesPositions(v, v.Out, r+1))
 		}
-		p.sortLayer(p.layers[r], medians)
+		p.sortLayer(layers[r].Nodes, medians)
 	}
 }
 
@@ -208,24 +224,22 @@ func (p *gansnerNorthProcessor) adjacentNodesPositions(n *graph.Node, edges []*g
 		}
 		m := e.ConnectedNode(n)
 		if m.Layer == adjLayer {
-			res = append(res, p.orders[m])
+			res = append(res, p.getPos(m))
 		}
 	}
 	sort.Ints(res)
 	return res
 }
 
-func (p *gansnerNorthProcessor) sortLayer(layer []*graph.Node, medians map[*graph.Node]float64) {
-	slices.SortFunc(layer, func(a, b *graph.Node) int {
-		afixed := medians[a] == -1 && p.orders[a] < p.orders[b]
-		bfixed := medians[b] == -1 && p.orders[b] < p.orders[a]
-		if afixed || bfixed || medians[a] < medians[b] {
-			return -1
-		}
-		return 1
+func (p *gansnerNorthProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64) {
+	sort.Slice(nodes, func(i, j int) bool {
+		a, b := nodes[i], nodes[j]
+		afixed := medians[a] == -1 && p.getPos(a) < p.getPos(b)
+		bfixed := medians[b] == -1 && p.getPos(b) < p.getPos(a)
+		return afixed || bfixed || medians[a] < medians[b]
 	})
-	for i, n := range layer {
-		p.orders[n] = i
+	for i, n := range nodes {
+		p.setPos(n, i)
 	}
 }
 
@@ -236,134 +250,68 @@ func (p *gansnerNorthProcessor) sortLayer(layer []*graph.Node, medians map[*grap
 // 7-12: Each adjacent pair of vertices is examined. Their order is switched if this reduces the number of
 // crossings. The function crossing(v,w) simply counts the number of edge crossings if v
 // appears to the left of w in their rank
-func (p *gansnerNorthProcessor) transpose() {
+func (p *gansnerNorthProcessor) transpose(layers map[int]*graph.Layer) {
 	// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
 	// todo: without max itr this may loop forever, fix it
 	for improved, itr := true, 0; improved && itr < 20; itr++ {
 		improved = false
-		for L := p.minL; L <= p.maxL; L++ {
-			for i := 0; i < len(p.layers[L])-2; i++ {
-				v := p.layers[L][i]
-				w := p.layers[L][i+1]
-				curX := p.layerCrossings(L, v, w)
-				newX := p.layerCrossings(L, w, v)
-				if curX > newX {
+		for L := 0; L < len(layers); L++ {
+			for i := 0; i < len(layers[L].Nodes)-2; i++ {
+				v := layers[L].Nodes[i]
+				w := layers[L].Nodes[i+1]
+
+				curX := crossingsAround(L, layers)
+				p.swap(v, w)
+				newX := crossingsAround(L, layers)
+
+				if curX < newX {
+					// no improvement, restore order
+					p.swap(v, w)
+				} else {
+					// keep new order
 					improved = true
-					p.swapOrder(v, w)
-					p.layers[L][i] = w
-					p.layers[L][i+1] = v
+					layers[L].Nodes[i] = w
+					layers[L].Nodes[i+1] = v
 				}
 			}
 		}
 	}
 }
 
-func (p *gansnerNorthProcessor) allCrossings() int {
+func crossings(layers map[int]*graph.Layer) int {
 	crossings := 0
-	for l := 1; l <= p.maxL; l++ {
-		crossings += p.layerCrossings(l, nil, nil)
-	}
-	p.crossings = crossings
-	return crossings
-}
-
-func (p *gansnerNorthProcessor) layerCrossings(l int, v, w *graph.Node) int {
-	switch {
-	case l == p.minL:
-		return p.crossingsOf(l+1, v, w)
-	case l == p.maxL:
-		return p.crossingsOf(l, v, w)
-	default:
-		return p.crossingsOf(l, v, w) + p.crossingsOf(l+1, v, w)
-	}
-}
-
-// determines the number of crossings between L and L-1 that involve v and w. crossings that aren't affected by v and w's relative
-// order aren't counted.
-// given that long edges have been broken by inserting virtual nodes, and that all edges
-// connect nodes only one layer apart, crossings are determined purely by node order.
-// todo: very inefficient, improve
-func (p *gansnerNorthProcessor) crossingsOf(l int, v, w *graph.Node) int {
-	nodes := p.layers[l]
-	// swap order
-	if v != nil && w != nil && p.orders[v] > p.orders[w] {
-		nodes = []*graph.Node{v, w}
-		p.swapOrder(v, w)
-		defer p.swapOrder(v, w) // undo the swap
-	}
-	crossings := 0
-	visited := map[uint64]bool{}
-	if l > p.minL {
-		// examine crossings with upper layer: l-1
-		for _, n := range nodes {
-			for _, e := range n.In {
-				if e.SelfLoops() {
-					continue
-				}
-				upperLayer := p.layers[l-1]
-				for i := p.orders[n]; i < len(upperLayer); i++ {
-					for _, f := range upperLayer[i].Out {
-						// todo: using bitmask here might give a false positive when there are two edges
-						// 	one from N to M and one from M to N (one of them was probably reversed during phase1)
-						if f == e || visited[p.bitmask(e, f)] {
-							continue
-						}
-						visited[p.bitmask(e, f)] = true
-						if p.edgesCross(e, f) {
-							crossings++
-						}
-					}
-				}
-			}
-		}
+	for l := 1; l < len(layers); l++ {
+		crossings += layers[l].CountCrossings()
 	}
 	return crossings
 }
 
-func (p *gansnerNorthProcessor) swapOrder(v, w *graph.Node) {
-	iv := p.orders[v]
-	iw := p.orders[w]
-	p.orders[v] = iw
-	p.orders[w] = iv
+func crossingsAround(l int, layers map[int]*graph.Layer) int {
+	if l == 0 {
+		return layers[l+1].CountCrossings()
+	}
+	if l == len(layers)-1 {
+		return layers[l].CountCrossings()
+	}
+	return layers[l].CountCrossings() + layers[l+1].CountCrossings()
 }
 
-func (p *gansnerNorthProcessor) edgesCross(e, f *graph.Edge) bool {
-	right2Left := p.orders[f.From] > p.orders[e.From] && p.orders[f.To] < p.orders[e.To]
-	left2Right := p.orders[f.From] < p.orders[e.From] && p.orders[f.To] > p.orders[e.To]
-	return right2Left || left2Right
+func (p *gansnerNorthProcessor) swap(v, w *graph.Node) {
+	iv := p.getPos(v)
+	iw := p.getPos(w)
+	p.setPos(v, iw)
+	p.setPos(w, iv)
 }
 
-func (p *gansnerNorthProcessor) bitmask(e, f *graph.Edge) uint64 {
-	x := uint64(0)
-	x |= 1 << p.nodeNum(e.From)
-	x |= 1 << p.nodeNum(e.To)
-	x |= 1 << p.nodeNum(f.From)
-	x |= 1 << p.nodeNum(f.To)
-	return x
+func (p *gansnerNorthProcessor) getPos(n *graph.Node) int {
+	pos := p.positions[n]
+	if pos != n.LayerIdx {
+		panic("gansner-north orderer: corrupted state: node in-layer position mismatch")
+	}
+	return pos
 }
 
-func (p *gansnerNorthProcessor) nodeNum(n *graph.Node) uint64 {
-	x := p.orders[n]
-	for i := n.Layer - 1; i >= p.minL; i-- {
-		x += len(p.layers[i])
-	}
-	return uint64(x)
-}
-
-func (p *gansnerNorthProcessor) clone() *gansnerNorthProcessor {
-	layers := map[int][]*graph.Node{}
-	for k, v := range p.layers {
-		layers[k] = append([]*graph.Node{}, v...)
-	}
-
-	orders := graph.NodeMap{}
-	for k, v := range p.orders {
-		orders[k] = v
-	}
-	return &gansnerNorthProcessor{
-		layers: layers,
-		orders: orders,
-		minL:   p.minL,
-		maxL:   p.maxL,
-	}
+func (p *gansnerNorthProcessor) setPos(n *graph.Node, pos int) {
+	p.positions[n] = pos
+	n.LayerIdx = pos
 }

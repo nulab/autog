@@ -13,8 +13,8 @@ const exampleDiagram = "ci_router_ComplexRouter.json"
 
 // todo: very ugly code used to set up a quick POC, eventually refactor this into its own project
 func main() {
-	// elkg := testfiles.ReadTestFile("internal/testfiles/elk_relabeled", exampleDiagram)
-	elkg := testfiles.ReadTestFile("internal/testfiles/elk_constructed", "simple_long_edge.json")
+	elkg := testfiles.ReadTestFile("internal/testfiles/elk_relabeled", exampleDiagram)
+	// elkg := testfiles.ReadTestFile("internal/testfiles/elk_constructed", "simple_long_edge.json")
 
 	dg := graph.FromAdjacencyList(elkg.AdjacencyList())
 	for _, n := range dg.Nodes {
@@ -38,17 +38,21 @@ func main() {
 			shape.Bounds.Right = shape.Bounds.Left + 100.0
 			shape.Bounds.Bottom = shape.Bounds.Top + 100.0
 			shape.BuildConnectionPoints()
+			if n.IsVirtual {
+				shape.Shapes[0].LineInfo.Type = 3
+			}
+
 			clip.Shapes = append(clip.Shapes, shape)
 			maxxoffset = max(maxxoffset, n.X)
 			shapes[n.ID] = shape
 		}
 		xoffset += maxxoffset + 100.0 + 40.0 // 40 is the conn-comp distance
-	}
 
-	for _, e := range dg.Edges {
-		line := NewLine()
-		setLineProperties(line, e, shapes)
-		clip.Shapes = append(clip.Shapes, line)
+		for _, e := range subg.Edges {
+			line := NewLine()
+			setLineProperties(line, e, shapes)
+			clip.Shapes = append(clip.Shapes, line)
+		}
 	}
 
 	b, err := json.Marshal(clip)

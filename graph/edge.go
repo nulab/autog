@@ -32,6 +32,19 @@ func (e *Edge) ConnectedNode(n *Node) *Node {
 	return e.From
 }
 
+func (e *Edge) Crosses(f *Edge) bool {
+	etop, ebtm := e.From, e.To
+	if e.To.Layer > e.From.Layer {
+		etop, ebtm = e.To, e.From
+	}
+	ftop, fbtm := f.From, f.To
+	if f.To.Layer > f.From.Layer {
+		ftop, fbtm = f.To, f.From
+	}
+	return (etop.LayerIdx < ftop.LayerIdx && ebtm.LayerIdx > fbtm.LayerIdx) ||
+		(etop.LayerIdx > ftop.LayerIdx && ebtm.LayerIdx < fbtm.LayerIdx)
+}
+
 // Type returns the edge type as follows:
 //   - 0: both of e's adjacent nodes are concrete nodes
 //   - 1: exactly one of e's adjacent nodes is virtual

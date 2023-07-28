@@ -51,7 +51,7 @@ func TestCrossings(t *testing.T) {
 			0: {nodes[0], nodes[1], nodes[2], nodes[3]},
 			1: {nodes[4], nodes[5], nodes[6], nodes[7]},
 		},
-		orders: map[*graph.Node]int{
+		positions: map[*graph.Node]int{
 			nodes[0]: 0, nodes[1]: 1, nodes[2]: 2, nodes[3]: 3,
 			nodes[4]: 0, nodes[5]: 1, nodes[6]: 2, nodes[7]: 3,
 		},

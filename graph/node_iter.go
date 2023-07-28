@@ -24,3 +24,21 @@ func (itr *edgeIter) Next() *Edge {
 	}
 	return itr.out[i-len(itr.in)]
 }
+
+func (n *Node) AllEdges() (visitor func(func(*Edge)) bool, next bool) {
+	i := 0
+	visitor = func(f func(*Edge)) bool {
+		if i >= len(n.In)+len(n.Out) {
+			return false
+		}
+		if i < len(n.In) {
+			f(n.In[i])
+		} else {
+			f(n.Out[i-len(n.In)])
+		}
+		i++
+		return true
+	}
+	next = true
+	return
+}
