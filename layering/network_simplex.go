@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	delta        = 1
 	thoroughness = 28
 )
 
@@ -133,7 +132,7 @@ func (p *networkSimplexProcessor) initLayers(g *graph.DGraph) {
 		// this makes the edge tight by construction because slack(e) = 0
 		for _, e := range n.Out {
 			m := e.To
-			m.Layer = max(m.Layer, n.Layer+delta)
+			m.Layer = max(m.Layer, n.Layer+e.Delta)
 			unseenInEdges[m]--
 			if unseenInEdges[m] == 0 {
 				sources = append(sources, m)
@@ -209,7 +208,7 @@ func (p *networkSimplexProcessor) exchange(e, f *graph.Edge, g *graph.DGraph) {
 
 	ftail, fhead := p.postorderOf(f)
 
-	d := ftail.Layer - fhead.Layer - delta
+	d := ftail.Layer - fhead.Layer - e.Delta
 	if !p.inHeadComponent(ftail, e) {
 		d *= -1
 	}
@@ -270,7 +269,7 @@ func (p *networkSimplexProcessor) setCutValues(g *graph.DGraph) {
 		th := 0
 		ht := 0
 
-		th += delta // e goes from tail to head by construction
+		th += e.Weight // e goes from tail to head by construction
 		// no other tree edge connects different components
 
 		for _, f := range g.Edges {
@@ -279,12 +278,12 @@ func (p *networkSimplexProcessor) setCutValues(g *graph.DGraph) {
 			}
 			if p.lim[f.To] <= p.lim[e.From] /* f.To is in tail component */ {
 				if p.lim[f.From] >= p.lim[e.To] /* f.From is in head component */ {
-					ht -= delta
+					ht -= e.Weight
 				}
 
 			} else /* f.To is in head component */ {
 				if p.lim[f.From] <= p.lim[e.From] /* f.From is in tail component */ {
-					th += delta
+					th += e.Weight
 				}
 			}
 		}
@@ -293,7 +292,7 @@ func (p *networkSimplexProcessor) setCutValues(g *graph.DGraph) {
 }
 
 func slack(e *graph.Edge) int {
-	return e.To.Layer - e.From.Layer - delta
+	return e.To.Layer - e.From.Layer - e.Delta
 }
 
 // The definition of head and tail in Gansner et al.'s paper are relative to the root of the postorder traversal:

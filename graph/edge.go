@@ -10,7 +10,8 @@ type Edge struct {
 type edge struct {
 	ID       string
 	From, To *Node
-	Weight   int // could be a float instead
+	Delta    int // edge's minimum length
+	Weight   int // edge's weight (could be a float instead)
 
 	// variables not relevant to the final output
 	IsInSpanningTree bool
@@ -23,6 +24,7 @@ func NewEdge(from, to *Node, weight int) *Edge {
 		edge: edge{
 			From:   from,
 			To:     to,
+			Delta:  1,
 			Weight: weight,
 		},
 	}

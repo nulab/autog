@@ -28,7 +28,7 @@ func (alg Alg) Process(g *graph.DGraph) {
 	case BrandesKoepfExtended:
 		execBrandesKoepf(g)
 	case NetworkSimplex:
-		panic("not implemented")
+		execNetworkSimplex(g)
 	default:
 		panic("positioning: unknown alg value")
 	}
