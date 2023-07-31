@@ -67,7 +67,9 @@ func execGraphvizDot(g *graph.DGraph) {
 	bestx := crossings(layers)
 	bestp := p.positions.Clone()
 
-	// TODO: these sorting routines don't yet account for flat edges (same-layer edges)
+	// TODO: these sorting routines don't yet account for flat edges (same-layer edges) because those are removed
+	// 	as a post-processing step in phase 2. Once this algorithm properly supports flat edges,
+	// 	unflattening can become a user option
 	for i := 0; i < maxiter; i++ {
 		// Depending on the parity of the current iteration
 		// number, the ranks are traversed from top to bottom or from bottom to top.
