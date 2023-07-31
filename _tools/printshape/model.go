@@ -70,11 +70,16 @@ type DrawInfo struct {
 	Enabled        bool            `json:"enabled"`
 	FillRule       string          `json:"fillRule"`
 	GradientColors []GradientColor `json:"gradientColors"`
+	SingleColor    *Color          `json:"singleColor,omitempty"`
+}
+
+type Color struct {
+	Color string `json:"color"`
 }
 
 type GradientColor struct {
-	Color  string `json:"color"`
-	Offset int    `json:"offset"`
+	Color
+	Offset int `json:"offset"`
 }
 
 type LineInfo struct {

@@ -15,6 +15,7 @@ type networkSimplexProcessor struct {
 	nodes map[string]*graph.Node
 }
 
+// todo: add documentation
 func execNetworkSimplex(g *graph.DGraph) {
 	p := &networkSimplexProcessor{
 		nodes: map[string]*graph.Node{},

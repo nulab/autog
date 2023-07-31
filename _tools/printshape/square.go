@@ -43,7 +43,7 @@ func NewSquare() *Shape {
 		DrawInfo: &DrawInfo{
 			Enabled:        true,
 			FillRule:       "nonzero",
-			GradientColors: []GradientColor{{"FFFFFF", 0}, {"000000", 100}},
+			GradientColors: []GradientColor{{Color{"FFFFFF"}, 0}, {Color{"000000"}, 100}},
 		},
 		Paths: []*Path{
 			{
