@@ -41,10 +41,13 @@ func execGraphvizDot(g *graph.DGraph) {
 	// at each iteration, this algorithm will update the node positions in all three places
 	// a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerPos
 
+	// todo: as per Gansner et al. they suggest to run the ordering routine twice
+	// 	where one initial order starts from the top layer and one from the bottom layer
+
 	// initialize positions
 	visited := graph.NodeSet{}
 	indices := map[int]int{}
-	for _, n := range g.Sources() {
+	for _, n := range g.Layers[0].Nodes {
 		p.initOrder(n, visited, indices)
 	}
 	for _, n := range g.Nodes {
@@ -70,15 +73,17 @@ func execGraphvizDot(g *graph.DGraph) {
 	// TODO: these sorting routines don't yet account for flat edges (same-layer edges) because those are removed
 	// 	as a post-processing step in phase 2. Once this algorithm properly supports flat edges,
 	// 	unflattening can become a user option
+	flipEqual := false
 	for i := 0; i < maxiter; i++ {
 		// Depending on the parity of the current iteration
 		// number, the ranks are traversed from top to bottom or from bottom to top.
 		if i%2 == 0 {
-			p.wmedianTopBottom(layers)
+			p.wmedianTopBottom(layers, flipEqual)
 		} else {
-			p.wmedianBottomTop(layers)
+			p.wmedianBottomTop(layers, flipEqual)
+			flipEqual = !flipEqual
 		}
-		p.transpose(layers)
+		p.transpose(layers, i%2 != 0)
 
 		if x := crossings(layers); x < bestx {
 			bestx = x
@@ -162,23 +167,23 @@ func (p *graphvizDotProcessor) initOrder(n *graph.Node, visited graph.NodeSet, i
 // what to do with vertices that have no adjacent vertices on the previous rank. In our
 // implementation such vertices are left fixed in their current positions with non-fixed vertices sorted
 // into the remaining positions.
-func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
+func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer, flipEqual bool) {
 	medians := map[*graph.Node]float64{}
 	for r := 1; r < len(layers); r++ {
 		for _, v := range layers[r].Nodes {
 			medians[v] = p.medianOf(p.adjacentNodesPositions(v, v.In, r-1))
 		}
-		p.sortLayer(layers[r].Nodes, medians)
+		p.sortLayer(layers[r].Nodes, medians, flipEqual)
 	}
 }
 
-func (p *graphvizDotProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
+func (p *graphvizDotProcessor) wmedianBottomTop(layers map[int]*graph.Layer, flipEqual bool) {
 	medians := map[*graph.Node]float64{}
 	for r := len(layers) - 1; r >= 0; r-- {
 		for _, v := range layers[r].Nodes {
 			medians[v] = p.medianOf(p.adjacentNodesPositions(v, v.Out, r+1))
 		}
-		p.sortLayer(layers[r].Nodes, medians)
+		p.sortLayer(layers[r].Nodes, medians, flipEqual)
 	}
 }
 
@@ -231,12 +236,14 @@ func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*gr
 	return res
 }
 
-func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64) {
+func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64, flipEqual bool) {
 	sort.Slice(nodes, func(i, j int) bool {
 		a, b := nodes[i], nodes[j]
-		afixed := medians[a] == -1 && p.getPos(a) < p.getPos(b)
-		bfixed := medians[b] == -1 && p.getPos(b) < p.getPos(a)
-		return afixed || bfixed || medians[a] < medians[b]
+		a_before_b := p.getPos(a) < p.getPos(b)
+		b_before_a := p.getPos(b) < p.getPos(a)
+		afixed := medians[a] == -1 && a_before_b
+		bfixed := medians[b] == -1 && b_before_a
+		return afixed || bfixed || medians[a] < medians[b] || (flipEqual && medians[a] == medians[b] && b_before_a)
 	})
 	for i, n := range nodes {
 		p.setPos(n, i)
@@ -246,7 +253,7 @@ func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph
 // transpose sweeps through layers in order and swaps pairs of adjacent nodes in the same layer;
 // it counts the number of crossings between L, L-1 and L+1, if there's an improvement it keeps looping
 // until no improvement is found.
-func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
+func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer, flipEqual bool) {
 	// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
 	// todo: without max itr this may loop forever, fix it
 	improved := true
@@ -261,15 +268,30 @@ func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
 				p.swap(v, w)
 				newX := crossingsAround(L, layers)
 
-				if curX <= newX {
-					// no improvement, restore order
-					p.swap(v, w)
-				} else {
+				switch {
+				case newX < curX:
 					// keep new order
 					improved = true
+					fallthrough
+
+				case newX == curX && flipEqual:
 					layers[L].Nodes[i] = w
 					layers[L].Nodes[i+1] = v
+
+				default:
+					// no improvement, restore order
+					p.swap(v, w)
 				}
+
+				// if newX < curX || (newX == curX && flipEqual) {
+				// 	// keep new order
+				// 	improved = true
+				// 	layers[L].Nodes[i] = w
+				// 	layers[L].Nodes[i+1] = v
+				// } else {
+				// 	// no improvement, restore order
+				// 	p.swap(v, w)
+				// }
 			}
 		}
 	}
