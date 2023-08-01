@@ -8,12 +8,18 @@ import (
 	"github.com/nulab/autog/monitor"
 )
 
+type initDirection uint8
+
+const (
+	initDirectionTop    initDirection = 0
+	initDirectionBottom initDirection = 1
+)
+
 const (
 	maxiter = 24
 )
 
 type graphvizDotProcessor struct {
-	phase3monitor
 	positions      graph.NodeMap
 	flipEqual      bool
 	transposeEqual bool
@@ -34,72 +40,22 @@ func execGraphvizDot(g *graph.DGraph, monitor *monitor.Monitor) {
 	// insert virtual nodes so that edges with length >1 have length 1
 	breakLongEdges(g)
 
-	p := &graphvizDotProcessor{
-		phase3monitor: phase3monitor{"graphvizdot", monitor},
-		positions:     graph.NodeMap{},
+	p3monitor := phase3monitor{"graphvizdot", monitor}
+
+	bestx_top, bestpos_top := run(g, initDirectionTop)
+	bestx_btm, bestpos_btm := run(g, initDirectionBottom)
+
+	var (
+		bestx               = 0
+		bestp graph.NodeMap = nil
+	)
+	if bestx_top < bestx_btm {
+		bestx, bestp = bestx_top, bestpos_top
+	} else {
+		bestx, bestp = bestx_btm, bestpos_btm
 	}
 
-	// node order is maintained in three different places:
-	// 	- in g.Layers.Nodes, which is a slice
-	// 	- in each node.LayerPos field
-	// 	- in p.positions
-	// at each iteration, this algorithm will update the node positions in all three places
-	// a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerPos
-
-	// todo: as per Gansner et al. they suggest to run the ordering routine twice
-	// 	where one initial order starts from the top layer and one from the bottom layer
-
-	// initialize positions
-	visited := graph.NodeSet{}
-	indices := map[int]int{}
-	for _, n := range g.Layers[0].Nodes {
-		p.initOrder(n, visited, indices)
-	}
-	for _, n := range g.Nodes {
-		p.initOrder(n, visited, indices)
-	}
-
-	layers := g.Layers // shallow copy
-
-	// propagate initial order to g.Layers.Nodes slice order
-	for _, layer := range layers {
-		sort.Slice(layer.Nodes, func(i, j int) bool {
-			a, b := layer.Nodes[i], layer.Nodes[j]
-			if a.Layer != b.Layer {
-				panic("same-layer nodes have different layers")
-			}
-			return p.positions[a] < p.positions[b]
-		})
-	}
-
-	bestx := crossings(layers)
-	bestp := p.positions.Clone()
-
-	// TODO: these sorting routines don't yet account for flat edges (same-layer edges) because those are removed
-	// 	as a post-processing step in phase 2. Once this algorithm properly supports flat edges,
-	// 	unflattening can become a user option
-	for i := 0; i < maxiter; i++ {
-		// Depending on the parity of the current iteration
-		// number, the ranks are traversed from top to bottom or from bottom to top.
-		if i%2 == 0 {
-			p.wmedianTopBottom(layers)
-		} else {
-			p.wmedianBottomTop(layers)
-			p.flipEqual = !p.flipEqual // switch after every two iterations
-		}
-		p.transpose(layers)
-		p.transposeEqual = !p.transposeEqual // switch after every two iterations
-
-		// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
-		if x := crossings(layers); x < bestx {
-			bestx = x
-			bestp = p.positions.Clone()
-		}
-		if bestx == 0 {
-			break
-		}
-	}
-	p.Monitor("crossings", bestx)
+	p3monitor.Monitor("crossings", bestx)
 
 	// reset the best node positions using the saved bestp
 	for _, n := range g.Nodes {
@@ -153,11 +109,91 @@ loop:
 	}
 }
 
-// initially orders the nodes in each rank. This may be done by a depth-first or
-// breadth-first search starting with vertices of minimum rank. Vertices are assigned positions in
-// their ranks in left-to-right order as the search progresses. This strategy ensures that the initial
-// ordering of a tree has no crossings. This is important because such crossings are obvious, easily avoided ‘‘mistakes.’’
-func (p *graphvizDotProcessor) initOrder(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
+// node order is maintained in three different places:
+//   - in g.Layers.Nodes, which is a slice
+//   - in each node.LayerPos field
+//   - in p.positions
+//
+// at each iteration, this algorithm will update the node positions in all three places
+// a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerPos
+func run(g *graph.DGraph, dir initDirection) (int, graph.NodeMap) {
+	p := &graphvizDotProcessor{
+		positions: graph.NodeMap{},
+	}
+	switch dir {
+	case initDirectionTop:
+		p.initTop(g)
+	case initDirectionBottom:
+		p.initBottom(g)
+	}
+	layers := g.Layers // shallow copy
+
+	// propagate initial order to g.Layers.Nodes slice order
+	for _, layer := range layers {
+		sort.Slice(layer.Nodes, func(i, j int) bool {
+			a, b := layer.Nodes[i], layer.Nodes[j]
+			if a.Layer != b.Layer {
+				panic("same-layer nodes have different layers")
+			}
+			return p.positions[a] < p.positions[b]
+		})
+	}
+
+	bestx := crossings(layers)
+	bestp := p.positions.Clone()
+
+	// TODO: these sorting routines don't yet account for flat edges (same-layer edges) because those are removed
+	// 	as a post-processing step in phase 2. Once this algorithm properly supports flat edges,
+	// 	unflattening can become a user option
+	for i := 0; i < maxiter; i++ {
+		// Depending on the parity of the current iteration
+		// number, the ranks are traversed from top to bottom or from bottom to top.
+		if i%2 == 0 {
+			p.wmedianTopBottom(layers)
+		} else {
+			p.wmedianBottomTop(layers)
+			p.flipEqual = !p.flipEqual // switch after every two iterations
+		}
+		p.transpose(layers)
+		p.transposeEqual = !p.transposeEqual // switch after every two iterations
+
+		// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
+		if x := crossings(layers); x < bestx {
+			bestx = x
+			bestp = p.positions.Clone()
+		}
+		if bestx == 0 {
+			break
+		}
+	}
+	return bestx, bestp
+}
+
+func (p *graphvizDotProcessor) initTop(g *graph.DGraph) {
+	// initialize positions
+	visited := graph.NodeSet{}
+	indices := map[int]int{}
+	for _, n := range g.Layers[0].Nodes {
+		p.initPositionsFromTop(n, visited, indices)
+	}
+	for _, n := range g.Nodes {
+		p.initPositionsFromTop(n, visited, indices)
+	}
+}
+
+func (p *graphvizDotProcessor) initBottom(g *graph.DGraph) {
+	// initialize positions
+	visited := graph.NodeSet{}
+	indices := map[int]int{}
+	for _, n := range g.Layers[len(g.Layers)-1].Nodes {
+		p.initPositionsFromBottom(n, visited, indices)
+	}
+	for _, n := range g.Nodes {
+		p.initPositionsFromBottom(n, visited, indices)
+	}
+}
+
+func (p *graphvizDotProcessor) initPositionsFromTop(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
 	if visited[n] {
 		return
 	}
@@ -165,7 +201,19 @@ func (p *graphvizDotProcessor) initOrder(n *graph.Node, visited graph.NodeSet, i
 	p.setPos(n, indices[n.Layer])
 	indices[n.Layer]++
 	for _, e := range n.Out {
-		p.initOrder(e.To, visited, indices)
+		p.initPositionsFromTop(e.To, visited, indices)
+	}
+}
+
+func (p *graphvizDotProcessor) initPositionsFromBottom(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
+	if visited[n] {
+		return
+	}
+	visited[n] = true
+	p.setPos(n, indices[n.Layer])
+	indices[n.Layer]++
+	for _, e := range n.In {
+		p.initPositionsFromBottom(e.From, visited, indices)
 	}
 }
 
@@ -176,7 +224,7 @@ func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 	medians := map[*graph.Node]float64{}
 	for r := 1; r < len(layers); r++ {
 		for _, v := range layers[r].Nodes {
-			medians[v] = p.medianOf(p.adjacentNodesPositions(v, v.In, r-1))
+			medians[v] = medianOf(p.adjacentNodesPositions(v, v.In, r-1))
 		}
 		p.sortLayer(layers[r].Nodes, medians)
 	}
@@ -186,14 +234,14 @@ func (p *graphvizDotProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
 	medians := map[*graph.Node]float64{}
 	for r := len(layers) - 1; r >= 0; r-- {
 		for _, v := range layers[r].Nodes {
-			medians[v] = p.medianOf(p.adjacentNodesPositions(v, v.Out, r+1))
+			medians[v] = medianOf(p.adjacentNodesPositions(v, v.Out, r+1))
 		}
 		p.sortLayer(layers[r].Nodes, medians)
 	}
 }
 
 // The median of each vertex is the median of the positions of adjacent nodes in the previous (or following) layer.
-func (p *graphvizDotProcessor) medianOf(adpos []int) float64 {
+func medianOf(adpos []int) float64 {
 	// convert positions to float64 to simplify arithmetic ops
 	fpos := make([]float64, len(adpos))
 	for i, x := range adpos {

@@ -37,7 +37,7 @@ func FromAdjacencyList(list map[string][]string) *DGraph {
 		nodeMap[sourceId] = n
 	}
 	return &DGraph{
-		Nodes: maps.Values(nodeMap), // note: this is non-deterministic
+		Nodes: maps.Values(nodeMap), // note: this is non-deterministic but might perform better on average
 		Edges: edgeList,
 	}
 }
