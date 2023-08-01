@@ -24,16 +24,6 @@ func (alg Alg) Process(g *graph.DGraph, _ *monitor.Monitor) {
 		panic("layering: unknown alg value")
 	}
 
-	// todo: might abstract this into a method, behind a user option
-	// 	unflattening makes the diagram strictly hierarchical but increases num of long edges
-loop:
-	for _, e := range g.Edges {
-		if !e.SelfLoops() && e.From.Layer == e.To.Layer {
-			e.To.Layer++
-			goto loop
-		}
-	}
-
 	m := map[int]*graph.Layer{}
 	for _, n := range g.Nodes {
 		layer := m[n.Layer]

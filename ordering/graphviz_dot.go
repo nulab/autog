@@ -23,6 +23,8 @@ type graphvizDotProcessor struct {
 	positions      graph.NodeMap
 	flipEqual      bool
 	transposeEqual bool
+	mustAfter      map[*graph.Node]*graph.Node
+	mustBefore     map[*graph.Node]*graph.Node
 }
 
 // Ordering algorithm used in Graphviz Dot and described in:
@@ -42,8 +44,17 @@ func execGraphvizDot(g *graph.DGraph, monitor *monitor.Monitor) {
 
 	p3monitor := phase3monitor{"graphvizdot", monitor}
 
-	bestx_top, bestpos_top := run(g, initDirectionTop)
-	bestx_btm, bestpos_btm := run(g, initDirectionBottom)
+	mustAfter := map[*graph.Node]*graph.Node{}
+	mustBefore := map[*graph.Node]*graph.Node{}
+	for _, e := range g.Edges {
+		if e.From.Layer == e.To.Layer {
+			mustAfter[e.To] = e.From
+			mustBefore[e.From] = e.To
+		}
+	}
+
+	bestx_top, bestpos_top := run(g, mustAfter, mustBefore, initDirectionTop)
+	bestx_btm, bestpos_btm := run(g, mustAfter, mustBefore, initDirectionBottom)
 
 	var (
 		bestx               = 0
@@ -116,9 +127,11 @@ loop:
 //
 // at each iteration, this algorithm will update the node positions in all three places
 // a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerPos
-func run(g *graph.DGraph, dir initDirection) (int, graph.NodeMap) {
+func run(g *graph.DGraph, mustAfter, mustBefore map[*graph.Node]*graph.Node, dir initDirection) (int, graph.NodeMap) {
 	p := &graphvizDotProcessor{
-		positions: graph.NodeMap{},
+		positions:  graph.NodeMap{},
+		mustAfter:  mustAfter,
+		mustBefore: mustBefore,
 	}
 	switch dir {
 	case initDirectionTop:
@@ -142,9 +155,6 @@ func run(g *graph.DGraph, dir initDirection) (int, graph.NodeMap) {
 	bestx := crossings(layers)
 	bestp := p.positions.Clone()
 
-	// TODO: these sorting routines don't yet account for flat edges (same-layer edges) because those are removed
-	// 	as a post-processing step in phase 2. Once this algorithm properly supports flat edges,
-	// 	unflattening can become a user option
 	for i := 0; i < maxiter; i++ {
 		// Depending on the parity of the current iteration
 		// number, the ranks are traversed from top to bottom or from bottom to top.
@@ -200,8 +210,22 @@ func (p *graphvizDotProcessor) initPositionsFromTop(n *graph.Node, visited graph
 	visited[n] = true
 	p.setPos(n, indices[n.Layer])
 	indices[n.Layer]++
+	p.initPositionsFlatEdges(n, visited, indices)
+
 	for _, e := range n.Out {
 		p.initPositionsFromTop(e.To, visited, indices)
+	}
+}
+
+func (p *graphvizDotProcessor) initPositionsFlatEdges(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
+	h, i := head(p.mustAfter, n)
+	if i > 0 {
+		for h != nil && h != n {
+			visited[h] = true
+			p.setPos(h, indices[h.Layer])
+			indices[h.Layer]++
+			h = p.mustBefore[h]
+		}
 	}
 }
 
@@ -288,12 +312,20 @@ func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*gr
 
 func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64) {
 	sort.Slice(nodes, func(i, j int) bool {
-		a, b := nodes[i], nodes[j]
+		a, aitr := head(p.mustAfter, nodes[i])
+		b, bitr := head(p.mustAfter, nodes[j])
+
+		if (aitr != 0 || bitr != 0) && a == b {
+			return aitr < bitr
+		}
 		a_before_b := p.getPos(a) < p.getPos(b)
 		b_before_a := p.getPos(b) < p.getPos(a)
 		afixed := medians[a] == -1 && a_before_b
 		bfixed := medians[b] == -1 && b_before_a
-		return afixed || bfixed || medians[a] < medians[b] || (p.flipEqual && medians[a] == medians[b] && b_before_a)
+
+		flipIfNotInClosure := p.flipEqual && aitr == 0 && bitr == 0 && medians[a] == medians[b] && b_before_a
+
+		return afixed || bfixed || medians[a] < medians[b] || flipIfNotInClosure
 	})
 	for i, n := range nodes {
 		p.setPos(n, i)
@@ -311,6 +343,19 @@ func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
 			for i := 0; i < len(layers[L].Nodes)-2; i++ {
 				v := layers[L].Nodes[i]
 				w := layers[L].Nodes[i+1]
+
+				// todo: the no-flip logic based on flat edges can be improved to consider
+				// 	the closure as if it were one node. the non-closure node could be brought to the other end
+				// 	of the closure
+
+				// if w is head, skip
+				if p.mustBefore[v] == nil && p.mustBefore[w] != nil {
+					continue
+				}
+				// if v is tail, skip
+				if p.mustAfter[v] != nil && p.mustAfter[w] == nil {
+					continue
+				}
 
 				curX := crossingsAround(L, layers)
 				p.swap(v, w)
@@ -368,4 +413,17 @@ func (p *graphvizDotProcessor) getPos(n *graph.Node) int {
 func (p *graphvizDotProcessor) setPos(n *graph.Node, pos int) {
 	p.positions[n] = pos
 	n.LayerPos = pos
+}
+
+// head returns the first element in a same-layer transitive closure to which k belongs, and the number of edges
+// that separate k and the head;
+// or returns k itself and 0 if k doesn't belong to any such closure
+func head[T comparable](m map[T]T, k T) (T, int) {
+	v := k
+	i := 0
+	for n, ok := m[k]; ok; n, ok = m[n] {
+		v = n
+		i++
+	}
+	return v, i
 }
