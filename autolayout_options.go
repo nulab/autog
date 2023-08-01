@@ -4,16 +4,18 @@ import (
 	"github.com/nulab/autog/cyclebreaking"
 	"github.com/nulab/autog/edgerouting"
 	"github.com/nulab/autog/layering"
+	"github.com/nulab/autog/monitor"
 	"github.com/nulab/autog/ordering"
 	"github.com/nulab/autog/positioning"
 )
 
 type options struct {
-	p1 cyclebreaking.Alg
-	p2 layering.Alg
-	p3 ordering.Alg
-	p4 positioning.Alg
-	p5 edgerouting.Alg
+	p1      cyclebreaking.Alg
+	p2      layering.Alg
+	p3      ordering.Alg
+	p4      positioning.Alg
+	p5      edgerouting.Alg
+	monitor *monitor.Monitor
 }
 
 var defaultOptions = options{
@@ -47,5 +49,11 @@ func WithOrdering(alg ordering.Alg) option {
 func WithPositioning(alg positioning.Alg) option {
 	return func(o *options) {
 		o.p4 = alg
+	}
+}
+
+func WithMonitor(monitor *monitor.Monitor) option {
+	return func(o *options) {
+		o.monitor = monitor
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/monitor"
 )
 
 const (
@@ -12,6 +13,7 @@ const (
 )
 
 type graphvizDotProcessor struct {
+	phase3monitor
 	positions      graph.NodeMap
 	flipEqual      bool
 	transposeEqual bool
@@ -23,7 +25,7 @@ type graphvizDotProcessor struct {
 //     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
 //
 // Note that ELK's implementation is based on the original algorithm proposed by Sugiyama et al. instead of Graphviz.
-func execGraphvizDot(g *graph.DGraph) {
+func execGraphvizDot(g *graph.DGraph, monitor *monitor.Monitor) {
 	if len(g.Layers) == 1 {
 		// no crossings to reduce
 		return
@@ -33,7 +35,8 @@ func execGraphvizDot(g *graph.DGraph) {
 	breakLongEdges(g)
 
 	p := &graphvizDotProcessor{
-		positions: graph.NodeMap{},
+		phase3monitor: phase3monitor{"graphvizdot", monitor},
+		positions:     graph.NodeMap{},
 	}
 
 	// node order is maintained in three different places:
@@ -96,6 +99,7 @@ func execGraphvizDot(g *graph.DGraph) {
 			break
 		}
 	}
+	p.Monitor("crossings", bestx)
 
 	// reset the best node positions using the saved bestp
 	for _, n := range g.Nodes {
@@ -268,11 +272,6 @@ func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
 				case newX < curX:
 					// improved and keep new order
 					improved = true
-					fallthrough
-
-				case newX == curX && p.transposeEqual:
-					// not improved because the number of crossings is the same,
-					// but keep new order anyway
 					layers[L].Nodes[i] = w
 					layers[L].Nodes[i+1] = v
 

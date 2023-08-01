@@ -1,7 +1,6 @@
 package autog
 
 import (
-	"github.com/nulab/autog/cyclebreaking"
 	"github.com/nulab/autog/graph"
 )
 
@@ -13,6 +12,7 @@ func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
 	for _, opt := range opts {
 		opt(&layoutOpts)
 	}
+	defer layoutOpts.monitor.Close()
 
 	pipeline := [...]processor{
 		layoutOpts.p1, // cycle breaking
@@ -20,11 +20,11 @@ func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
 		layoutOpts.p3, // ordering
 		layoutOpts.p4, // positioning
 		// layoutOpts.p5, // edge routing
-		cyclebreaking.UndoRevertEdges,
+		// cyclebreaking.UndoRevertEdges,
 	}
 
 	for _, phase := range pipeline {
-		phase.Process(graph)
+		phase.Process(graph, layoutOpts.monitor)
 	}
 
 	return graph

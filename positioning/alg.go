@@ -2,13 +2,24 @@ package positioning
 
 import (
 	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/monitor"
 )
 
 type Alg uint8
 
 const (
-	VerticalAlign Alg = iota
+	// NoPositioning does nothing. Nodes won't be assigned any coordinates.
+	NoPositioning Alg = iota
+
+	// VerticalAlign aligns nodes in each layer around the center of the diagram.
+	// It's a simple and fast to implement algorithm for quick prototyping.
+	VerticalAlign
+
+	// BrandesKoepfExtended
 	BrandesKoepfExtended
+
+	// NetworkSimplex sets X coordinates by constructing an auxiliary graph and solving it with the network simplex method.
+	// Layers in the auxiliary graph are X coordinates in the main graph.
 	NetworkSimplex
 	_endAlg
 )
@@ -21,8 +32,10 @@ func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
 
-func (alg Alg) Process(g *graph.DGraph) {
+func (alg Alg) Process(g *graph.DGraph, _ *monitor.Monitor) {
 	switch alg {
+	case NoPositioning:
+		return
 	case VerticalAlign:
 		execVerticalAlign(g)
 	case BrandesKoepfExtended:

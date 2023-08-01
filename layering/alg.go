@@ -2,6 +2,7 @@ package layering
 
 import (
 	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/monitor"
 )
 
 type Alg uint8
@@ -15,7 +16,7 @@ func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
 
-func (alg Alg) Process(g *graph.DGraph) {
+func (alg Alg) Process(g *graph.DGraph, _ *monitor.Monitor) {
 	switch alg {
 	case NetworkSimplex:
 		execNetworkSimplex(g)

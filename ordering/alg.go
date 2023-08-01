@@ -1,6 +1,9 @@
 package ordering
 
-import "github.com/nulab/autog/graph"
+import (
+	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/monitor"
+)
 
 type Alg uint8
 
@@ -13,10 +16,10 @@ func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
 
-func (alg Alg) Process(g *graph.DGraph) {
+func (alg Alg) Process(g *graph.DGraph, m *monitor.Monitor) {
 	switch alg {
 	case GraphvizDot:
-		execGraphvizDot(g)
+		execGraphvizDot(g, m)
 	default:
 		panic("ordering: unknown alg value")
 	}

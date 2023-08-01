@@ -22,7 +22,7 @@ func execNetworkSimplex(g *graph.DGraph) {
 	}
 
 	aux := p.auxiliaryGraph(g)
-	layering.NetworkSimplex.Process(aux)
+	layering.NetworkSimplex.Process(aux, nil)
 
 	for _, l := range g.Layers {
 		for i, n := range l.Nodes {
