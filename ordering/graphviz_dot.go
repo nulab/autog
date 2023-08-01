@@ -12,7 +12,9 @@ const (
 )
 
 type graphvizDotProcessor struct {
-	positions graph.NodeMap
+	positions      graph.NodeMap
+	flipEqual      bool
+	transposeEqual bool
 }
 
 // Ordering algorithm used in Graphviz Dot and described in:
@@ -73,18 +75,19 @@ func execGraphvizDot(g *graph.DGraph) {
 	// TODO: these sorting routines don't yet account for flat edges (same-layer edges) because those are removed
 	// 	as a post-processing step in phase 2. Once this algorithm properly supports flat edges,
 	// 	unflattening can become a user option
-	flipEqual := false
 	for i := 0; i < maxiter; i++ {
 		// Depending on the parity of the current iteration
 		// number, the ranks are traversed from top to bottom or from bottom to top.
 		if i%2 == 0 {
-			p.wmedianTopBottom(layers, flipEqual)
+			p.wmedianTopBottom(layers)
 		} else {
-			p.wmedianBottomTop(layers, flipEqual)
-			flipEqual = !flipEqual
+			p.wmedianBottomTop(layers)
+			p.flipEqual = !p.flipEqual // switch after every two iterations
 		}
-		p.transpose(layers, i%2 != 0)
+		p.transpose(layers)
+		p.transposeEqual = !p.transposeEqual // switch after every two iterations
 
+		// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
 		if x := crossings(layers); x < bestx {
 			bestx = x
 			bestp = p.positions.Clone()
@@ -162,35 +165,30 @@ func (p *graphvizDotProcessor) initOrder(n *graph.Node, visited graph.NodeSet, i
 	}
 }
 
-// At each rank a vertex is assigned a median based on the adjacent vertices on the previous
-// rank. Then, the vertices in the rank are sorted by their medians. An important consideration is
-// what to do with vertices that have no adjacent vertices on the previous rank. In our
-// implementation such vertices are left fixed in their current positions with non-fixed vertices sorted
-// into the remaining positions.
-func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer, flipEqual bool) {
+// The weighted median routine assigns an order to each vertex in layer L(i) based on the current order
+// of adjacent nodes in the next rank. Next is L(i)-1 in top-bottom sweep, or L(i)+1 in bottom-top sweep.
+// Nodes with no adjacent nodes in the next layer are kept in place.
+func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 	medians := map[*graph.Node]float64{}
 	for r := 1; r < len(layers); r++ {
 		for _, v := range layers[r].Nodes {
 			medians[v] = p.medianOf(p.adjacentNodesPositions(v, v.In, r-1))
 		}
-		p.sortLayer(layers[r].Nodes, medians, flipEqual)
+		p.sortLayer(layers[r].Nodes, medians)
 	}
 }
 
-func (p *graphvizDotProcessor) wmedianBottomTop(layers map[int]*graph.Layer, flipEqual bool) {
+func (p *graphvizDotProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
 	medians := map[*graph.Node]float64{}
 	for r := len(layers) - 1; r >= 0; r-- {
 		for _, v := range layers[r].Nodes {
 			medians[v] = p.medianOf(p.adjacentNodesPositions(v, v.Out, r+1))
 		}
-		p.sortLayer(layers[r].Nodes, medians, flipEqual)
+		p.sortLayer(layers[r].Nodes, medians)
 	}
 }
 
-// The median value of a vertex is defined as the median position of the adjacent vertices if that
-// is uniquely defined. Otherwise, it is interpolated between the two median positions using a
-// measure of tightness. Generally, the weighted median is biased toward the side where vertices are
-// more closely packed.
+// The median of each vertex is the median of the positions of adjacent nodes in the previous (or following) layer.
 func (p *graphvizDotProcessor) medianOf(adpos []int) float64 {
 	// convert positions to float64 to simplify arithmetic ops
 	fpos := make([]float64, len(adpos))
@@ -236,14 +234,14 @@ func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*gr
 	return res
 }
 
-func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64, flipEqual bool) {
+func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64) {
 	sort.Slice(nodes, func(i, j int) bool {
 		a, b := nodes[i], nodes[j]
 		a_before_b := p.getPos(a) < p.getPos(b)
 		b_before_a := p.getPos(b) < p.getPos(a)
 		afixed := medians[a] == -1 && a_before_b
 		bfixed := medians[b] == -1 && b_before_a
-		return afixed || bfixed || medians[a] < medians[b] || (flipEqual && medians[a] == medians[b] && b_before_a)
+		return afixed || bfixed || medians[a] < medians[b] || (p.flipEqual && medians[a] == medians[b] && b_before_a)
 	})
 	for i, n := range nodes {
 		p.setPos(n, i)
@@ -253,9 +251,7 @@ func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph
 // transpose sweeps through layers in order and swaps pairs of adjacent nodes in the same layer;
 // it counts the number of crossings between L, L-1 and L+1, if there's an improvement it keeps looping
 // until no improvement is found.
-func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer, flipEqual bool) {
-	// todo: adaptive strategy to keep iterating in case of sufficiently large improvement
-	// todo: without max itr this may loop forever, fix it
+func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
 	improved := true
 	for improved {
 		improved = false
@@ -270,11 +266,13 @@ func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer, flipEqual 
 
 				switch {
 				case newX < curX:
-					// keep new order
+					// improved and keep new order
 					improved = true
 					fallthrough
 
-				case newX == curX && flipEqual:
+				case newX == curX && p.transposeEqual:
+					// not improved because the number of crossings is the same,
+					// but keep new order anyway
 					layers[L].Nodes[i] = w
 					layers[L].Nodes[i+1] = v
 
@@ -282,16 +280,6 @@ func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer, flipEqual 
 					// no improvement, restore order
 					p.swap(v, w)
 				}
-
-				// if newX < curX || (newX == curX && flipEqual) {
-				// 	// keep new order
-				// 	improved = true
-				// 	layers[L].Nodes[i] = w
-				// 	layers[L].Nodes[i+1] = v
-				// } else {
-				// 	// no improvement, restore order
-				// 	p.swap(v, w)
-				// }
 			}
 		}
 	}
