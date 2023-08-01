@@ -12,6 +12,11 @@ func (layer *Layer) String() string {
 	return fmt.Sprint(layer.Nodes)
 }
 
+// Tail returns the last node in this layer, i.e. the node with greatest index
+func (layer *Layer) Tail() *Node {
+	return layer.Nodes[len(layer.Nodes)-1]
+}
+
 // func (layer *Layer) RemoveNode(n *Node) {
 // 	i := 0
 // 	for j, m := range layer.Nodes {

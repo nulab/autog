@@ -50,101 +50,49 @@ func horizontalCompaction() {
 
 }
 
-// func (p *brandesKoepfPositioner) markConflicts(g *graph.DGraph) {
-// 	L := len(g.Layers)
-// 	if L < 3 {
-// 		return
-// 	}
-// 	layerSize := map[int]int{}
-// 	for _, n := range g.Nodes {
-// 		layerSize[n.Layer]++
-// 	}
-//
-// 	U := 2
-// 	for i := 1; i < L-1; i++ {
-// 		layer := g.Layers[U]
-//
-// 		k0 := 0
-// 		l := 0
-//
-// 		for l1 := 0; l1 < layerSize[i+1]; l1++ {
-// 			vli := layer[l1]
-// 			if (l1 == layerSize[i+1]-1) || incidentToInner(vli, i+1, i) {
-// 				k1 := layerSize[i] - 1
-// 				if incidentToInner(vli, i+1, i) {
-// 					k1 = -1 // todo
-// 				}
-// 				for l <= l1 {
-// 					vl := layer[l]
-// 					if !incidentToInner(vl, i+1, i) {
-// 						for true {
-// 							k := -20 // todo
-// 							if k < k0 || k > k1 {
-// 								// Marked edge can't return null here, because the upper neighbor
-// 								// relationship between v_l and upperNeighbor enforces the existence
-// 								// of at least one edge between the two nodes
-// 								p.markedEdges = append(p.markedEdges /*upperNeighbor.getSecond()*/, nil)
-// 							}
-// 						}
-// 					}
-//
-// 					l++
-// 				}
-// 				k0 = k1
-// 			}
-// 		}
-// 	}
-//
-// 	//
-// 	//        // The following call succeeds since there are at least 3 layers in the graph
-// 	//        Iterator<Layer> layerIterator = layeredGraph.getLayers().listIterator(2);
-// 	//        for (int i = 1; i < numberOfLayers - 1; i++) {
-// 	//            // The variable naming here follows the notation of the corresponding paper
-// 	//            // Normally, underscores are not allowed in local variable names, but since there
-// 	//            // is no way of properly writing indices beside underscores, Checkstyle will be
-// 	//            // disabled here and in future methods containing indexed variables
-// 	//            // CHECKSTYLEOFF Local Variable Names
-// 	//            Layer currentLayer = layerIterator.next();
-// 	//            Iterator<LNode> nodeIterator = currentLayer.getNodes().iterator();
-// 	//
-// 	//            int k_0 = 0;
-// 	//            int l = 0;
-// 	//
-// 	//            for (int l_1 = 0; l_1 < layerSize[i + 1]; l_1++) {
-// 	//                // In the paper, l and i are indices for the layer and the position in the layer
-// 	//                LNode v_l_i = nodeIterator.next(); // currentLayer.getNodes().get(l_1);
-// 	//
-// 	//                if (l_1 == ((layerSize[i + 1]) - 1) || incidentToInnerSegment(v_l_i, i + 1, i)) {
-// 	//                    int k_1 = layerSize[i] - 1;
-// 	//                    if (incidentToInnerSegment(v_l_i, i + 1, i)) {
-// 	//                        k_1 = ni.nodeIndex[ni.leftNeighbors.get(v_l_i.id).get(0).getFirst().id];
-// 	//                    }
-// 	//
-// 	//                    while (l <= l_1) {
-// 	//                        LNode v_l = currentLayer.getNodes().get(l);
-// 	//
-// 	//                        if (!incidentToInnerSegment(v_l, i + 1, i)) {
-// 	//                            for (Pair<LNode, LEdge> upperNeighbor : ni.leftNeighbors.get(v_l.id)) {
-// 	//                                int k = ni.nodeIndex[upperNeighbor.getFirst().id];
-// 	//
-// 	//                                if (k < k_0 || k > k_1) {
-// 	//                                    // Marked edge can't return null here, because the upper neighbor
-// 	//                                    // relationship between v_l and upperNeighbor enforces the existence
-// 	//                                    // of at least one edge between the two nodes
-// 	//                                    markedEdges.add(upperNeighbor.getSecond());
-// 	//                                }
-// 	//                            }
-// 	//                        }
-// 	//
-// 	//                        l++;
-// 	//                    }
-// 	//
-// 	//                    k_0 = k_1;
-// 	//                }
-// 	//            }
-// 	//            // CHECKSTYLEON Local Variable Names
-// 	//        }
-// }
+// marks edges that cross inner edges, i.e. type 1 and type 2 conflicts as defined in B&K
+func markConflicts(g *graph.DGraph) {
+	if len(g.Layers) < 4 {
+		return
+	}
+	marked := []*graph.Edge{}
+	// sweep layers from top to bottom except the first and the last
+	for i := 1; i < len(g.Layers)-1; i++ {
+		k0 := 0
+		for l1, v := range g.Layers[i+1].Nodes {
+			ksrc := incidentToInner(v)
+			if g.Layers[i+1].Tail() == v || ksrc >= 0 {
+				// set k1 to the index of the last node or the index of the inner edge's source
+				// if v is the tail node, ksrc is either identical to v.LayerPos or negative
+				// if v belongs to an inner edge, ksrc is non-negative and identical to v.LayerPost
+				// therefore max() returns the correct value for k1
+				k1 := max(v.LayerPos, ksrc)
+				// range over same layer nodes until v included
+				for l2, w := range g.Layers[i+1].Nodes {
+					if l2 > l1 {
+						break
+					}
+					for _, e := range w.In {
+						if e.SelfLoops() || e.IsFlat() {
+							continue
+						}
+						// greater than k1 captures that e crosses an inner edge from left to right:
+						// 	- k1 is set to the position of v's source;
+						// 	- the strict inequality prevents erroneously marking e as conflicting with itself;
+						// 	- there is a conflict even if v is the target node of both e and the inner edge
+						// lesser than k0 captures that e crosses an inner edge from right to left:
+						// 	- k0 is updated only after finding an inner edge with target v
+						//	- at the next iteration moving to v+1, there is a crossing if the v+1 source precedes v's source
+						if e.From.LayerPos < k0 || e.From.LayerPos > k1 {
+							marked = append(marked, e)
+						}
+					}
+				}
+				k0 = k1
+			}
+		}
+	}
+}
 
 type block = []*graph.Edge
 
@@ -188,6 +136,17 @@ func width(port) float64 {
 	return 0
 }
 
-func incidentToInner(n *graph.Node, i, j int) bool {
-	return false
+// returns a non-negative number if n is the target node of an inner edge, i.e. an edge connecting two virtual nodes
+// on adjacent layers, where the number is the position of the edge source in the upper layer;
+// it returns -1 if the node isn't involved in an inner edge.
+func incidentToInner(n *graph.Node) int {
+	if !n.IsVirtual {
+		return -1
+	}
+	for _, e := range n.In {
+		if e.From.IsVirtual && e.From.Layer == n.Layer-1 {
+			return e.From.LayerPos
+		}
+	}
+	return -1
 }

@@ -34,6 +34,10 @@ func (e *Edge) SelfLoops() bool {
 	return e.From == e.To
 }
 
+func (e *Edge) IsFlat() bool {
+	return e.From.Layer == e.To.Layer
+}
+
 func (e *Edge) Reverse() {
 	n := e.From
 	e.From = e.To
