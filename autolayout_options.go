@@ -22,7 +22,7 @@ var defaultOptions = options{
 	p1: cyclebreaking.Greedy,
 	p2: layering.NetworkSimplex,
 	p3: ordering.GraphvizDot,
-	p4: positioning.VerticalAlign,
+	p4: positioning.BrandesKoepfExtended,
 	p5: edgerouting.NoRouting,
 }
 

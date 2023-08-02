@@ -6,7 +6,6 @@ import (
 	"github.com/nulab/autog"
 	"github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/testfiles"
-	"github.com/nulab/autog/positioning"
 	"github.com/vibridi/cacooclip"
 )
 
@@ -30,7 +29,7 @@ func main() {
 	xoffset := 0.0
 	shapes := map[string]*Shape{}
 	for _, subg := range dg.ConnectedComponents() {
-		autog.Layout(subg, autog.WithPositioning(positioning.NetworkSimplex))
+		autog.Layout(subg)
 		maxxoffset := 0.0
 		for _, n := range subg.Nodes {
 			shape := NewGroup(n.ID)
