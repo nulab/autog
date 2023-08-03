@@ -191,6 +191,7 @@ type classes struct {
 	sinks  map[*graph.Node]*graph.Node // sink blocks
 	xshift map[*graph.Node]float64
 	xcoord map[*graph.Node]float64
+	xcinit map[*graph.Node]bool
 }
 
 func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout layout) map[*graph.Node]float64 {
@@ -198,11 +199,11 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 		sinks:  map[*graph.Node]*graph.Node{},
 		xshift: map[*graph.Node]float64{},
 		xcoord: map[*graph.Node]float64{},
+		xcinit: map[*graph.Node]bool{},
 	}
 	for _, n := range g.Nodes {
 		c.sinks[n] = n
 		c.xshift[n] = outermostX(layout.h)
-		c.xcoord[n] = -1
 	}
 
 	iter := layersIterator(g, layout.v)
@@ -225,10 +226,11 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 }
 
 func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout layout) {
-	if c.xcoord[v] >= 0 {
+	if c.xcinit[v] {
 		// already placed
 		return
 	}
+	c.xcinit[v] = true
 	c.xcoord[v] = 0
 	w := v
 	for {
@@ -471,7 +473,7 @@ func balanceLayouts(layoutXCoords [4]xcoordinates) xcoordinates {
 	}
 
 	medianx := xcoordinates{}
-	for _, n := range []*graph.Node{} {
+	for _, n := range nodes {
 		xs := make([]float64, 4)
 		for i := range layoutXCoords {
 			xs[i] = layoutXCoords[i][n] + shift[i]
