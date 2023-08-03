@@ -1,4 +1,4 @@
-package ordering
+package phase3
 
 import (
 	"sort"

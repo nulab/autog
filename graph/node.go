@@ -1,6 +1,10 @@
 package graph
 
-import "github.com/nulab/autog/internal/pragma"
+import (
+	"strconv"
+
+	"github.com/nulab/autog/internal/pragma"
+)
 
 type Node struct {
 	pragma.NotCopiable
@@ -14,7 +18,7 @@ type Node struct {
 }
 
 func (n *Node) String() string {
-	return n.ID
+	return n.ID + "(" + strconv.Itoa(n.LayerPos) + ")"
 }
 
 // Number of incoming edges

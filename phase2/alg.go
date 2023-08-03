@@ -1,4 +1,4 @@
-package layering
+package phase2
 
 import (
 	"github.com/nulab/autog/graph"

@@ -10,7 +10,7 @@ import (
 	"github.com/nulab/autog/internal/elk"
 	"github.com/nulab/autog/internal/testfiles"
 	"github.com/nulab/autog/monitor"
-	"github.com/nulab/autog/positioning"
+	"github.com/nulab/autog/phase4"
 )
 
 const (
@@ -36,7 +36,7 @@ func main() {
 		for i := 0; i < itr; i++ {
 			autog.Layout(
 				graph.FromAdjacencyList(ad),
-				autog.WithPositioning(positioning.NoPositioning),
+				autog.WithPositioning(phase4.NoPositioning),
 				autog.WithMonitor(monitor.New(relayTo(ch, wg))),
 			)
 		}

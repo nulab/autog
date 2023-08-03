@@ -1,10 +1,10 @@
-package positioning
+package phase4
 
 import (
 	"strconv"
 
 	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/layering"
+	"github.com/nulab/autog/phase2"
 )
 
 const (
@@ -22,7 +22,7 @@ func execNetworkSimplex(g *graph.DGraph) {
 	}
 
 	aux := p.auxiliaryGraph(g)
-	layering.NetworkSimplex.Process(aux, nil)
+	phase2.NetworkSimplex.Process(aux, nil)
 
 	for _, l := range g.Layers {
 		for i, n := range l.Nodes {

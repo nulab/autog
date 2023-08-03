@@ -1,6 +1,7 @@
-package positioning
+package phase4
 
 import (
+	"fmt"
 	"maps"
 	"math"
 	"sort"
@@ -76,7 +77,17 @@ func execBrandesKoepf(g *graph.DGraph) {
 		xcoords[i] = p.horizontalCompaction(g, a)
 	}
 
+	for i, xc := range xcoords {
+		for n, x := range xc {
+			if n.ID == "N8" || n.ID == "N3" {
+				fmt.Printf("%s x coord in layout %d: %.02f\n", n.ID, i, x)
+			}
+		}
+	}
+
 	finalLayout := balanceLayouts(xcoords, g.Nodes)
+
+	// todo: verify feasibility of balanced layout or choose a feasible one
 
 	for _, l := range g.Layers {
 		for _, n := range l.Nodes {
@@ -215,6 +226,7 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 	for _, n := range g.Nodes {
 		c.xcoord[n] = c.xcoord[p.blockroot[n]]
 		if shift := c.xshift[c.sinks[p.blockroot[n]]]; withinOutermostX(shift, layout.h) {
+			fmt.Println("applying shift", c.xcoord[n], shift)
 			c.xcoord[n] = c.xcoord[n] + shift
 		}
 	}

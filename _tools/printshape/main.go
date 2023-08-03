@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"strconv"
 
 	"github.com/nulab/autog"
 	"github.com/nulab/autog/graph"
@@ -9,11 +10,11 @@ import (
 	"github.com/vibridi/cacooclip"
 )
 
-const exampleDiagram = "ci_router_ComplexRouter.json"
+const exampleDiagram = "simple_acyclic.json" //  "ci_router_ComplexRouter.json"
 
 // todo: very ugly code used to set up a quick POC, eventually refactor this into its own project
 func main() {
-	elkg := testfiles.ReadTestFile("internal/testfiles/elk_relabeled", exampleDiagram)
+	elkg := testfiles.ReadTestFile("internal/testfiles/elk_constructed", exampleDiagram)
 	// elkg := testfiles.ReadTestFile("internal/testfiles/elk_constructed", "simple_long_edge.json")
 
 	dg := graph.FromAdjacencyList(elkg.AdjacencyList())
@@ -29,10 +30,10 @@ func main() {
 	xoffset := 0.0
 	shapes := map[string]*Shape{}
 	for _, subg := range dg.ConnectedComponents() {
-		autog.Layout(subg)
+		autog.Layout(subg) // , autog.WithPositioning(positioning.NetworkSimplex))
 		maxxoffset := 0.0
 		for _, n := range subg.Nodes {
-			shape := NewGroup(n.ID)
+			shape := NewGroup(n.ID + "-L" + strconv.Itoa(n.Layer) + "-P" + strconv.Itoa(n.LayerPos))
 			shape.Bounds.Top = n.Y
 			shape.Bounds.Left = n.X + xoffset
 			shape.Bounds.Right = shape.Bounds.Left + 100.0

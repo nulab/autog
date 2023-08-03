@@ -1,34 +1,38 @@
 package autog
 
 import (
-	"github.com/nulab/autog/cyclebreaking"
-	"github.com/nulab/autog/edgerouting"
-	"github.com/nulab/autog/layering"
 	"github.com/nulab/autog/monitor"
-	"github.com/nulab/autog/ordering"
-	"github.com/nulab/autog/positioning"
+	cbreaking "github.com/nulab/autog/phase1"
+	layering "github.com/nulab/autog/phase2"
+	ordering "github.com/nulab/autog/phase3"
+	positioning "github.com/nulab/autog/phase4"
+	routing "github.com/nulab/autog/phase5"
 )
 
 type options struct {
-	p1      cyclebreaking.Alg
+	p1      cbreaking.Alg
 	p2      layering.Alg
 	p3      ordering.Alg
 	p4      positioning.Alg
-	p5      edgerouting.Alg
+	p5      routing.Alg
 	monitor *monitor.Monitor
 }
 
+// external parameters that can be supplied to algorithms
+type params struct {
+}
+
 var defaultOptions = options{
-	p1: cyclebreaking.Greedy,
+	p1: cbreaking.Greedy,
 	p2: layering.NetworkSimplex,
 	p3: ordering.GraphvizDot,
 	p4: positioning.BrandesKoepfExtended,
-	p5: edgerouting.NoRouting,
+	p5: routing.NoRouting,
 }
 
 type option func(*options)
 
-func WithCycleBreaking(alg cyclebreaking.Alg) option {
+func WithCycleBreaking(alg cbreaking.Alg) option {
 	return func(o *options) {
 		o.p1 = alg
 	}
@@ -49,6 +53,12 @@ func WithOrdering(alg ordering.Alg) option {
 func WithPositioning(alg positioning.Alg) option {
 	return func(o *options) {
 		o.p4 = alg
+	}
+}
+
+func WithEdgeRouting(alg routing.Alg) option {
+	return func(o *options) {
+		o.p5 = alg
 	}
 }
 

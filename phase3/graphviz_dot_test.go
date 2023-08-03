@@ -1,4 +1,4 @@
-package ordering
+package phase3
 
 import (
 	"fmt"
@@ -6,10 +6,10 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/nulab/autog/cyclebreaking"
 	"github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/testfiles"
-	"github.com/nulab/autog/layering"
+	"github.com/nulab/autog/phase1"
+	"github.com/nulab/autog/phase2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,33 +46,29 @@ func TestCrossings(t *testing.T) {
 		return nodes[i].ID < nodes[j].ID
 	})
 
-	p := &graphvizDotProcessor{
-		layers: map[int][]*graph.Node{
-			0: {nodes[0], nodes[1], nodes[2], nodes[3]},
-			1: {nodes[4], nodes[5], nodes[6], nodes[7]},
-		},
-		positions: map[*graph.Node]int{
-			nodes[0]: 0, nodes[1]: 1, nodes[2]: 2, nodes[3]: 3,
-			nodes[4]: 0, nodes[5]: 1, nodes[6]: 2, nodes[7]: 3,
-		},
-		minL: 0,
-		maxL: 1,
+	layers := map[int]*graph.Layer{
+		0: {Index: 0, Nodes: []*graph.Node{nodes[0], nodes[1], nodes[2], nodes[3]}},
+		1: {Index: 1, Nodes: []*graph.Node{nodes[4], nodes[5], nodes[6], nodes[7]}},
 	}
 
-	assert.Equal(t, 2, p.crossingsOf(1, nodes[6], nodes[7]))
-	assert.Equal(t, 1, p.crossingsOf(1, nodes[7], nodes[6]))
+	p := &graphvizDotProcessor{positions: graph.NodeMap{}}
 
-	assert.Equal(t, 3, p.crossingsOf(1, nodes[5], nodes[6]))
-	assert.Equal(t, 4, p.crossingsOf(1, nodes[6], nodes[5]))
+	for _, l := range layers {
+		for i, n := range l.Nodes {
+			p.setPos(n, i)
+		}
+	}
 
-	assert.Equal(t, 2, p.crossingsOf(1, nodes[4], nodes[5]))
-	assert.Equal(t, 3, p.crossingsOf(1, nodes[5], nodes[4]))
-
-	assert.Equal(t, 2, p.crossingsOf(0, nodes[2], nodes[3]))
-	assert.Equal(t, 1, p.crossingsOf(0, nodes[3], nodes[2]))
-
-	assert.Equal(t, 1, p.crossingsOf(0, nodes[0], nodes[1]))
-	assert.Equal(t, 0, p.crossingsOf(0, nodes[1], nodes[0]))
+	assert.Equal(t, 3, crossings(layers))
+	p.swap(nodes[6], nodes[7])
+	assert.Equal(t, 2, crossings(layers))
+	p.swap(nodes[6], nodes[7])
+	p.swap(nodes[4], nodes[5])
+	assert.Equal(t, 4, crossings(layers))
+	p.swap(nodes[4], nodes[6])
+	assert.Equal(t, 5, crossings(layers))
+	p.swap(nodes[4], nodes[7])
+	assert.Equal(t, 6, crossings(layers))
 }
 
 func TestGansnerNorthOrdering(t *testing.T) {
@@ -80,7 +76,7 @@ func TestGansnerNorthOrdering(t *testing.T) {
 	for _, g := range testgs {
 		dg := graph.FromAdjacencyList(g.AdjacencyList())
 		if dg.HasCycles() {
-			cyclebreaking.DepthFirst.Process(dg)
+			phase1.DepthFirst.Process(dg, nil)
 		}
 		t.Run(g.Name, func(t *testing.T) {
 			if len(g.Nodes) >= 100 {
@@ -88,8 +84,8 @@ func TestGansnerNorthOrdering(t *testing.T) {
 			}
 			for _, subg := range dg.ConnectedComponents() {
 				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
-					layering.NetworkSimplex.Process(subg)
-					execGraphvizDot(subg)
+					phase2.NetworkSimplex.Process(subg, nil)
+					execGraphvizDot(subg, nil)
 
 					indices := map[int]map[int]bool{}
 					for _, n := range subg.Nodes {

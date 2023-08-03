@@ -1,12 +1,12 @@
-package layering
+package phase2
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/nulab/autog/cyclebreaking"
 	"github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/testfiles"
+	"github.com/nulab/autog/phase1"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,7 +59,7 @@ func TestNetworkSimplexLayering(t *testing.T) {
 		}
 		dg := graph.FromAdjacencyList(g.AdjacencyList())
 		if dg.HasCycles() {
-			cyclebreaking.DepthFirst.Process(dg)
+			phase1.DepthFirst.Process(dg, nil)
 		}
 		t.Run(g.Name, func(t *testing.T) {
 			for _, subg := range dg.ConnectedComponents() {

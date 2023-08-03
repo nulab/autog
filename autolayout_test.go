@@ -3,13 +3,13 @@ package autog
 import (
 	"testing"
 
-	"github.com/nulab/autog/cyclebreaking"
 	"github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/elk"
 	"github.com/nulab/autog/internal/testfiles"
-	"github.com/nulab/autog/layering"
-	"github.com/nulab/autog/ordering"
-	"github.com/nulab/autog/positioning"
+	"github.com/nulab/autog/phase1"
+	"github.com/nulab/autog/phase2"
+	"github.com/nulab/autog/phase3"
+	"github.com/nulab/autog/phase4"
 )
 
 func TestGansnerNorthOrdering(t *testing.T) {
@@ -17,7 +17,7 @@ func TestGansnerNorthOrdering(t *testing.T) {
 	for _, g := range testgs[:1] {
 		dg := graph.FromAdjacencyList(g.AdjacencyList())
 		if dg.HasCycles() {
-			cyclebreaking.DepthFirst.Process(dg)
+			phase1.DepthFirst.Process(dg)
 		}
 		t.Run(g.Name, func(t *testing.T) {
 			if len(g.Nodes) >= 100 {
@@ -25,9 +25,9 @@ func TestGansnerNorthOrdering(t *testing.T) {
 			}
 			for _, subg := range dg.ConnectedComponents() {
 				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
-					layering.NetworkSimplex.Process(subg)
-					ordering.GraphvizDot.Process(subg)
-					positioning.VerticalAlign.Process(subg)
+					phase2.NetworkSimplex.Process(subg)
+					phase3.GraphvizDot.Process(subg)
+					phase4.VerticalAlign.Process(subg)
 
 				})
 

@@ -1,4 +1,4 @@
-package edgerouting
+package phase5
 
 import (
 	"github.com/nulab/autog/graph"
@@ -14,12 +14,6 @@ const (
 func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
-
-// A B OR
-// V V F
-// V F F
-// F V F
-// F F V
 
 func (alg Alg) Process(g *graph.DGraph) {
 	// remove virtual nodes
