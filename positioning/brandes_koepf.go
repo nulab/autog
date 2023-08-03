@@ -55,10 +55,9 @@ type brandesKoepfPositioner struct {
 
 func execBrandesKoepf(g *graph.DGraph) {
 	p := &brandesKoepfPositioner{
-		markedEdges: markConflicts(g),
-		neighbors:   neighbors(g),
-		blockroot:   make(map[*graph.Node]*graph.Node, len(g.Nodes)),
-		align:       make(map[*graph.Node]*graph.Node, len(g.Nodes)),
+		neighbors: neighbors(g),
+		blockroot: make(map[*graph.Node]*graph.Node, len(g.Nodes)),
+		align:     make(map[*graph.Node]*graph.Node, len(g.Nodes)),
 
 		layerFor: func(n *graph.Node) *graph.Layer {
 			return g.Layers[n.Layer]
@@ -68,6 +67,7 @@ func execBrandesKoepf(g *graph.DGraph) {
 		p.blockroot[n] = n
 		p.align[n] = n
 	}
+	p.markConflicts(g)
 
 	layouts := [4]layout{{bottom, right}, {bottom, left}, {top, right}, {top, left}}
 	xcoords := [4]xcoordinates{}
@@ -76,18 +76,21 @@ func execBrandesKoepf(g *graph.DGraph) {
 		xcoords[i] = p.horizontalCompaction(g, a)
 	}
 
-	finalLayout := balanceLayouts(xcoords)
+	finalLayout := balanceLayouts(xcoords, g.Nodes)
 
-	for _, n := range g.Nodes {
-		n.X = finalLayout[n]
+	for _, l := range g.Layers {
+		for _, n := range l.Nodes {
+			n.X = finalLayout[n]
+			l.H = max(l.H, n.H)
+		}
 	}
 }
 
 // marks edges that cross inner edges, i.e. type 1 and type 2 conflicts as defined in B&K
-func markConflicts(g *graph.DGraph) graph.EdgeSet {
-	marked := graph.EdgeSet{}
+func (p *brandesKoepfPositioner) markConflicts(g *graph.DGraph) {
+	p.markedEdges = graph.EdgeSet{}
 	if len(g.Layers) < 4 {
-		return marked
+		return
 	}
 	// sweep layers from top to bottom except the first and the last
 	for i := 1; i < len(g.Layers)-1; i++ {
@@ -95,11 +98,12 @@ func markConflicts(g *graph.DGraph) graph.EdgeSet {
 		for l1, v := range g.Layers[i+1].Nodes {
 			ksrc := incidentToInner(v)
 			if g.Layers[i+1].Tail() == v || ksrc >= 0 {
-				// set k1 to the index of the last node or the index of the inner edge's source
-				// if v is the tail node, ksrc is either identical to v.LayerPos or negative
-				// if v belongs to an inner edge, ksrc is non-negative and identical to v.LayerPost
-				// therefore max() returns the correct value for k1
-				k1 := max(v.LayerPos, ksrc)
+				// set k1 to the index of the second-to-last node or the previous, or
+				// if v belongs to an inner edge, to the leftmost upper neighbor of v
+				k1 := g.Layers[i].Len() - 1
+				if ksrc >= 0 {
+					k1 = p.neighbors[v][bottom][0].node.LayerPos
+				}
 				// range over same layer nodes until v included
 				for l2, w := range g.Layers[i+1].Nodes {
 					if l2 > l1 {
@@ -109,15 +113,8 @@ func markConflicts(g *graph.DGraph) graph.EdgeSet {
 						if e.SelfLoops() || e.IsFlat() {
 							continue
 						}
-						// greater than k1 captures that e crosses an inner edge from left to right:
-						// 	- k1 is set to the position of v's source;
-						// 	- the strict inequality prevents erroneously marking e as conflicting with itself;
-						// 	- there is a conflict even if v is the target node of both e and the inner edge
-						// lesser than k0 captures that e crosses an inner edge from right to left:
-						// 	- k0 is updated only after finding an inner edge with target v
-						//	- at the next iteration moving to v+1, there is a crossing if the v+1 source precedes v's source
 						if e.From.LayerPos < k0 || e.From.LayerPos > k1 {
-							marked[e] = true
+							p.markedEdges[e] = true
 						}
 					}
 				}
@@ -125,7 +122,6 @@ func markConflicts(g *graph.DGraph) graph.EdgeSet {
 			}
 		}
 	}
-	return marked
 }
 
 func neighbors(g *graph.DGraph) map[*graph.Node]map[direction][]pair {
@@ -448,7 +444,7 @@ func space(n *graph.Node) float64 {
 	return n.W + 100 // todo: space between nodes
 }
 
-func balanceLayouts(layoutXCoords [4]xcoordinates) xcoordinates {
+func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordinates {
 	minx := [4]float64{}
 	maxx := [4]float64{}
 	width := [4]float64{}
