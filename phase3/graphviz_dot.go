@@ -102,6 +102,7 @@ loop:
 			virtualNode.In = append(virtualNode.In, e)
 			// create new edge from virtual to e's former target
 			f := graph.NewEdge(virtualNode, to, 1)
+			f.IsReversed = e.IsReversed
 			// add f to virtual node outgoing edges
 			virtualNode.Out = []*graph.Edge{f}
 			// replace e with f in e's former target incoming edges
