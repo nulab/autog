@@ -1,26 +1,31 @@
 package monitor
 
+type Monitor interface {
+	Send(key string, val any)
+	Close()
+}
+
 type Log struct {
 	Name  string
 	Value value
 }
 
-func New(c chan Log) *Monitor {
-	return &Monitor{c}
+func New(c chan Log) Monitor {
+	return &monitor{c}
 }
 
-type Monitor struct {
+type monitor struct {
 	c chan Log
 }
 
-func (m *Monitor) Send(key string, val any) {
+func (m *monitor) Send(key string, val any) {
 	if m == nil {
 		return
 	}
 	m.c <- Log{key, value{val}}
 }
 
-func (m *Monitor) Close() {
+func (m *monitor) Close() {
 	if m == nil {
 		return
 	}
