@@ -27,6 +27,7 @@ var defaultOptions = options{
 	p5: routing.NoRouting,
 	params: graph.Params{
 		GraphvizDotMaxIter: 24,
+		Monitor:            monitor.NewNoop(),
 	},
 }
 
