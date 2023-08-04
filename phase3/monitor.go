@@ -6,11 +6,11 @@ import (
 
 type phase3monitor struct {
 	alg string
-	m   *monitor.Monitor
+	monitor.Monitor
 }
 
-func (m phase3monitor) Monitor(key string, value any) {
-	if m.m != nil {
-		m.m.Send("phase3/"+m.alg+"/"+key, value)
+func (m phase3monitor) Send(key string, value any) {
+	if m.Monitor != nil {
+		m.Monitor.Send("phase3/"+m.alg+"/"+key, value)
 	}
 }

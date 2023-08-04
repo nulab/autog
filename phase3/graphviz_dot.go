@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/monitor"
 )
 
 type initDirection uint8
@@ -33,7 +32,7 @@ type graphvizDotProcessor struct {
 //     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
 //
 // Note that ELK's implementation is based on the original algorithm proposed by Sugiyama et al. instead of Graphviz.
-func execGraphvizDot(g *graph.DGraph, monitor *monitor.Monitor) {
+func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 	if len(g.Layers) == 1 {
 		// no crossings to reduce
 		return
@@ -42,7 +41,7 @@ func execGraphvizDot(g *graph.DGraph, monitor *monitor.Monitor) {
 	// insert virtual nodes so that edges with length >1 have length 1
 	breakLongEdges(g)
 
-	p3monitor := phase3monitor{"graphvizdot", monitor}
+	p3monitor := phase3monitor{"graphvizdot", params.Monitor}
 
 	mustAfter := map[*graph.Node]*graph.Node{}
 	mustBefore := map[*graph.Node]*graph.Node{}
@@ -66,7 +65,7 @@ func execGraphvizDot(g *graph.DGraph, monitor *monitor.Monitor) {
 		bestx, bestp = bestx_btm, bestpos_btm
 	}
 
-	p3monitor.Monitor("crossings", bestx)
+	p3monitor.Send("crossings", bestx)
 
 	// reset the best node positions using the saved bestp
 	for _, n := range g.Nodes {

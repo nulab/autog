@@ -15,7 +15,7 @@ func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
 
-func (alg Alg) Process(g *graph.DGraph) {
+func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	// remove virtual nodes
 	i := 0
 loop:

@@ -2,13 +2,12 @@ package phase1
 
 import (
 	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/monitor"
 )
 
 type Alg uint8
 
 const (
-	Greedy Alg = iota
+	Greedy Alg = iota // todo: document that this is non-deterministic
 	DepthFirst
 	_endAlg
 )
@@ -17,7 +16,7 @@ func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
 
-func (alg Alg) Process(g *graph.DGraph, _ *monitor.Monitor) {
+func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 
 	switch alg {
 	case Greedy:

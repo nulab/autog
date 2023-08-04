@@ -2,7 +2,6 @@ package phase3
 
 import (
 	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/monitor"
 )
 
 type Alg uint8
@@ -16,10 +15,10 @@ func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
 
-func (alg Alg) Process(g *graph.DGraph, m *monitor.Monitor) {
+func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	switch alg {
 	case GraphvizDot:
-		execGraphvizDot(g, m)
+		execGraphvizDot(g, params)
 	default:
 		panic("ordering: unknown alg value")
 	}

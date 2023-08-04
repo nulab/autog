@@ -1,6 +1,7 @@
 package autog
 
 import (
+	"github.com/nulab/autog/graph"
 	"github.com/nulab/autog/monitor"
 	cbreaking "github.com/nulab/autog/phase1"
 	layering "github.com/nulab/autog/phase2"
@@ -10,16 +11,12 @@ import (
 )
 
 type options struct {
-	p1      cbreaking.Alg
-	p2      layering.Alg
-	p3      ordering.Alg
-	p4      positioning.Alg
-	p5      routing.Alg
-	monitor *monitor.Monitor
-}
-
-// external parameters that can be supplied to algorithms
-type params struct {
+	p1     cbreaking.Alg
+	p2     layering.Alg
+	p3     ordering.Alg
+	p4     positioning.Alg
+	p5     routing.Alg
+	params graph.Params
 }
 
 var defaultOptions = options{
@@ -28,6 +25,9 @@ var defaultOptions = options{
 	p3: ordering.GraphvizDot,
 	p4: positioning.BrandesKoepf,
 	p5: routing.NoRouting,
+	params: graph.Params{
+		GraphvizDotMaxIter: 24,
+	},
 }
 
 type option func(*options)
@@ -62,8 +62,8 @@ func WithEdgeRouting(alg routing.Alg) option {
 	}
 }
 
-func WithMonitor(monitor *monitor.Monitor) option {
+func WithMonitor(monitor monitor.Monitor) option {
 	return func(o *options) {
-		o.monitor = monitor
+		o.params.Monitor = monitor
 	}
 }

@@ -12,7 +12,7 @@ func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
 	for _, opt := range opts {
 		opt(&layoutOpts)
 	}
-	defer layoutOpts.monitor.Close()
+	defer layoutOpts.params.Monitor.Close()
 
 	pipeline := [...]processor{
 		layoutOpts.p1, // cycle breaking
@@ -24,7 +24,7 @@ func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
 	}
 
 	for _, phase := range pipeline {
-		phase.Process(graph, layoutOpts.monitor)
+		phase.Process(graph, layoutOpts.params)
 	}
 
 	return graph

@@ -124,7 +124,8 @@ func execGreedy(g *graph.DGraph) {
 }
 
 func (p *greedyProcessor) pickRandom(nodes []*graph.Node) *graph.Node {
-	return nodes[p.rnd.Intn(len(nodes))]
+	return nodes[len(nodes)/2] // todo: deterministic for debugging
+	// return nodes[p.rnd.Intn(len(nodes))]
 }
 
 // Updates indegree and outdegree values of the neighbors of the given node,
