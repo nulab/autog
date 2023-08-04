@@ -14,16 +14,11 @@ const (
 	initDirectionBottom initDirection = 1
 )
 
-const (
-	maxiter = 24
-)
-
 type graphvizDotProcessor struct {
 	positions      graph.NodeIntMap
 	flipEqual      bool
 	transposeEqual bool
-	mustAfter      graph.NodeMap
-	mustBefore     graph.NodeMap
+	fixedPositions fixedPositions
 }
 
 // Ordering algorithm used in Graphviz Dot and described in:
@@ -43,17 +38,11 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 
 	p3monitor := phase3monitor{"graphvizdot", params.Monitor}
 
-	mustAfter := graph.NodeMap{}
-	mustBefore := graph.NodeMap{}
-	for _, e := range g.Edges {
-		if e.From.Layer == e.To.Layer {
-			mustAfter[e.To] = e.From
-			mustBefore[e.From] = e.To
-		}
-	}
+	maxiter := params.GraphvizDotMaxIter
+	fixedPositions := initFixedPositions(g.Edges)
 
-	bestx_top, bestpos_top := run(g, mustAfter, mustBefore, initDirectionTop)
-	bestx_btm, bestpos_btm := run(g, mustAfter, mustBefore, initDirectionBottom)
+	bestx_top, bestpos_top := graphvizRun(g, graphvizRunParams{maxiter, fixedPositions, initDirectionTop})
+	bestx_btm, bestpos_btm := graphvizRun(g, graphvizRunParams{maxiter, fixedPositions, initDirectionBottom})
 
 	var (
 		bestx                  = 0
@@ -120,6 +109,12 @@ loop:
 	}
 }
 
+type graphvizRunParams struct {
+	maxiter        int
+	fixedPositions fixedPositions
+	dir            initDirection
+}
+
 // node order is maintained in three different places:
 //   - in g.Layers.Nodes, which is a slice
 //   - in each node.LayerPos field
@@ -127,13 +122,12 @@ loop:
 //
 // at each iteration, this algorithm will update the node positions in all three places
 // a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerPos
-func run(g *graph.DGraph, mustAfter, mustBefore graph.NodeMap, dir initDirection) (int, graph.NodeIntMap) {
+func graphvizRun(g *graph.DGraph, params graphvizRunParams) (int, graph.NodeIntMap) {
 	p := &graphvizDotProcessor{
-		positions:  graph.NodeIntMap{},
-		mustAfter:  mustAfter,
-		mustBefore: mustBefore,
+		positions:      graph.NodeIntMap{},
+		fixedPositions: params.fixedPositions,
 	}
-	switch dir {
+	switch params.dir {
 	case initDirectionTop:
 		p.initTop(g)
 	case initDirectionBottom:
@@ -155,7 +149,7 @@ func run(g *graph.DGraph, mustAfter, mustBefore graph.NodeMap, dir initDirection
 	bestx := crossings(layers)
 	bestp := p.positions.Clone()
 
-	for i := 0; i < maxiter; i++ {
+	for i := 0; i < params.maxiter; i++ {
 		// Depending on the parity of the current iteration
 		// number, the ranks are traversed from top to bottom or from bottom to top.
 		if i%2 == 0 {
@@ -211,21 +205,8 @@ func (p *graphvizDotProcessor) initPositionsFromTop(n *graph.Node, visited graph
 	p.setPos(n, indices[n.Layer])
 	indices[n.Layer]++
 	p.initPositionsFlatEdges(n, visited, indices)
-
 	for _, e := range n.Out {
 		p.initPositionsFromTop(e.To, visited, indices)
-	}
-}
-
-func (p *graphvizDotProcessor) initPositionsFlatEdges(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
-	h, i := head(p.mustAfter, n)
-	if i > 0 {
-		for h != nil && h != n {
-			visited[h] = true
-			p.setPos(h, indices[h.Layer])
-			indices[h.Layer]++
-			h = p.mustBefore[h]
-		}
 	}
 }
 
@@ -236,8 +217,21 @@ func (p *graphvizDotProcessor) initPositionsFromBottom(n *graph.Node, visited gr
 	visited[n] = true
 	p.setPos(n, indices[n.Layer])
 	indices[n.Layer]++
+	p.initPositionsFlatEdges(n, visited, indices)
 	for _, e := range n.In {
 		p.initPositionsFromBottom(e.From, visited, indices)
+	}
+}
+
+func (p *graphvizDotProcessor) initPositionsFlatEdges(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
+	h, i := p.fixedPositions.head(n)
+	if i > 0 {
+		for h != nil && h != n {
+			visited[h] = true
+			p.setPos(h, indices[h.Layer])
+			indices[h.Layer]++
+			h = p.fixedPositions.mustBefore[h]
+		}
 	}
 }
 
@@ -312,8 +306,8 @@ func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*gr
 
 func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians graph.NodeFloatMap) {
 	sort.Slice(nodes, func(i, j int) bool {
-		a, aitr := head(p.mustAfter, nodes[i])
-		b, bitr := head(p.mustAfter, nodes[j])
+		a, aitr := p.fixedPositions.head(nodes[i])
+		b, bitr := p.fixedPositions.head(nodes[j])
 
 		if (aitr != 0 || bitr != 0) && a == b {
 			return aitr < bitr
@@ -349,11 +343,11 @@ func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
 				// 	of the closure
 
 				// if w is head, skip
-				if p.mustBefore[v] == nil && p.mustBefore[w] != nil {
+				if p.fixedPositions.mustBefore[v] == nil && p.fixedPositions.mustBefore[w] != nil {
 					continue
 				}
 				// if v is tail, skip
-				if p.mustAfter[v] != nil && p.mustAfter[w] == nil {
+				if p.fixedPositions.mustAfter[v] != nil && p.fixedPositions.mustAfter[w] == nil {
 					continue
 				}
 
@@ -413,17 +407,4 @@ func (p *graphvizDotProcessor) getPos(n *graph.Node) int {
 func (p *graphvizDotProcessor) setPos(n *graph.Node, pos int) {
 	p.positions[n] = pos
 	n.LayerPos = pos
-}
-
-// head returns the first element in a same-layer transitive closure to which k belongs, and the number of edges
-// that separate k and the head;
-// or returns k itself and 0 if k doesn't belong to any such closure
-func head[T comparable](m map[T]T, k T) (T, int) {
-	v := k
-	i := 0
-	for n, ok := m[k]; ok; n, ok = m[n] {
-		v = n
-		i++
-	}
-	return v, i
 }
