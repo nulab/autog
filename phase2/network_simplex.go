@@ -329,13 +329,57 @@ func normalize(g *graph.DGraph) {
 	}
 }
 
-// Nodes having equal in- and out-edge weights [NDR: degrees]
-// and multiple feasible ranks are moved to a feasible rank with the fewest
-// nodes.
-// [NDR: feasible rank is such that l(e) >= d(e)]
-// The purpose is to reduce crowding and improve the
-// aspect ratio of the drawing, following principle A4. The adjustment does not change the cost of the rank assignment. Nodes
-// are adjusted in a greedy fashion, which works sufficiently well.
+// nodes are shifted to less crowded layers if the shift preserves feasibility (edge length >= edge delta)
 func balance(g *graph.DGraph) {
-	// todo
+	lsize := map[int]int{}
+	for _, n := range g.Nodes {
+		lsize[n.Layer]++
+	}
+	for _, n := range g.Nodes {
+		if n.Indeg() == n.Outdeg() {
+			l := n.Layer
+
+			span := feasibleSpan(n)
+			// if the node has only flat edges, or in/out-span 1, or is source/sink with span 1, this does nothing
+			// otherwise it may shift the node
+			for i := l - span[0] + 1; i < l+span[1]; i++ {
+				if lsize[i] < lsize[l] {
+					l = i
+				}
+			}
+			// node could've moved back to the original layer
+			if lsize[l] < lsize[n.Layer] {
+				lsize[n.Layer]--
+				lsize[l]++
+				n.Layer = l
+			}
+
+		}
+	}
+}
+
+func feasibleSpan(n *graph.Node) (span [2]int) {
+	minInSpan := math.MaxInt
+	minOutSpan := math.MaxInt
+
+	n.VisitEdges(func(e *graph.Edge) {
+		edgespan := e.To.Layer - e.From.Layer
+		switch {
+		case e.To == n && edgespan < minInSpan:
+			minInSpan = edgespan
+
+		case e.From == n && edgespan < minOutSpan:
+			minOutSpan = edgespan
+		}
+	})
+	if minInSpan == math.MaxInt {
+		minInSpan = -1
+	}
+	if minOutSpan == math.MaxInt {
+		minOutSpan = -1
+	}
+
+	span[0] = minInSpan
+	span[1] = minOutSpan
+	return
 }
