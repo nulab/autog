@@ -115,6 +115,8 @@ type graphvizRunParams struct {
 	dir            initDirection
 }
 
+type graphvizInitFn func(n *graph.Node, visited graph.NodeSet, indices map[int]int)
+
 // node order is maintained in three different places:
 //   - in g.Layers.Nodes, which is a slice
 //   - in each node.LayerPos field
@@ -129,9 +131,9 @@ func graphvizRun(g *graph.DGraph, params graphvizRunParams) (int, graph.NodeIntM
 	}
 	switch params.dir {
 	case initDirectionTop:
-		p.initTop(g)
+		p.initPositions(g, g.Layers[0], p.initPositionsFromTop)
 	case initDirectionBottom:
-		p.initBottom(g)
+		p.initPositions(g, g.Layers[len(g.Layers)-1], p.initPositionsFromBottom)
 	}
 	layers := g.Layers // shallow copy
 
@@ -173,27 +175,15 @@ func graphvizRun(g *graph.DGraph, params graphvizRunParams) (int, graph.NodeIntM
 	return bestx, bestp
 }
 
-func (p *graphvizDotProcessor) initTop(g *graph.DGraph) {
+func (p *graphvizDotProcessor) initPositions(g *graph.DGraph, layer *graph.Layer, fn graphvizInitFn) {
 	// initialize positions
 	visited := graph.NodeSet{}
 	indices := map[int]int{}
-	for _, n := range g.Layers[0].Nodes {
-		p.initPositionsFromTop(n, visited, indices)
+	for _, n := range layer.Nodes {
+		fn(n, visited, indices)
 	}
 	for _, n := range g.Nodes {
-		p.initPositionsFromTop(n, visited, indices)
-	}
-}
-
-func (p *graphvizDotProcessor) initBottom(g *graph.DGraph) {
-	// initialize positions
-	visited := graph.NodeSet{}
-	indices := map[int]int{}
-	for _, n := range g.Layers[len(g.Layers)-1].Nodes {
-		p.initPositionsFromBottom(n, visited, indices)
-	}
-	for _, n := range g.Nodes {
-		p.initPositionsFromBottom(n, visited, indices)
+		fn(n, visited, indices)
 	}
 }
 
