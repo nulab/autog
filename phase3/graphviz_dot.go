@@ -19,11 +19,11 @@ const (
 )
 
 type graphvizDotProcessor struct {
-	positions      graph.NodeMap
+	positions      graph.NodeIntMap
 	flipEqual      bool
 	transposeEqual bool
-	mustAfter      map[*graph.Node]*graph.Node
-	mustBefore     map[*graph.Node]*graph.Node
+	mustAfter      graph.NodeMap
+	mustBefore     graph.NodeMap
 }
 
 // Ordering algorithm used in Graphviz Dot and described in:
@@ -43,8 +43,8 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 
 	p3monitor := phase3monitor{"graphvizdot", params.Monitor}
 
-	mustAfter := map[*graph.Node]*graph.Node{}
-	mustBefore := map[*graph.Node]*graph.Node{}
+	mustAfter := graph.NodeMap{}
+	mustBefore := graph.NodeMap{}
 	for _, e := range g.Edges {
 		if e.From.Layer == e.To.Layer {
 			mustAfter[e.To] = e.From
@@ -56,8 +56,8 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 	bestx_btm, bestpos_btm := run(g, mustAfter, mustBefore, initDirectionBottom)
 
 	var (
-		bestx               = 0
-		bestp graph.NodeMap = nil
+		bestx                  = 0
+		bestp graph.NodeIntMap = nil
 	)
 	if bestx_top < bestx_btm {
 		bestx, bestp = bestx_top, bestpos_top
@@ -127,9 +127,9 @@ loop:
 //
 // at each iteration, this algorithm will update the node positions in all three places
 // a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerPos
-func run(g *graph.DGraph, mustAfter, mustBefore map[*graph.Node]*graph.Node, dir initDirection) (int, graph.NodeMap) {
+func run(g *graph.DGraph, mustAfter, mustBefore graph.NodeMap, dir initDirection) (int, graph.NodeIntMap) {
 	p := &graphvizDotProcessor{
-		positions:  graph.NodeMap{},
+		positions:  graph.NodeIntMap{},
 		mustAfter:  mustAfter,
 		mustBefore: mustBefore,
 	}
@@ -245,7 +245,7 @@ func (p *graphvizDotProcessor) initPositionsFromBottom(n *graph.Node, visited gr
 // of adjacent nodes in the next rank. Next is L(i)-1 in top-bottom sweep, or L(i)+1 in bottom-top sweep.
 // Nodes with no adjacent nodes in the next layer are kept in place.
 func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
-	medians := map[*graph.Node]float64{}
+	medians := graph.NodeFloatMap{}
 	for r := 1; r < len(layers); r++ {
 		for _, v := range layers[r].Nodes {
 			medians[v] = medianOf(p.adjacentNodesPositions(v, v.In, r-1))
@@ -255,7 +255,7 @@ func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 }
 
 func (p *graphvizDotProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
-	medians := map[*graph.Node]float64{}
+	medians := graph.NodeFloatMap{}
 	for r := len(layers) - 1; r >= 0; r-- {
 		for _, v := range layers[r].Nodes {
 			medians[v] = medianOf(p.adjacentNodesPositions(v, v.Out, r+1))
@@ -310,7 +310,7 @@ func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*gr
 	return res
 }
 
-func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians map[*graph.Node]float64) {
+func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians graph.NodeFloatMap) {
 	sort.Slice(nodes, func(i, j int) bool {
 		a, aitr := head(p.mustAfter, nodes[i])
 		b, bitr := head(p.mustAfter, nodes[j])

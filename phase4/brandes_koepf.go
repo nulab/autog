@@ -30,8 +30,8 @@ const (
 
 type layout struct {
 	v, h      direction
-	blockroot map[*graph.Node]*graph.Node
-	alignment map[*graph.Node]*graph.Node
+	blockroot graph.NodeMap
+	alignment graph.NodeMap
 }
 
 type pair struct {
@@ -39,7 +39,7 @@ type pair struct {
 	edge *graph.Edge
 }
 
-type xcoordinates map[*graph.Node]float64
+type xcoordinates graph.NodeFloatMap
 
 func (xc xcoordinates) Size() (w, minx, maxx float64) {
 	minx = math.Inf(+1)
@@ -83,8 +83,8 @@ func execBrandesKoepf(g *graph.DGraph) {
 
 	for i, a := range layouts {
 		// initialize per-layout blocks and alignment maps
-		a.blockroot = make(map[*graph.Node]*graph.Node, len(g.Nodes))
-		a.alignment = make(map[*graph.Node]*graph.Node, len(g.Nodes))
+		a.blockroot = make(graph.NodeMap, len(g.Nodes))
+		a.alignment = make(graph.NodeMap, len(g.Nodes))
 		for _, n := range g.Nodes {
 			a.blockroot[n] = n
 			a.alignment[n] = n
@@ -220,18 +220,18 @@ func (p *brandesKoepfPositioner) verticalAlign(g *graph.DGraph, layout layout) {
 }
 
 type classes struct {
-	sinks  map[*graph.Node]*graph.Node // sink blocks
-	xshift map[*graph.Node]float64
-	xcoord map[*graph.Node]float64
-	xcinit map[*graph.Node]bool
+	sinks  graph.NodeMap // sink blocks
+	xshift graph.NodeFloatMap
+	xcoord graph.NodeFloatMap
+	xcinit graph.NodeSet
 }
 
-func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout layout) map[*graph.Node]float64 {
+func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout layout) xcoordinates {
 	c := &classes{
-		sinks:  map[*graph.Node]*graph.Node{},
-		xshift: map[*graph.Node]float64{},
-		xcoord: map[*graph.Node]float64{},
-		xcinit: map[*graph.Node]bool{},
+		sinks:  graph.NodeMap{},
+		xshift: graph.NodeFloatMap{},
+		xcoord: graph.NodeFloatMap{},
+		xcinit: graph.NodeSet{},
 	}
 	for _, n := range g.Nodes {
 		c.sinks[n] = n
@@ -254,7 +254,7 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 			c.xcoord[n] = c.xcoord[n] + shift
 		}
 	}
-	return c.xcoord
+	return xcoordinates(c.xcoord)
 }
 
 func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout layout) {
@@ -306,7 +306,7 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 
 // type block = []*graph.Edge
 //
-// var inn = map[*graph.Node]float64{}
+// var inn = graph.NodeFloatMap{}
 // var blox = [][]*graph.Edge{}
 // var blockSize = map[*block]float64{}
 //

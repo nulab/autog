@@ -51,7 +51,7 @@ func TestCrossings(t *testing.T) {
 		1: {Index: 1, Nodes: []*graph.Node{nodes[4], nodes[5], nodes[6], nodes[7]}},
 	}
 
-	p := &graphvizDotProcessor{positions: graph.NodeMap{}}
+	p := &graphvizDotProcessor{positions: graph.NodeIntMap{}}
 
 	for _, l := range layers {
 		for i, n := range l.Nodes {
@@ -76,7 +76,7 @@ func TestGansnerNorthOrdering(t *testing.T) {
 	for _, g := range testgs {
 		dg := graph.FromAdjacencyList(g.AdjacencyList())
 		if dg.HasCycles() {
-			phase1.DepthFirst.Process(dg, nil)
+			phase1.DepthFirst.Process(dg, graph.Params{})
 		}
 		t.Run(g.Name, func(t *testing.T) {
 			if len(g.Nodes) >= 100 {
@@ -84,8 +84,8 @@ func TestGansnerNorthOrdering(t *testing.T) {
 			}
 			for _, subg := range dg.ConnectedComponents() {
 				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
-					phase2.NetworkSimplex.Process(subg, nil)
-					execGraphvizDot(subg, nil)
+					phase2.NetworkSimplex.Process(subg, graph.Params{})
+					execGraphvizDot(subg, graph.Params{})
 
 					indices := map[int]map[int]bool{}
 					for _, n := range subg.Nodes {

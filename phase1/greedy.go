@@ -10,9 +10,9 @@ import (
 
 type greedyProcessor struct {
 	rnd     *rand.Rand
-	arcdiag graph.NodeMap
-	outdeg  graph.NodeMap
-	indeg   graph.NodeMap
+	arcdiag graph.NodeIntMap
+	outdeg  graph.NodeIntMap
+	indeg   graph.NodeIntMap
 }
 
 // Process implements a greedy cycle breaker.
@@ -30,9 +30,9 @@ type greedyProcessor struct {
 func execGreedy(g *graph.DGraph) {
 	p := greedyProcessor{
 		rnd:     rand.New(rand.NewSource(time.Now().UnixNano())),
-		arcdiag: make(graph.NodeMap),
-		outdeg:  make(graph.NodeMap),
-		indeg:   make(graph.NodeMap),
+		arcdiag: graph.NodeIntMap{},
+		outdeg:  graph.NodeIntMap{},
+		indeg:   graph.NodeIntMap{},
 	}
 
 	nodeCount := len(g.Nodes)

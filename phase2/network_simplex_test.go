@@ -38,8 +38,8 @@ func TestB(t *testing.T) {
 func TestPostorderTraversal(t *testing.T) {
 	p := &networkSimplexProcessor{
 		poIndex: 1,
-		lim:     make(graph.NodeMap),
-		low:     make(graph.NodeMap),
+		lim:     make(graph.NodeIntMap),
+		low:     make(graph.NodeIntMap),
 	}
 	g := testfiles.ReadTestFile("../internal/testfiles/elk_constructed", "simple_acyclic.json")
 	dg := graph.FromAdjacencyList(g.AdjacencyList())
@@ -59,7 +59,7 @@ func TestNetworkSimplexLayering(t *testing.T) {
 		}
 		dg := graph.FromAdjacencyList(g.AdjacencyList())
 		if dg.HasCycles() {
-			phase1.DepthFirst.Process(dg, nil)
+			phase1.DepthFirst.Process(dg, graph.Params{})
 		}
 		t.Run(g.Name, func(t *testing.T) {
 			for _, subg := range dg.ConnectedComponents() {

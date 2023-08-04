@@ -11,9 +11,9 @@ const (
 )
 
 type networkSimplexProcessor struct {
-	poIndex int           // node post-order traversal index
-	lim     graph.NodeMap // Gansner et al.: number from a root node in spanning tree postorder traversal
-	low     graph.NodeMap // Gansner et al.: lowest postorder traversal number among nodes reachable from the input node
+	poIndex int              // node post-order traversal index
+	lim     graph.NodeIntMap // Gansner et al.: number from a root node in spanning tree postorder traversal
+	low     graph.NodeIntMap // Gansner et al.: lowest postorder traversal number among nodes reachable from the input node
 }
 
 // todo: exec alg on single connected components?
@@ -25,8 +25,8 @@ type networkSimplexProcessor struct {
 //   - ELK Java code at https://github.com/eclipse/elk/blob/master/plugins/org.eclipse.elk.alg.layered/src/org/eclipse/elk/alg/layered/p2layers/NetworkSimplexLayerer.java
 func execNetworkSimplex(g *graph.DGraph) {
 	p := &networkSimplexProcessor{
-		lim: make(graph.NodeMap),
-		low: make(graph.NodeMap),
+		lim: make(graph.NodeIntMap),
+		low: make(graph.NodeIntMap),
 	}
 	p.feasibleTree(g)
 
@@ -115,7 +115,7 @@ func (p *networkSimplexProcessor) feasibleTree(g *graph.DGraph) {
 // Source nodes have no incoming edges, so are processed first.
 func (p *networkSimplexProcessor) initLayers(g *graph.DGraph) {
 	// initialize the count of incoming edges for all nodes
-	unseenInEdges := make(graph.NodeMap)
+	unseenInEdges := make(graph.NodeIntMap)
 	for _, n := range g.Nodes {
 		unseenInEdges[n] = n.Indeg()
 	}
