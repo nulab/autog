@@ -2,12 +2,7 @@ package phase4
 
 import "github.com/nulab/autog/graph"
 
-const (
-	defaultNodeMargin  = 20.0
-	defaultNodeSpacing = 40.0
-)
-
-func execVerticalAlign(g *graph.DGraph) {
+func execVerticalAlign(g *graph.DGraph, params graph.Params) {
 	maxW := 0.0
 	for _, layer := range g.Layers {
 		layer.H = 0.0
@@ -15,9 +10,9 @@ func execVerticalAlign(g *graph.DGraph) {
 		var last *graph.Node
 		for _, n := range layer.Nodes {
 			if last != nil {
-				layer.W += defaultNodeSpacing
+				layer.W += params.NodeSpacing
 			}
-			layer.W += defaultNodeMargin*2 + n.W
+			layer.W += params.NodeMargin*2 + n.W
 			layer.H = max(layer.H, n.H)
 			last = n
 		}
@@ -29,11 +24,11 @@ func execVerticalAlign(g *graph.DGraph) {
 		var last *graph.Node
 		for _, n := range layer.Nodes {
 			if last != nil {
-				pos += defaultNodeSpacing
+				pos += params.NodeSpacing
 			}
-			pos += defaultNodeMargin
+			pos += params.NodeMargin
 			n.X = pos
-			pos += n.W + defaultNodeMargin
+			pos += n.W + params.NodeMargin
 			last = n
 		}
 	}

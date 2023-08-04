@@ -26,8 +26,14 @@ var defaultOptions = options{
 	p4: positioning.BrandesKoepf,
 	p5: routing.NoRouting,
 	params: graph.Params{
-		GraphvizDotMaxIter: 24,
-		Monitor:            monitor.NewNoop(),
+		NetworkSimplexThoroughness:               28,
+		NetworkSimplexMaxIterFactor:              0,
+		GraphvizDotMaxIter:                       24,
+		NetworkSimplexAuxiliaryGraphWeightFactor: 4,
+		LayerSpacing:                             150.0,
+		NodeMargin:                               20.0,
+		NodeSpacing:                              40.0,
+		Monitor:                                  monitor.NewNoop(),
 	},
 }
 
@@ -68,3 +74,5 @@ func WithMonitor(monitor monitor.Monitor) option {
 		o.params.Monitor = monitor
 	}
 }
+
+// todo: param options

@@ -24,10 +24,6 @@ const (
 	_endAlg
 )
 
-const (
-	defaultLayerSpacing = 150
-)
-
 func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
@@ -37,23 +33,23 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	case NoPositioning:
 		return
 	case VerticalAlign:
-		execVerticalAlign(g)
+		execVerticalAlign(g, params)
 	case BrandesKoepf:
-		execBrandesKoepf(g)
+		execBrandesKoepf(g, params)
 	case NetworkSimplex:
-		execNetworkSimplex(g)
+		execNetworkSimplex(g, params)
 	default:
 		panic("positioning: unknown alg value")
 	}
-	assignYCoords(g)
+	assignYCoords(g, params.LayerSpacing)
 }
 
-func assignYCoords(g *graph.DGraph) {
+func assignYCoords(g *graph.DGraph, layerSpacing float64) {
 	y := 0.0
 	for i := 0; i < len(g.Layers); i++ {
 		for _, n := range g.Layers[i].Nodes {
 			n.Y = y
 		}
-		y += g.Layers[i].H + defaultLayerSpacing
+		y += g.Layers[i].H + layerSpacing
 	}
 }

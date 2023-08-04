@@ -6,10 +6,29 @@ import "github.com/nulab/autog/monitor"
 // and don't strictly belong to the graph itself
 type Params struct {
 
+	// ---- phase2 options ---
+
+	// Factor used in to determine the maximum number of iterations.
+	NetworkSimplexThoroughness uint
+	// If positive, factor by which thoroughness is multiplied to determine the maximum number of iterations.
+	// Otherwise, ignored.
+	NetworkSimplexMaxIterFactor int
+
 	// ---- phase3 options ---
 
 	// Maximum number of iterations of the GraphvizDot orderer.
-	GraphvizDotMaxIter int
+	GraphvizDotMaxIter uint
+
+	// ---- phase4 options ---
+
+	// Spacing between layers.
+	LayerSpacing float64
+	// Left and right margin between nodes.
+	NodeMargin float64
+	// Spacing between nodes, not including margin.
+	NodeSpacing float64
+	// Weight factor for edges in the network simplex positioner.
+	NetworkSimplexAuxiliaryGraphWeightFactor int
 
 	// ---- other options ---
 

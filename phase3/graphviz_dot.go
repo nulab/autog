@@ -38,7 +38,7 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 
 	p3monitor := phase3monitor{"graphvizdot", params.Monitor}
 
-	maxiter := params.GraphvizDotMaxIter
+	maxiter := int(params.GraphvizDotMaxIter)
 	fixedPositions := initFixedPositions(g.Edges)
 
 	bestx_top, bestpos_top := graphvizRun(g, graphvizRunParams{maxiter, fixedPositions, initDirectionTop})

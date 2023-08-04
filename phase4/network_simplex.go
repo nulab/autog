@@ -7,33 +7,35 @@ import (
 	"github.com/nulab/autog/phase2"
 )
 
-const (
-	edgeWeightFactor = 4
-)
-
 type networkSimplexProcessor struct {
 	nodes map[string]*graph.Node
 }
 
-// todo: add documentation
-func execNetworkSimplex(g *graph.DGraph) {
+// Positioning algorithm used in Graphviz Dot and described in:
+//   - "Emden R. Gansner, Eleftherios Koutsofios, Stephen C. North, Kiem-Phong Vo, A technique for
+//     drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
+//     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
+//
+// It constructs an auxiliary graph and runs network simplex on it. The resulting layers are the X coordinates of the main graph.
+func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 	p := &networkSimplexProcessor{
 		nodes: map[string]*graph.Node{},
 	}
+	aux := p.auxiliaryGraph(g, params.NetworkSimplexAuxiliaryGraphWeightFactor)
 
-	aux := p.auxiliaryGraph(g)
-	phase2.NetworkSimplex.Process(aux, graph.Params{})
+	params.NetworkSimplexMaxIterFactor = len(g.Nodes)
+	phase2.NetworkSimplex.Process(aux, params)
 
 	for _, l := range g.Layers {
 		for i, n := range l.Nodes {
-			l.W += defaultNodeMargin*2 + n.W
+			l.W += params.NodeMargin*2 + n.W
 			l.H = max(l.H, n.H)
-			n.X = float64(p.nodes[n.ID].Layer + ((defaultNodeMargin + defaultNodeSpacing) * i))
+			n.X = float64(p.nodes[n.ID].Layer) + ((params.NodeMargin + params.NodeSpacing) * float64(i))
 		}
 	}
 }
 
-func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph) *graph.DGraph {
+func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph, edgeWeightFactor int) *graph.DGraph {
 	g1 := &graph.DGraph{}
 
 	for _, n := range g.Nodes {
@@ -46,7 +48,7 @@ func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph) *graph.DGraph 
 		p.nodes[ne.ID] = ne
 		g1.Nodes = append(g1.Nodes, ne)
 
-		weight := e.Weight * omega(e)
+		weight := e.Weight * omega(e) * edgeWeightFactor
 
 		u, v := p.nodes[e.From.ID], p.nodes[e.To.ID]
 
@@ -85,11 +87,11 @@ func rho(a, b *graph.Node) float64 {
 func omega(e *graph.Edge) int {
 	switch e.Type() {
 	case 0:
-		return 1 * edgeWeightFactor
+		return 1
 	case 1:
-		return 2 * edgeWeightFactor
+		return 2
 	case 2:
-		return 8 * edgeWeightFactor
+		return 8
 	default:
 		panic("unexpected edge type")
 	}

@@ -36,8 +36,8 @@ func main() {
 			shape := NewGroup(n.ID + "-L" + strconv.Itoa(n.Layer) + "-P" + strconv.Itoa(n.LayerPos))
 			shape.Bounds.Top = n.Y
 			shape.Bounds.Left = n.X + xoffset
-			shape.Bounds.Right = shape.Bounds.Left + 100.0
-			shape.Bounds.Bottom = shape.Bounds.Top + 100.0
+			shape.Bounds.Right = shape.Bounds.Left + n.W
+			shape.Bounds.Bottom = shape.Bounds.Top + n.W
 			shape.BuildConnectionPoints()
 			if n.IsVirtual {
 				shape.Shapes[0].LineInfo.Type = 3

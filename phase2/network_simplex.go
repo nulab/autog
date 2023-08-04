@@ -6,10 +6,6 @@ import (
 	"github.com/nulab/autog/graph"
 )
 
-const (
-	thoroughness = 28
-)
-
 type networkSimplexProcessor struct {
 	poIndex int              // node post-order traversal index
 	lim     graph.NodeIntMap // Gansner et al.: number from a root node in spanning tree postorder traversal
@@ -23,7 +19,7 @@ type networkSimplexProcessor struct {
 //     drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
 //     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
 //   - ELK Java code at https://github.com/eclipse/elk/blob/master/plugins/org.eclipse.elk.alg.layered/src/org/eclipse/elk/alg/layered/p2layers/NetworkSimplexLayerer.java
-func execNetworkSimplex(g *graph.DGraph) {
+func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 	p := &networkSimplexProcessor{
 		lim: make(graph.NodeIntMap),
 		low: make(graph.NodeIntMap),
@@ -33,7 +29,11 @@ func execNetworkSimplex(g *graph.DGraph) {
 	// ELK defines the max iterations as an arbitrary user value N times a fixed factor K times the sqroot of |V|.
 	// where |V| is the number of nodes in each connected component.
 	// N*K in ELK defaults to 28.
-	maxitr := thoroughness * int(math.Sqrt(float64(len(g.Nodes))))
+	k1 := int(math.Sqrt(float64(len(g.Nodes))))
+	if params.NetworkSimplexMaxIterFactor > 0 {
+		k1 = params.NetworkSimplexMaxIterFactor
+	}
+	maxitr := int(params.NetworkSimplexThoroughness) * k1
 
 	e := negCutValueTreeEdge(g.Edges)
 	i := 0

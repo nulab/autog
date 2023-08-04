@@ -18,7 +18,7 @@ func (alg Alg) IsValid() bool {
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	switch alg {
 	case NetworkSimplex:
-		execNetworkSimplex(g)
+		execNetworkSimplex(g, params)
 	default:
 		panic("layering: unknown alg value")
 	}

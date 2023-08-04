@@ -14,11 +14,6 @@ import (
 // If ports aren't relevant to a particular implementation, node size still is, so the port can be set by default
 // at the middle point of the node side.
 
-const (
-	// todo: space between nodes
-	spaceBetweenNodes = 100.0
-)
-
 type direction uint8
 
 const (
@@ -56,16 +51,20 @@ type brandesKoepfPositioner struct {
 	markedEdges graph.EdgeSet
 	neighbors   map[*graph.Node]map[direction][]pair
 	layerFor    func(*graph.Node) *graph.Layer
+	nodeMargin  float64
+	nodeSpacing float64
 }
 
 // this implements an O(n) time x-coordinate assignment algorithm, based on:
 //   - "Ulrik Brandes and Boris Köpf, Fast and Simple Horizontal Coordinate Assignment"
 //     https://link.springer.com/content/pdf/10.1007/3-540-45848-4_3.pdf
 //   - ELK Java code at https://github.com/eclipse/elk/tree/master/plugins/org.eclipse.elk.alg.layered/src/org/eclipse/elk/alg/layered/p4nodes/bk
-func execBrandesKoepf(g *graph.DGraph) {
+func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 	p := &brandesKoepfPositioner{
 		markedEdges: graph.EdgeSet{},
 		neighbors:   neighbors(g),
+		nodeMargin:  params.NodeMargin,
+		nodeSpacing: params.NodeSpacing,
 
 		layerFor: func(n *graph.Node) *graph.Layer {
 			return g.Layers[n.Layer]
@@ -96,12 +95,12 @@ func execBrandesKoepf(g *graph.DGraph) {
 
 	finalLayout := balanceLayouts(xcoords, g.Nodes)
 
-	if !verifyLayout(finalLayout, g.Layers) {
+	if !verifyLayout(finalLayout, g.Layers, params.NodeMargin) {
 		changed := false
 		smallest, _, _ := finalLayout.Size()
 
 		for _, xc := range xcoords {
-			if verifyLayout(xc, g.Layers) {
+			if verifyLayout(xc, g.Layers, params.NodeMargin) {
 				if w, _, _ := xc.Size(); w < smallest {
 					smallest = w
 					finalLayout = xc
@@ -117,7 +116,7 @@ func execBrandesKoepf(g *graph.DGraph) {
 
 	for _, l := range g.Layers {
 		for _, n := range l.Nodes {
-			n.X = finalLayout[n]
+			n.X = finalLayout[n] // + (params.NodeSpacing+params.NodeMargin*2)*float64(i)
 			l.H = max(l.H, n.H)
 		}
 	}
@@ -277,20 +276,19 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 			if c.sinks[v] == v {
 				c.sinks[v] = c.sinks[uroot]
 			}
-			const margin = 40
 			if c.sinks[v] != c.sinks[uroot] {
 				switch layout.h {
 				case left:
-					c.xshift[c.sinks[uroot]] = min(c.xshift[c.sinks[uroot]], c.xcoord[v]-margin-c.xcoord[uroot]-space(u))
+					c.xshift[c.sinks[uroot]] = min(c.xshift[c.sinks[uroot]], c.xcoord[v]-c.xcoord[uroot]-p.space(u))
 				case right:
-					c.xshift[c.sinks[uroot]] = max(c.xshift[c.sinks[uroot]], c.xcoord[v]+margin+space(u)-c.xcoord[uroot])
+					c.xshift[c.sinks[uroot]] = max(c.xshift[c.sinks[uroot]], c.xcoord[v]-c.xcoord[uroot]+p.space(u))
 				}
 			} else {
 				switch layout.h {
 				case left:
-					c.xcoord[v] = max(c.xcoord[v], c.xcoord[uroot]+margin+space(u))
+					c.xcoord[v] = max(c.xcoord[v], c.xcoord[uroot]+p.space(u))
 				case right:
-					c.xcoord[v] = min(c.xcoord[v], c.xcoord[uroot]-margin-space(w))
+					c.xcoord[v] = min(c.xcoord[v], c.xcoord[uroot]-p.space(u))
 				}
 
 			}
@@ -476,8 +474,8 @@ func previousNodeInLayer(n *graph.Node, nodes []*graph.Node, dir direction) *gra
 	}
 }
 
-func space(n *graph.Node) float64 {
-	return n.W + spaceBetweenNodes
+func (p *brandesKoepfPositioner) space(n *graph.Node) float64 {
+	return n.W + p.nodeSpacing + p.nodeMargin*2
 }
 
 func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordinates {
@@ -516,12 +514,13 @@ func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordin
 	return medianx
 }
 
-func verifyLayout(layout xcoordinates, layers map[int]*graph.Layer) bool {
+// todo: account for node margin/spacing
+func verifyLayout(layout xcoordinates, layers map[int]*graph.Layer, nodeMargin float64) bool {
 	for _, layer := range layers {
 		pos := math.Inf(-1)
 		for _, n := range layer.Nodes {
-			left := layout[n] - defaultNodeMargin
-			right := layout[n] + n.W + defaultNodeMargin
+			left := layout[n] - nodeMargin
+			right := layout[n] + n.W + nodeMargin
 
 			if left > pos && right > pos {
 				pos = right
