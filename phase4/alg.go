@@ -15,12 +15,12 @@ const (
 	// It's a simple and fast to implement algorithm for quick prototyping.
 	VerticalAlign
 
-	// BrandesKoepfExtended aligns nodes based on blocks and classes. Runs in O(V+E).
-	BrandesKoepfExtended
+	// BrandesKoepf aligns nodes based on blocks and classes. Runs in O(V+E).
+	BrandesKoepf
 
 	// NetworkSimplex sets X coordinates by constructing an auxiliary graph and solving it with the network simplex method.
-	// Layers in the auxiliary graph are X coordinates in the main graph. Time-intensive for large graphs. Gansner et al.
-	// mention graph size above "a few dozen" nodes.
+	// Layers in the auxiliary graph are X coordinates in the main graph.
+	// Time-intensive for large graphs, above a few dozen nodes.
 	NetworkSimplex
 	_endAlg
 )
@@ -39,7 +39,7 @@ func (alg Alg) Process(g *graph.DGraph, _ *monitor.Monitor) {
 		return
 	case VerticalAlign:
 		execVerticalAlign(g)
-	case BrandesKoepfExtended:
+	case BrandesKoepf:
 		execBrandesKoepf(g)
 	case NetworkSimplex:
 		execNetworkSimplex(g)

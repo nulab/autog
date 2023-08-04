@@ -18,7 +18,7 @@ type networkSimplexProcessor struct {
 
 // todo: exec alg on single connected components?
 
-// Process implements a graph node layering algorithm, based on:
+// this implements a graph node layering algorithm, based on:
 //   - "Emden R. Gansner, Eleftherios Koutsofios, Stephen C. North, Kiem-Phong Vo, A technique for
 //     drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
 //     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs

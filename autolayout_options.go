@@ -26,7 +26,7 @@ var defaultOptions = options{
 	p1: cbreaking.Greedy,
 	p2: layering.NetworkSimplex,
 	p3: ordering.GraphvizDot,
-	p4: positioning.BrandesKoepfExtended,
+	p4: positioning.BrandesKoepf,
 	p5: routing.NoRouting,
 }
 

@@ -9,10 +9,15 @@ import (
 	"github.com/nulab/autog/graph"
 )
 
-// todo: maybe this will become Rüegg-Schulze or BrandesKoepfExtended instead, which accounts for node sizes and ports.
-// Rueegg-Schulze developed the algo for arbitrary port positioning.
+// todo: make sure this accounts for node sizes and ports.
+// Rueegg-Schulze https://rtsys.informatik.uni-kiel.de/~biblio/downloads/papers/gd15.pdf
 // If ports aren't relevant to a particular implementation, node size still is, so the port can be set by default
 // at the middle point of the node side.
+
+const (
+	// todo: space between nodes
+	spaceBetweenNodes = 100.0
+)
 
 type direction uint8
 
@@ -24,7 +29,9 @@ const (
 )
 
 type layout struct {
-	v, h direction
+	v, h      direction
+	blockroot map[*graph.Node]*graph.Node
+	alignment map[*graph.Node]*graph.Node
 }
 
 type pair struct {
@@ -48,46 +55,65 @@ func (xc xcoordinates) Size() (w, minx, maxx float64) {
 type brandesKoepfPositioner struct {
 	markedEdges graph.EdgeSet
 	neighbors   map[*graph.Node]map[direction][]pair
-	blockroot   map[*graph.Node]*graph.Node
-	align       map[*graph.Node]*graph.Node
-
-	layerFor func(*graph.Node) *graph.Layer
+	layerFor    func(*graph.Node) *graph.Layer
 }
 
+// this implements an O(n) time x-coordinate assignment algorithm, based on:
+//   - "Ulrik Brandes and Boris Köpf, Fast and Simple Horizontal Coordinate Assignment"
+//     https://link.springer.com/content/pdf/10.1007/3-540-45848-4_3.pdf
+//   - ELK Java code at https://github.com/eclipse/elk/tree/master/plugins/org.eclipse.elk.alg.layered/src/org/eclipse/elk/alg/layered/p4nodes/bk
 func execBrandesKoepf(g *graph.DGraph) {
 	p := &brandesKoepfPositioner{
-		neighbors: neighbors(g),
-		blockroot: make(map[*graph.Node]*graph.Node, len(g.Nodes)),
-		align:     make(map[*graph.Node]*graph.Node, len(g.Nodes)),
+		markedEdges: graph.EdgeSet{},
+		neighbors:   neighbors(g),
 
 		layerFor: func(n *graph.Node) *graph.Layer {
 			return g.Layers[n.Layer]
 		},
 	}
-	for _, n := range g.Nodes {
-		p.blockroot[n] = n
-		p.align[n] = n
-	}
 	p.markConflicts(g)
 
-	layouts := [4]layout{{bottom, right}, {bottom, left}, {top, right}, {top, left}}
+	layouts := [4]layout{
+		{v: bottom, h: right},
+		{v: bottom, h: left},
+		{v: top, h: right},
+		{v: top, h: left},
+	}
 	xcoords := [4]xcoordinates{}
+
 	for i, a := range layouts {
+		// initialize per-layout blocks and alignment maps
+		a.blockroot = make(map[*graph.Node]*graph.Node, len(g.Nodes))
+		a.alignment = make(map[*graph.Node]*graph.Node, len(g.Nodes))
+		for _, n := range g.Nodes {
+			a.blockroot[n] = n
+			a.alignment[n] = n
+		}
+		// main phases
 		p.verticalAlign(g, a)
 		xcoords[i] = p.horizontalCompaction(g, a)
 	}
 
-	for i, xc := range xcoords {
-		for n, x := range xc {
-			if n.ID == "N8" || n.ID == "N3" {
-				fmt.Printf("%s x coord in layout %d: %.02f\n", n.ID, i, x)
-			}
-		}
-	}
-
 	finalLayout := balanceLayouts(xcoords, g.Nodes)
 
-	// todo: verify feasibility of balanced layout or choose a feasible one
+	if !verifyLayout(finalLayout, g.Layers) {
+		changed := false
+		smallest, _, _ := finalLayout.Size()
+
+		for _, xc := range xcoords {
+			if verifyLayout(xc, g.Layers) {
+				if w, _, _ := xc.Size(); w < smallest {
+					smallest = w
+					finalLayout = xc
+					changed = true
+				}
+			}
+		}
+		if !changed {
+			fmt.Println("NO VIABLE LAYOUT")
+			// finalLayout = xcoords[0]
+		}
+	}
 
 	for _, l := range g.Layers {
 		for _, n := range l.Nodes {
@@ -99,7 +125,6 @@ func execBrandesKoepf(g *graph.DGraph) {
 
 // marks edges that cross inner edges, i.e. type 1 and type 2 conflicts as defined in B&K
 func (p *brandesKoepfPositioner) markConflicts(g *graph.DGraph) {
-	p.markedEdges = graph.EdgeSet{}
 	if len(g.Layers) < 4 {
 		return
 	}
@@ -176,15 +201,15 @@ func (p *brandesKoepfPositioner) verticalAlign(g *graph.DGraph, layout layout) {
 			vkneighbors := p.neighbors[vk][layout.v]
 			if d := len(vkneighbors); d > 0 {
 				for _, m := range medianNeighborIndices(d, layout.h) {
-					if p.align[vk] == vk /* not aligned */ {
+					if layout.alignment[vk] == vk /* not aligned */ {
 						u, uv := vkneighbors[m].node, vkneighbors[m].edge
 						if !p.markedEdges[uv] && withinOutermostPos(r, u.LayerPos, layout.h) {
 							// align and blockroot maintain a circular reference:
 							// in top-bottom direction, a node u aligns with a lower one vk
 							// and vk aligns with the root of its block
-							p.align[u] = vk
-							p.blockroot[vk] = p.blockroot[u]
-							p.align[vk] = p.blockroot[vk]
+							layout.alignment[u] = vk
+							layout.blockroot[vk] = layout.blockroot[u]
+							layout.alignment[vk] = layout.blockroot[vk]
 							r = u.LayerPos
 						}
 					}
@@ -217,16 +242,15 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 	for layer := iter(); layer != nil; layer = iter() {
 		iter := nodesIterator(layer.Nodes, layout.h)
 		for n := iter(); n != nil; n = iter() {
-			if p.blockroot[n] == n {
+			if layout.blockroot[n] == n {
 				p.placeBlock(n, c, layout)
 			}
 		}
 	}
 
 	for _, n := range g.Nodes {
-		c.xcoord[n] = c.xcoord[p.blockroot[n]]
-		if shift := c.xshift[c.sinks[p.blockroot[n]]]; withinOutermostX(shift, layout.h) {
-			fmt.Println("applying shift", c.xcoord[n], shift)
+		c.xcoord[n] = c.xcoord[layout.blockroot[n]]
+		if shift := c.xshift[c.sinks[layout.blockroot[n]]]; withinOutermostX(shift, layout.h) {
 			c.xcoord[n] = c.xcoord[n] + shift
 		}
 	}
@@ -248,7 +272,7 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 
 		if leftNotLast || rightNotLast {
 			u := previousNodeInLayer(w, wlayer.Nodes, layout.h)
-			uroot := p.blockroot[u]
+			uroot := layout.blockroot[u]
 			p.placeBlock(uroot, c, layout)
 			if c.sinks[v] == v {
 				c.sinks[v] = c.sinks[uroot]
@@ -272,7 +296,7 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 			}
 		}
 		// the align map contains the next node in the block
-		w = p.align[w]
+		w = layout.alignment[w]
 		if w == v {
 			// back at root
 			break
@@ -453,7 +477,7 @@ func previousNodeInLayer(n *graph.Node, nodes []*graph.Node, dir direction) *gra
 }
 
 func space(n *graph.Node) float64 {
-	return n.W + 100 // todo: space between nodes
+	return n.W + spaceBetweenNodes
 }
 
 func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordinates {
@@ -490,4 +514,21 @@ func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordin
 		medianx[n] = (xs[1] + xs[2]) / 2.0
 	}
 	return medianx
+}
+
+func verifyLayout(layout xcoordinates, layers map[int]*graph.Layer) bool {
+	for _, layer := range layers {
+		pos := math.Inf(-1)
+		for _, n := range layer.Nodes {
+			left := layout[n] - defaultNodeMargin
+			right := layout[n] + n.W + defaultNodeMargin
+
+			if left > pos && right > pos {
+				pos = right
+			} else {
+				return false
+			}
+		}
+	}
+	return true
 }

@@ -15,7 +15,7 @@ import (
 
 const (
 	exampleDiagram = "ci_router_ComplexRouter.json"
-	itr            = 500
+	itr            = 1000
 )
 
 func main() {
@@ -57,6 +57,14 @@ func main() {
 	}
 	avg := float64(tot) / float64(i)
 	fmt.Printf("iterations: %d, crossings: avg: %.02f, min: %d, max: %d\n", i, avg, minx, maxx)
+
+	// greedy cb picking middle node
+	// iterations: 500, crossings: avg: 2.00, min: 0, max: 9
+	// iterations: 1000, crossings: avg: 2.17, min: 0, max: 9
+
+	// greedy cb non-det
+	// iterations: 500, crossings: avg: 1.87, min: 0, max: 9
+	// iterations: 1000, crossings: avg: 1.84, min: 0, max: 9
 }
 
 func checkSuitability(elkg *elk.Graph) {
