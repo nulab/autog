@@ -21,6 +21,9 @@ const (
 	// Layers in the auxiliary graph are X coordinates in the main graph.
 	// Time-intensive for large graphs, above a few dozen nodes.
 	NetworkSimplex
+
+	// SinkColoring is a variant of BrandesKöpf that aligns nodes based on vertical blocks starting from the bottom.
+	SinkColoring
 	_endAlg
 )
 
@@ -38,6 +41,8 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 		execBrandesKoepf(g, params)
 	case NetworkSimplex:
 		execNetworkSimplex(g, params)
+	case SinkColoring:
+		execSinkColoring(g, params)
 	default:
 		panic("positioning: unknown alg value")
 	}
