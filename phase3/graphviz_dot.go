@@ -2,7 +2,6 @@ package phase3
 
 import (
 	"sort"
-	"strconv"
 
 	"github.com/nulab/autog/graph"
 )
@@ -34,7 +33,7 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 	}
 
 	// insert virtual nodes so that edges with length >1 have length 1
-	breakLongEdges(g)
+	g.BreakLongEdges()
 
 	p3monitor := phase3monitor{"graphvizdot", params.Monitor}
 
@@ -64,48 +63,6 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 		sort.Slice(l.Nodes, func(i, j int) bool {
 			return l.Nodes[i].LayerPos < l.Nodes[j].LayerPos
 		})
-	}
-}
-
-func breakLongEdges(g *graph.DGraph) {
-	v := 1
-	i := 0
-loop:
-	for i < len(g.Edges) {
-		e := g.Edges[i]
-		i++
-		if e.To.Layer-e.From.Layer > 1 {
-			from, to := e.From, e.To
-			// create virtual node
-			virtualNode := &graph.Node{
-				ID:        "V" + strconv.Itoa(v),
-				Layer:     from.Layer + 1,
-				IsVirtual: true,
-				Size:      graph.Size{H: 100.0, W: 100.0}, // todo: eventually this doesn't belong here
-			}
-			v++
-			// set e's target to the virtual node
-			e.To = virtualNode
-			// add e to virtual node incoming edges
-			virtualNode.In = append(virtualNode.In, e)
-			// create new edge from virtual to e's former target
-			f := graph.NewEdge(virtualNode, to, 1)
-			f.IsReversed = e.IsReversed
-			// add f to virtual node outgoing edges
-			virtualNode.Out = []*graph.Edge{f}
-			// replace e with f in e's former target incoming edges
-			for _, in := range to.In {
-				if in == e {
-					e = f
-				}
-			}
-			// update the graph's node and edge lists
-			g.Edges = append(g.Edges, f)
-			g.Nodes = append(g.Nodes, virtualNode)
-			g.Layers[virtualNode.Layer].Nodes = append(g.Layers[virtualNode.Layer].Nodes, virtualNode)
-			// restart loop
-			goto loop
-		}
 	}
 }
 
