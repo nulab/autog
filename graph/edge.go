@@ -40,9 +40,16 @@ func (e *Edge) IsFlat() bool {
 }
 
 func (e *Edge) Reverse() {
-	n := e.From
-	e.From = e.To
-	e.To = n
+	from, to := e.From, e.To
+
+	from.Out.Remove(e)
+	to.In.Remove(e)
+
+	from.In.Add(e)
+	to.Out.Add(e)
+
+	e.From = to
+	e.To = from
 	e.IsReversed = !e.IsReversed
 }
 
