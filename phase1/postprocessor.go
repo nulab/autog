@@ -1,21 +1,24 @@
 package phase1
 
-import "github.com/nulab/autog/graph"
+import (
+	"github.com/nulab/autog/graph"
+)
 
 type postProcessor uint8
 
 const (
-	UndoRevertEdges postProcessor = iota
+	RestoreEdges postProcessor = iota
 )
 
-func (postProcessor) Process(g *graph.DGraph) {
-	// if !g.HasCycles() {
-	// 	return
-	// }
-	// for _, e := range g.Edges {
-	// 	if e.IsReversed {
-	// 		// e.IsReversed = false
-	// 		e.Reverse()
-	// 	}
-	// }
+func (postProcessor) Process(g *graph.DGraph, _ graph.Params) {
+	for _, e := range g.Edges {
+		if e.IsReversed {
+			// reverse back
+			e.Reverse()
+		}
+	}
+	for _, e := range g.HiddenEdges {
+		g.Edges.Add(e)
+	}
+	g.HiddenEdges = graph.EdgeList{}
 }

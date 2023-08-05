@@ -2,6 +2,7 @@ package autog
 
 import (
 	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/phase1"
 )
 
 // todo: to decrease coupling between client code and the graph types used here, the layout could take as params
@@ -20,7 +21,7 @@ func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
 		layoutOpts.p3, // ordering
 		layoutOpts.p4, // positioning
 		// layoutOpts.p5, // edge routing
-		// cyclebreaking.UndoRevertEdges,
+		phase1.RestoreEdges,
 	}
 
 	for _, phase := range pipeline {
