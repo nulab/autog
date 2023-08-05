@@ -285,6 +285,10 @@ func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
 				v := layers[L].Nodes[i]
 				w := layers[L].Nodes[i+1]
 
+				if p.fixedPositions.mustBefore[v] == w {
+					continue
+				}
+
 				// todo: the no-flip logic based on flat edges can be improved to consider
 				// 	the closure as if it were one node. the non-closure node could be brought to the other end
 				// 	of the closure

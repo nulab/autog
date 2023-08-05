@@ -71,6 +71,11 @@ func TestCrossings(t *testing.T) {
 	assert.Equal(t, 6, crossings(layers))
 }
 
+func TestAAA(t *testing.T) {
+	g := buildGraph()
+	execGraphvizDot(g, graph.Params{})
+}
+
 func TestGansnerNorthOrdering(t *testing.T) {
 	testgs := testfiles.ReadTestDir("../internal/testfiles/elk_relabeled")
 	for _, g := range testgs {
@@ -150,4 +155,54 @@ func printNodeOrders(g *graph.DGraph) {
 	for _, n := range g.Nodes {
 		fmt.Printf("%s L:%d I:%d\n", n.ID, n.Layer, n.LayerPos)
 	}
+}
+
+func buildGraph() *graph.DGraph {
+	type edgelist = []*graph.Edge
+
+	n10 := &graph.Node{ID: "N10"}
+	n9 := &graph.Node{ID: "N9"}
+	n15 := &graph.Node{ID: "N15"}
+	n8 := &graph.Node{ID: "N8"}
+	// n3 := &graph.Node{ID: "N3"}
+	n6 := &graph.Node{ID: "N6"}
+	n1 := &graph.Node{ID: "N1"}
+	n4 := &graph.Node{ID: "N4"}
+	n2 := &graph.Node{ID: "N2"}
+	n16 := &graph.Node{ID: "N16"}
+	n12 := &graph.Node{ID: "N12"}
+	n13 := &graph.Node{ID: "N13"}
+	n14 := &graph.Node{ID: "N14"}
+	n5 := &graph.Node{ID: "N5"}
+	n7 := &graph.Node{ID: "N7"}
+	n11 := &graph.Node{ID: "N11"}
+	v1 := &graph.Node{ID: "V1"}
+	v2 := &graph.Node{ID: "V2"}
+
+	// N10
+	n9n10 := graph.NewEdge(n9, n10, 0)
+	n15n10 := graph.NewEdge(n15, n10, 0)
+	n10.In = edgelist{n9n10, n15n10}
+
+	n10n11 := graph.NewEdge(n10, n11, 0)
+	n10.Out = edgelist{n10n11}
+
+	// N9
+	n15n9 := graph.NewEdge(n15, n9, 0)
+	n9.In = edgelist{n15n9}
+	n9.Out = edgelist{n9n10}
+
+	// N15
+	n8n15 := graph.NewEdge(n8, n15, 0)
+	n15n1 := graph.NewEdge(n15, n1, 0)
+	n15.In = edgelist{n8n15}
+	n15.Out = edgelist{n15n1, n15n9, n15n10}
+
+	// N8
+	// n3n8 := graph.NewEdge(n3, n8, 0)
+
+	g := &graph.DGraph{
+		Nodes: []*graph.Node{n10, n9, n15, n8, n6, n1, n4, n2, n16, n12, n13, n14, n5, n7, n11, v1, v2},
+	}
+	return g
 }
