@@ -10,8 +10,8 @@ import (
 func TestVisitEdges(t *testing.T) {
 	ids := strings.Split("abcde", "")
 	es := []*Edge{}
-	for _, id := range ids {
-		es = append(es, &Edge{edge: edge{ID: id}})
+	for i := range ids {
+		es = append(es, &Edge{edge: edge{Delta: i}})
 	}
 
 	n := &Node{
@@ -21,7 +21,7 @@ func TestVisitEdges(t *testing.T) {
 
 	i := 0
 	n.VisitEdges(func(e *Edge) {
-		assert.Equal(t, ids[i], e.ID)
+		assert.Equal(t, ids[i], i)
 		i++
 	})
 	assert.Equal(t, 5, i)

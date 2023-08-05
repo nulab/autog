@@ -7,7 +7,7 @@ import (
 
 type DGraph struct {
 	Nodes    []*Node
-	Edges    []*Edge
+	Edges    EdgeList
 	Layers   map[int]*Layer
 	isCyclic *bool
 }

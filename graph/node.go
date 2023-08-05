@@ -10,8 +10,8 @@ type Node struct {
 	pragma.NotCopiable
 
 	ID        string
-	In, Out   []*Edge // this could also be list of nodes
-	Layer     int     // todo: this probably shouldn't be visible outside
+	In, Out   EdgeList // this could also be list of nodes
+	Layer     int      // todo: this probably shouldn't be visible outside
 	LayerPos  int
 	IsVirtual bool
 	Size

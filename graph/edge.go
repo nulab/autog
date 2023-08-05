@@ -1,6 +1,8 @@
 package graph
 
-import "github.com/nulab/autog/internal/pragma"
+import (
+	"github.com/nulab/autog/internal/pragma"
+)
 
 type Edge struct {
 	pragma.NotCopiable
@@ -8,7 +10,6 @@ type Edge struct {
 }
 
 type edge struct {
-	ID       string
 	From, To *Node
 	Delta    int // edge's minimum length
 	Weight   int // edge's weight (could be a float instead)
