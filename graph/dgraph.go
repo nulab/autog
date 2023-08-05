@@ -6,10 +6,11 @@ import (
 )
 
 type DGraph struct {
-	Nodes    []*Node
-	Edges    EdgeList
-	Layers   map[int]*Layer
-	isCyclic *bool
+	Nodes       []*Node
+	Edges       EdgeList
+	HiddenEdges EdgeList
+	Layers      map[int]*Layer
+	isCyclic    *bool
 }
 
 // todo: this can probably become generic, to allow arbitrary ID types

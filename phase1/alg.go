@@ -46,7 +46,6 @@ func removeTwoNodeCycles(g *graph.DGraph) {
 		e.From.Out.Remove(e)
 		e.To.In.Remove(e)
 		g.Edges.Remove(e)
-
-		// todo: add to a separate list
+		g.HiddenEdges.Add(e)
 	}
 }
