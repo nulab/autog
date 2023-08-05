@@ -13,6 +13,8 @@ type Params struct {
 	// If positive, factor by which thoroughness is multiplied to determine the maximum number of iterations.
 	// Otherwise, ignored.
 	NetworkSimplexMaxIterFactor int
+	// If true, balances the network simplex layering by moving nodes to less crowded layers.
+	NetworkSimplexBalance bool
 
 	// ---- phase3 options ---
 

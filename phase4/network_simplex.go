@@ -24,6 +24,7 @@ func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 	aux := p.auxiliaryGraph(g, params.NetworkSimplexAuxiliaryGraphWeightFactor)
 
 	params.NetworkSimplexMaxIterFactor = len(g.Nodes)
+	params.NetworkSimplexBalance = false
 	phase2.NetworkSimplex.Process(aux, params)
 
 	for _, l := range g.Layers {

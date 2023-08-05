@@ -47,7 +47,9 @@ func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 		i++
 	}
 	normalize(g)
-	balance(g)
+	if params.NetworkSimplexBalance {
+		balance(g)
+	}
 }
 
 // returns the first tree edge with negative cut value;

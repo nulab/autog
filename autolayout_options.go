@@ -28,6 +28,7 @@ var defaultOptions = options{
 	params: graph.Params{
 		NetworkSimplexThoroughness:               28,
 		NetworkSimplexMaxIterFactor:              0,
+		NetworkSimplexBalance:                    true,
 		GraphvizDotMaxIter:                       24,
 		NetworkSimplexAuxiliaryGraphWeightFactor: 4,
 		LayerSpacing:                             150.0,
