@@ -1,6 +1,8 @@
 package graph
 
-import "strconv"
+import (
+	"strconv"
+)
 
 func (g *DGraph) BreakLongEdges() {
 	for _, e := range g.Edges {
@@ -15,11 +17,9 @@ loop:
 	for i < len(g.Edges) {
 		e := g.Edges[i]
 		i++
-		// target node is below
 		if e.To.Layer-e.From.Layer > 1 {
 			g.breakLongEdge(e, v)
 			v++
-			// restart loop
 			goto loop
 		}
 	}
@@ -44,9 +44,10 @@ func (g *DGraph) breakLongEdge(e *Edge, v int) {
 	// add f to virtual node outgoing edges
 	virtualNode.Out = []*Edge{f}
 	// replace e with f in e's former target incoming edges
-	for _, in := range to.In {
+	for i, in := range to.In {
 		if in == e {
-			e = f
+			to.In[i] = f
+			break
 		}
 	}
 	// update the graph's node and edge lists
