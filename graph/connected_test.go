@@ -30,7 +30,7 @@ func TestConnectedComponents(t *testing.T) {
 	for _, c := range tests {
 		t.Run(c.filename, func(t *testing.T) {
 			g := testfiles.ReadTestFile("../internal/testfiles/elk_original", c.filename)
-			dg := FromAdjacencyList(g.AdjacencyList())
+			dg := FromElk(g)
 			subgs := dg.ConnectedComponents()
 			assertComponents(t, subgs, c.want)
 		})

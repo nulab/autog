@@ -1,8 +1,9 @@
 package graph
 
 import (
-	"maps"
 	"strings"
+
+	"github.com/nulab/autog/internal/elk"
 )
 
 type DGraph struct {
@@ -13,33 +14,49 @@ type DGraph struct {
 	isCyclic    *bool
 }
 
-// todo: this can probably become generic, to allow arbitrary ID types
-func FromAdjacencyList(list map[string][]string) *DGraph {
+func FromElk(g *elk.Graph) *DGraph {
 	nodeMap := map[string]*Node{}
+	portNodeMap := make(map[string]string) // port-node map (each port belongs to one node)
+
+	nodeList := []*Node{}
 	edgeList := []*Edge{}
-	for sourceId, targetIds := range list {
-		n := nodeMap[sourceId]
-		if n == nil {
-			n = &Node{ID: sourceId}
-		}
-		for _, targetId := range targetIds {
-			m := nodeMap[targetId]
-			if m == nil {
-				m = &Node{ID: targetId}
-			}
-			e := NewEdge(n, m, 1)
-			edgeList = append(edgeList, e)
 
-			m.In = append(m.In, e)
-			n.Out = append(n.Out, e)
-
-			nodeMap[targetId] = m
+	for _, n := range g.Nodes {
+		for _, p := range n.Ports {
+			portNodeMap[p.ID] = n.ID
 		}
-		nodeMap[sourceId] = n
 	}
+	for _, edge := range g.Edges {
+		if len(edge.Sources) > 1 || len(edge.Targets) > 1 {
+			panic("hyperedges are not supported")
+		}
+		sourceId := portNodeMap[edge.Sources[0]]
+		targetId := portNodeMap[edge.Targets[0]]
+
+		sourceNode := nodeMap[sourceId]
+		if sourceNode == nil {
+			sourceNode = &Node{ID: sourceId}
+			nodeList = append(nodeList, sourceNode)
+			nodeMap[sourceId] = sourceNode
+		}
+		targetNode := nodeMap[targetId]
+		if targetNode == nil {
+			targetNode = &Node{ID: targetId}
+			nodeList = append(nodeList, targetNode)
+			nodeMap[targetId] = targetNode
+		}
+
+		e := NewEdge(sourceNode, targetNode, 1)
+		edgeList = append(edgeList, e)
+
+		targetNode.In = append(targetNode.In, e)
+		sourceNode.Out = append(sourceNode.Out, e)
+	}
+
 	return &DGraph{
-		Nodes: maps.Values(nodeMap), // note: this is non-deterministic but might perform better on average
-		Edges: edgeList,
+		Nodes:       nodeList,
+		Edges:       edgeList,
+		HiddenEdges: EdgeList{},
 	}
 }
 
@@ -70,7 +87,29 @@ func (g *DGraph) Sinks() []*Node {
 func (g *DGraph) String() string {
 	bld := strings.Builder{}
 	for _, n := range g.Nodes {
+		bld.WriteString(n.ID)
+		bld.WriteRune('\n')
+		bld.WriteString("-IN:")
+		if len(n.In) == 0 {
+			bld.WriteRune('\t')
+			bld.WriteString("none")
+			bld.WriteRune('\n')
+		}
+		for _, e := range n.In {
+			bld.WriteRune('\t')
+			bld.WriteString(e.From.ID)
+			bld.WriteString(" -> ")
+			bld.WriteString(n.ID)
+			bld.WriteRune('\n')
+		}
+		bld.WriteString("-OUT:")
+		if len(n.Out) == 0 {
+			bld.WriteRune('\t')
+			bld.WriteString("none")
+			bld.WriteRune('\n')
+		}
 		for _, e := range n.Out {
+			bld.WriteRune('\t')
 			bld.WriteString(n.ID)
 			bld.WriteString(" -> ")
 			bld.WriteString(e.To.ID)
