@@ -325,19 +325,19 @@ func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
 func crossings(layers map[int]*graph.Layer) int {
 	crossings := 0
 	for l := 1; l < len(layers); l++ {
-		crossings += layers[l].CountCrossings()
+		crossings += countCrossings(layers[l-1], layers[l])
 	}
 	return crossings
 }
 
 func crossingsAround(l int, layers map[int]*graph.Layer) int {
 	if l == 0 {
-		return layers[l+1].CountCrossings()
+		return countCrossings(layers[l], layers[l+1])
 	}
 	if l == len(layers)-1 {
-		return layers[l].CountCrossings()
+		return countCrossings(layers[l-1], layers[l])
 	}
-	return layers[l].CountCrossings() + layers[l+1].CountCrossings()
+	return countCrossings(layers[l-1], layers[l]) + countCrossings(layers[l], layers[l+1])
 }
 
 func (p *graphvizDotProcessor) swap(v, w *graph.Node) {
