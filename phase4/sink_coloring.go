@@ -50,10 +50,11 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 					// do nothing
 				} else {
 					q := []*graph.Node{n}
+					shift := x
 					for len(q) > 0 {
 						n, q = q[0], q[1:]
-						placeBlock(roots[n], x)
-						x += blockwidth[n] + params.NodeMargin + params.NodeSpacing
+						placeBlock(roots[n], shift)
+						shift += blockwidth[n] + params.NodeMargin + params.NodeSpacing
 						r := roots[n]
 						if r.LayerPos < g.Layers[r.Layer].Len()-1 {
 							q = append(q, g.Layers[r.Layer].Nodes[r.LayerPos+1])
