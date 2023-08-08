@@ -1,7 +1,6 @@
 package phase4
 
 import (
-	"fmt"
 	"maps"
 	"math"
 	"sort"
@@ -109,8 +108,8 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 			}
 		}
 		if !changed {
-			fmt.Println("NO VIABLE LAYOUT")
-			// finalLayout = xcoords[0]
+			// keep balanced layout
+			// todo: monitor failure condition
 		}
 	}
 

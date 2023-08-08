@@ -14,7 +14,8 @@ const (
 	// It's a simple and fast to implement algorithm for quick prototyping.
 	VerticalAlign
 
-	// BrandesKoepf aligns nodes based on blocks and classes. Runs in O(V+E).
+	// BrandesKoepf aligns nodes based on blocks and classes in O(V+E).
+	// It results in a compact drawing but with less long straight edges.
 	BrandesKoepf
 
 	// NetworkSimplex sets X coordinates by constructing an auxiliary graph and solving it with the network simplex method.
@@ -23,6 +24,7 @@ const (
 	NetworkSimplex
 
 	// SinkColoring is a variant of BrandesKöpf that aligns nodes based on vertical blocks starting from the bottom.
+	// It results in a larger drawing but with more long vertical edge paths. Runs in O(2kn) with 1 <= k <= maxshifts
 	SinkColoring
 	_endAlg
 )
