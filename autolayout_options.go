@@ -70,10 +70,32 @@ func WithEdgeRouting(alg routing.Alg) option {
 	}
 }
 
+func WithNetworkSimplexThoroughness(thoroughness uint) option {
+	return func(o *options) {
+		o.params.NetworkSimplexThoroughness = thoroughness
+	}
+}
+
+func WithNetworkSimplexBalance(balance bool) option {
+	return func(o *options) {
+		o.params.NetworkSimplexBalance = balance
+	}
+}
+
+func WithLayerSpacing(spacing float64) option {
+	return func(o *options) {
+		o.params.LayerSpacing = spacing
+	}
+}
+
+func WithNodeSpacing(spacing float64) option {
+	return func(o *options) {
+		o.params.NodeSpacing = spacing
+	}
+}
+
 func WithMonitor(monitor monitor.Monitor) option {
 	return func(o *options) {
 		o.params.Monitor = monitor
 	}
 }
-
-// todo: param options
