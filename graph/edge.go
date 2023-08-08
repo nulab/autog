@@ -18,6 +18,7 @@ type edge struct {
 	IsInSpanningTree bool
 	IsReversed       bool
 	CutValue         int
+	Points           [][2]float64
 }
 
 func NewEdge(from, to *Node, weight int) *Edge {

@@ -24,7 +24,7 @@ var defaultOptions = options{
 	p2: layering.NetworkSimplex,
 	p3: ordering.GraphvizDot,
 	p4: positioning.SinkColoring,
-	p5: routing.NoRouting,
+	p5: routing.PieceWise,
 	params: graph.Params{
 		NetworkSimplexThoroughness:               28,
 		NetworkSimplexMaxIterFactor:              0,

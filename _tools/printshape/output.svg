@@ -3,7 +3,7 @@
 <svg width="1510" height="2010"
      xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink">
-<text x="10" y="50" style="font-size:20px;fill:black" >2023-08-08 12:53:15.552482 +0200 CEST m=+0.008227959</text>
+<text x="10" y="50" style="font-size:20px;fill:black" >2023-08-08 16:31:41.398039 +0200 CEST m=+0.008327292</text>
 <defs>
 <marker id="arrowhead" refX="7" refY="2" markerWidth="8" markerHeight="8" orient="auto-start-reverse" >
 <path d="M0,0 V4 L8,2 Z" style="fill:black" />
@@ -47,45 +47,31 @@
 <text x="915" y="1130" style="text-anchor:middle;font-size:30px;fill:black" >N12-3</text>
 <rect x="605" y="1080" width="100" height="100" style="fill:none;stroke:black" />
 <text x="655" y="1130" style="text-anchor:middle;font-size:30px;fill:black" >N17-2</text>
-<line x1="655" y1="180" x2="470" y2="330" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="655" y1="180" x2="1160" y2="380" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="655" y1="180" x2="1420" y2="330" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="655" y1="180" x2="655" y2="330" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="840" y1="680" x2="840" y2="830" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="655" y1="430" x2="840" y2="580" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="470" y1="680" x2="655" y2="830" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="470" y1="680" x2="470" y2="880" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="470" y1="430" x2="310" y2="630" style="stroke-width:2;fill:none;stroke:black;marker-start:url(#arrowhead)" />
-<line x1="310" y1="1180" x2="470" y2="1330" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="90" y1="930" x2="310" y2="1080" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="470" y1="430" x2="470" y2="580" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="470" y1="430" x2="90" y2="580" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="90" y1="680" x2="200" y2="880" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="90" y1="680" x2="90" y2="830" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="1160" y1="930" x2="1160" y2="1130" style="stroke-width:2;fill:none;stroke:black;marker-start:url(#arrowhead)" />
-<line x1="1160" y1="1680" x2="655" y2="1830" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="915" y1="1430" x2="1160" y2="1580" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="915" y1="1180" x2="1025" y2="1380" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="915" y1="1180" x2="915" y2="1330" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="1160" y1="680" x2="1160" y2="830" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="1160" y1="930" x2="655" y2="1080" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="1160" y1="930" x2="915" y2="1080" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="1420" y1="430" x2="1160" y2="580" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="655" y1="430" x2="655" y2="630" style="stroke-width:2;fill:none;stroke:black;marker-start:url(#arrowhead)" />
-<line x1="655" y1="930" x2="655" y2="1080" style="stroke-width:2;fill:none;stroke:black;marker-start:url(#arrowhead)" />
-<line x1="655" y1="1180" x2="655" y2="1380" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="1160" y1="380" x2="1160" y2="580" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="470" y1="880" x2="470" y2="1130" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="310" y1="630" x2="310" y2="880" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="200" y1="880" x2="310" y2="1080" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="1160" y1="1130" x2="1160" y2="1380" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="1025" y1="1380" x2="1160" y2="1580" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="655" y1="630" x2="655" y2="830" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="655" y1="1380" x2="655" y2="1630" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="470" y1="1130" x2="470" y2="1330" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="310" y1="880" x2="310" y2="1080" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="1160" y1="1380" x2="1160" y2="1580" style="stroke-width:2;fill:none;stroke:black;" />
-<line x1="655" y1="1630" x2="655" y2="1830" style="stroke-width:2;fill:none;stroke:black;marker-end:url(#arrowhead)" />
-<line x1="470" y1="680" x2="470" y2="1330" style="stroke-width:2;fill:none;stroke:black;marker-start:url(#arrowhead)" />
-<line x1="655" y1="1180" x2="655" y2="1830" style="stroke-width:2;fill:none;stroke:black;marker-start:url(#arrowhead)" />
+<polyline points="655,180 470,330" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="655,180 1160,380 1160,580" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="655,180 1420,330" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="655,180 655,330" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="840,680 840,830" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="655,430 840,580" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="470,680 655,830" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="470,680 470,880 470,1130 470,1330" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="470,430 310,630 310,880 310,1080" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="310,1180 470,1330" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="90,930 310,1080" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="470,430 470,580" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="470,430 90,580" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="90,680 200,880 310,1080" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="90,680 90,830" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="1160,930 1160,1130 1160,1380 1160,1580" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="1160,1680 655,1830" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="915,1430 1160,1580" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="915,1180 1025,1380 1160,1580" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="915,1180 915,1330" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="1160,680 1160,830" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="1160,930 655,1080" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="1160,930 915,1080" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="1420,430 1160,580" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="655,430 655,630 655,830" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="655,930 655,1080" style="stroke-width:2;fill:none;stroke:black" />
+<polyline points="655,1180 655,1380 655,1630 655,1830" style="stroke-width:2;fill:none;stroke:black" />
 </svg>

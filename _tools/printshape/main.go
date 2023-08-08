@@ -4,7 +4,7 @@ import (
 	"github.com/nulab/autog"
 	"github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/testfiles"
-	positioning "github.com/nulab/autog/phase4"
+	routing "github.com/nulab/autog/phase5"
 )
 
 const exampleDiagram = "lib_decg_DECGPi.json" //  "ci_router_ComplexRouter.json" //  //
@@ -23,7 +23,7 @@ func main() {
 		}
 	}
 
-	autog.Layout(g, autog.WithPositioning(positioning.SinkColoring))
+	autog.Layout(g, autog.WithEdgeRouting(routing.PieceWise))
 	// cacooShapesJson(g)
 	svgFile(g)
 
