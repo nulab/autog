@@ -19,7 +19,7 @@ const (
 
 	// NetworkSimplex sets X coordinates by constructing an auxiliary graph and solving it with the network simplex method.
 	// Layers in the auxiliary graph are X coordinates in the main graph.
-	// Time-intensive for large graphs, above a few dozen nodes.
+	// Might be time-intensive for graphs above a few dozen nodes.
 	NetworkSimplex
 
 	// SinkColoring is a variant of BrandesKöpf that aligns nodes based on vertical blocks starting from the bottom.

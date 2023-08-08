@@ -4,7 +4,12 @@ import (
 	"github.com/nulab/autog/graph"
 )
 
-// todo: add documentation
+// This implements an heuristic for x-coordinate assignment similar to the one proposed by Brandes & Köpf.
+// Vertices are partitioned in blocks (colored) based on vertical alignment and giving priority to long edges.
+// The partitioning proceeds greedily sweeping the layers from bottom to top.
+// Initial x-coordinates are assigned to all nodes by packing them as left as possible in their layer, while respecting
+// their relative position. Finally, all nodes are assigned the maximum x in their block.
+// If there's any overlap, nodes are shifted right recursively.
 func execSinkColoring(g *graph.DGraph, params graph.Params) {
 	colors := graph.NodeMap{}
 	roots := graph.NodeMap{}
@@ -13,58 +18,40 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 		roots[n] = n
 	}
 
+	// paint nodes, and remember the maximum same-color block width, O(n)
+	blockwidth := graph.NodeFloatMap{}
 	iter := layersIterator(g, top)
 	for layer := iter(); layer != nil; layer = iter() {
 		for _, n := range layer.Nodes {
-			setColor(n, colors, roots)
+			_, w := setColor(n, colors, roots)
+			blockwidth[roots[n]] = max(blockwidth[roots[n]], w)
 		}
 	}
 
+	// init coordinates by packing nodes to the left, O(n)
 	xcoord := graph.NodeFloatMap{}
-	xinit := graph.NodeSet{}
-	blockwidth := graph.NodeFloatMap{}
-
-	placeBlock := func(n *graph.Node, x float64) {
-		for {
-			xcoord[n] = x
-			xinit[n] = true
-			blockwidth[n] = max(blockwidth[n], n.W)
-			if n != colors[n] {
-				n = colors[n]
-			} else {
-				break
-			}
-		}
-	}
-
 	iter = layersIterator(g, bottom)
 	for layer := iter(); layer != nil; layer = iter() {
 		x := 0.0
 		for _, n := range layer.Nodes {
-			x = max(x, xcoord[n])
-			if !xinit[n] {
-				// apply x coord
-				placeBlock(roots[n], x)
-			} else {
-				if xcoord[n] >= x {
-					// do nothing
-				} else {
-					q := []*graph.Node{n}
-					shift := x
-					for len(q) > 0 {
-						n, q = q[0], q[1:]
-						placeBlock(roots[n], shift)
-						shift += blockwidth[n] + params.NodeMargin + params.NodeSpacing
-						r := roots[n]
-						if r.LayerPos < g.Layers[r.Layer].Len()-1 {
-							q = append(q, g.Layers[r.Layer].Nodes[r.LayerPos+1])
-						}
-					}
-				}
-			}
-			x += blockwidth[n] + params.NodeMargin + params.NodeSpacing
+			xcoord[n] = x
+			x += blockwidth[roots[n]] + params.NodeMargin + params.NodeSpacing
 		}
 	}
+
+	// compute maximum x coord for each block, O(n)
+	blockmax := graph.NodeFloatMap{}
+	for n, x := range xcoord {
+		blockmax[roots[n]] = max(blockmax[roots[n]], x)
+	}
+
+	lmax := 0
+	for _, l := range g.Layers {
+		lmax = max(lmax, l.Len())
+	}
+
+	spacing := params.NodeSpacing + params.NodeMargin
+	placeBlock(g, lmax, spacing, blockmax, blockwidth, xcoord, roots)
 
 	for _, l := range g.Layers {
 		for _, n := range l.Nodes {
@@ -74,26 +61,14 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 	}
 }
 
-func setColor(n *graph.Node, colors graph.NodeMap, roots graph.NodeMap) *graph.Node {
+func setColor(n *graph.Node, colors graph.NodeMap, roots graph.NodeMap) (*graph.Node, float64) {
 	if colors[n] != n || len(n.In) == 0 {
-		return n
+		return n, n.W
 	}
 
-	// candidate edge
+	// candidate edge; this assumes the edge is viable, i.e. doesn't self-loop and is not flat
 	mid := len(n.In) / 2
 	e := n.In[mid]
-
-	// i := 1
-	// j := 0
-	// for e.SelfLoops() || e.IsFlat() {
-	// 	if j%2 == 0 {
-	// 		e = n.In[mid-i]
-	// 	} else {
-	// 		e = n.In[mid+i]
-	// 		i++
-	// 	}
-	// 	j++
-	// }
 
 	for _, f := range n.In {
 		// prefer edges connecting to virtual nodes
@@ -107,19 +82,50 @@ func setColor(n *graph.Node, colors graph.NodeMap, roots graph.NodeMap) *graph.N
 	}
 	m := e.ConnectedNode(n)
 	if colors[m] != m {
-		return n
+		return n, n.W
 	}
-	root := setColor(m, colors, roots)
+	root, rootw := setColor(m, colors, roots)
 	colors[m] = n
 	roots[n] = root
-	return root
+	return root, max(n.W, rootw)
 }
 
-func setX(n *graph.Node, colors graph.NodeMap, shift graph.NodeFloatMap, xcoord graph.NodeFloatMap, xinit graph.NodeSet) {
-	if xinit[n] || colors[n] == n {
-		return
+// one run of this routine is O(2n); by placing the recursive call at the end behind a boolean flag, it runs again only once for
+// all remaining overlaps. Therefore it becomes O(2*(1+k)*n) where k is the number of times any overlap is found.
+func placeBlock(g *graph.DGraph, layerMaxLen int, spacing float64, blockmax, blockwidth, xcoord graph.NodeFloatMap, roots graph.NodeMap) {
+	for _, n := range g.Nodes {
+		x := blockmax[roots[n]]
+		xcoord[n] = max(x, x+(blockwidth[roots[n]]-n.W)/2)
 	}
-	xcoord[n] = shift[n] // defaults to 0
-	xinit[n] = true
-	setX(colors[n], colors, shift, xcoord, xinit)
+
+	shift := false
+	for k := 0; k < layerMaxLen; k++ {
+		for _, l := range g.Layers {
+			switch {
+			case k >= l.Len():
+				continue
+			case k == l.Len()-1 && k > 0:
+				// consider previous and current nodes
+				prv, cur := l.Nodes[k-1], l.Nodes[k]
+				// shift if there is an overlap
+				if xcoord[cur] < xcoord[prv]+blockwidth[roots[prv]]+spacing {
+					xcoord[cur] = xcoord[prv] + blockwidth[roots[prv]] + spacing
+					shift = true
+					blockmax[roots[cur]] = max(blockmax[roots[cur]], xcoord[cur])
+				}
+			case k < l.Len()-1:
+				// consider current and successive nodes
+				cur, suc := l.Nodes[k], l.Nodes[k+1]
+				// shift if there is an overlap
+				if xcoord[cur] > xcoord[suc] {
+					xcoord[suc] = xcoord[cur] + blockwidth[roots[cur]] + spacing
+					shift = true
+					blockmax[roots[l.Nodes[k+1]]] = max(blockmax[roots[l.Nodes[k+1]]], xcoord[l.Nodes[k+1]])
+				}
+			}
+		}
+	}
+	if shift {
+		placeBlock(g, layerMaxLen, spacing, blockmax, blockwidth, xcoord, roots)
+	}
 }
