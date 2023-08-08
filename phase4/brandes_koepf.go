@@ -1,7 +1,6 @@
 package phase4
 
 import (
-	"maps"
 	"math"
 	"sort"
 
@@ -301,48 +300,6 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 	}
 }
 
-// type block = []*graph.Edge
-//
-// var inn = graph.NodeFloatMap{}
-// var blox = [][]*graph.Edge{}
-// var blockSize = map[*block]float64{}
-//
-// func innerShift(nodes []*graph.Node) {
-// 	for _, n := range nodes {
-// 		inn[n] = 0
-// 		for _, b := range blox {
-// 			left, right := 0.0, 0.0
-// 			for _, e := range b {
-// 				p, q := e.From, e.To
-// 				s := inn[π(p)] + xp(p) - xp(q)
-// 				inn[π(q)] = s
-// 				left = min(left, s)
-// 				right = max(right, s+width(π(q)))
-// 			}
-// 			for _, e := range blox {
-// 				n := (*graph.Node)(unsafe.Pointer(e[0]))
-// 				inn[n] -= left
-// 			}
-// 			blockSize[&b] = right - left
-// 		}
-// 	}
-// }
-//
-// type port = *graph.Node // todo
-//
-// // maps port to node
-// func π(port) *graph.Node {
-// 	return nil
-// }
-//
-// func xp(port) float64 {
-// 	return 0.0
-// }
-//
-// func width(port) float64 {
-// 	return 0
-// }
-
 // returns a non-negative number if n is the target node of an inner edge, i.e. an edge connecting two virtual nodes
 // on adjacent layers, where the number is the position of the edge source in the upper layer;
 // it returns -1 if the node isn't involved in an inner edge.
@@ -359,7 +316,7 @@ func incidentToInner(n *graph.Node) int {
 }
 
 func layersIterator(g *graph.DGraph, dir direction) func() *graph.Layer {
-	ks := maps.Keys(g.Layers)
+	ks := g.Layers.Keys()
 	switch dir {
 	case bottom:
 		sort.Ints(ks)

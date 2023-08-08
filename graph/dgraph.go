@@ -10,7 +10,7 @@ type DGraph struct {
 	Nodes       []*Node
 	Edges       EdgeList
 	HiddenEdges EdgeList
-	Layers      map[int]*Layer
+	Layers      Layers
 	isCyclic    *bool
 }
 
