@@ -28,11 +28,12 @@ loop:
 func (g *DGraph) breakLongEdge(e *Edge, v int) {
 	from, to := e.From, e.To
 	// create virtual node
+	// note that the size of the virtual node may affect positioning algorithms
+	// with no size, the node effectively becomes the bend point of the long edge
 	virtualNode := &Node{
 		ID:        "V" + strconv.Itoa(v),
 		Layer:     from.Layer + 1,
 		IsVirtual: true,
-		Size:      Size{H: 100.0, W: 100.0}, // todo: eventually this doesn't belong here
 	}
 	// set e's target to the virtual node
 	e.To = virtualNode
