@@ -9,7 +9,7 @@ import (
 
 const exampleDiagram = "lib_decg_DECGPi.json" //  "ci_router_ComplexRouter.json" //  //
 
-// todo: very ugly code used to set up a quick POC, eventually refactor this into its own project
+// todo: minimal POC code, eventually refactor this into its own project
 func main() {
 	elkg := testfiles.ReadTestFile("internal/testfiles/elk_relabeled", exampleDiagram)
 	// elkg := testfiles.ReadTestFile("internal/testfiles/elk_constructed", "simple_long_edge.json")
