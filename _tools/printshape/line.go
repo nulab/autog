@@ -24,13 +24,20 @@ func NewLine() *Line {
 }
 
 func setLineProperties(line *Line, e *graph.Edge, shapes map[string]*Shape) {
-	if e.IsReversed {
-		a := line.StartArrow
-		line.StartArrow = line.EndArrow
-		line.EndArrow = a
-		line.LineInfo.Color = "d2302f"
-		line.LineInfo.Thickness = 2
-	}
+	// if e.WasReversed {
+	// 	// a := line.StartArrow
+	// 	// line.StartArrow = line.EndArrow
+	// 	// line.EndArrow = a
+	// 	line.LineInfo.Color = "d2302f"
+	// 	line.LineInfo.Thickness = 2
+	// }
+	// if e.WasHidden {
+	// 	// a := line.StartArrow
+	// 	// line.StartArrow = line.EndArrow
+	// 	// line.EndArrow = a
+	// 	line.LineInfo.Color = "ffb74e"
+	// 	line.LineInfo.Thickness = 4
+	// }
 
 	if e.From.Layer == e.To.Layer {
 		sameLayerLine(line, e, shapes)
@@ -38,6 +45,15 @@ func setLineProperties(line *Line, e *graph.Edge, shapes map[string]*Shape) {
 	}
 
 	from, to := shapes[e.From.ID], shapes[e.To.ID]
+	if from.Bounds.Top > to.Bounds.Top {
+		t := to
+		to = from
+		from = t
+		a := line.StartArrow
+		line.StartArrow = line.EndArrow
+		line.EndArrow = a
+	}
+
 	line.StartConnection = from.Shapes[0].Uid + ".8"
 	line.EndConnection = to.Shapes[0].Uid + ".7"
 

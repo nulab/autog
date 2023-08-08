@@ -4,7 +4,7 @@ package main
 func NewGroup(text string) *Shape {
 	return &Shape{
 		Type: ShapeType_Group,
-		Bounds: Bounds{
+		Bounds: &Bounds{
 			Top:    -200,
 			Bottom: -100,
 			Left:   -250,
@@ -18,7 +18,7 @@ func NewSquare() *Shape {
 	return &Shape{
 		Type: ShapeType_Polygon,
 		Uid:  cacooUid(),
-		Bounds: Bounds{
+		Bounds: &Bounds{
 			Top:    0,
 			Bottom: 100,
 			Left:   0,
@@ -58,7 +58,7 @@ func NewText(text string) *Shape {
 	return &Shape{
 		Type: ShapeType_Text,
 		Uid:  cacooUid(),
-		Bounds: Bounds{
+		Bounds: &Bounds{
 			Top:         1,
 			Bottom:      -2,
 			Left:        1,

@@ -1,5 +1,6 @@
 package graph
 
+// FIXME: it could be bugged
 func (g *DGraph) ConnectedComponents() []*DGraph {
 	var subgs []*DGraph
 	visited := NodeSet{}

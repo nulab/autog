@@ -1,66 +1,30 @@
 package main
 
 import (
-	"encoding/json"
-	"strconv"
-
 	"github.com/nulab/autog"
 	"github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/testfiles"
-	"github.com/vibridi/cacooclip"
+	positioning "github.com/nulab/autog/phase4"
 )
 
-const exampleDiagram = "ci_router_ComplexRouter.json"
+const exampleDiagram = "lib_decg_DECGPi.json" //  "ci_router_ComplexRouter.json" //  //
 
 // todo: very ugly code used to set up a quick POC, eventually refactor this into its own project
 func main() {
 	elkg := testfiles.ReadTestFile("internal/testfiles/elk_relabeled", exampleDiagram)
 	// elkg := testfiles.ReadTestFile("internal/testfiles/elk_constructed", "simple_long_edge.json")
 
-	dg := graph.FromAdjacencyList(elkg.AdjacencyList())
-	for _, n := range dg.Nodes {
+	g := graph.FromElk(elkg)
+	for _, n := range g.Nodes {
 		n.W = 100
 		n.H = 100
-	}
-
-	clip := ClipboardShapes{
-		Target:  "shapes",
-		SheetId: "A97FC",
-	}
-	xoffset := 0.0
-	shapes := map[string]*Shape{}
-	for _, subg := range dg.ConnectedComponents() {
-		autog.Layout(subg) // , autog.WithPositioning(positioning.NetworkSimplex))
-		maxxoffset := 0.0
-		for _, n := range subg.Nodes {
-			shape := NewGroup(n.ID + "-L" + strconv.Itoa(n.Layer) + "-P" + strconv.Itoa(n.LayerPos))
-			shape.Bounds.Top = n.Y
-			shape.Bounds.Left = n.X + xoffset
-			shape.Bounds.Right = shape.Bounds.Left + n.W
-			shape.Bounds.Bottom = shape.Bounds.Top + n.W
-			shape.BuildConnectionPoints()
-			if n.IsVirtual {
-				shape.Shapes[0].LineInfo.Type = 3
-			}
-
-			clip.Shapes = append(clip.Shapes, shape)
-			maxxoffset = max(maxxoffset, n.X)
-			shapes[n.ID] = shape
-		}
-		xoffset += maxxoffset + 100.0 + 40.0 // 40 is the conn-comp distance
-
-		for _, e := range subg.Edges {
-			line := NewLine()
-			setLineProperties(line, e, shapes)
-			clip.Shapes = append(clip.Shapes, line)
+		if n.ID == "N13" || n.ID == "N4" {
+			n.W = 150
 		}
 	}
 
-	b, err := json.Marshal(clip)
-	if err != nil {
-		panic(err)
-	}
-	if err = cacooclip.Write(string(b)); err != nil {
-		panic(err)
-	}
+	autog.Layout(g, autog.WithPositioning(positioning.SinkColoring))
+	// cacooShapesJson(g)
+	svgFile(g)
+
 }

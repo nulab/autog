@@ -22,7 +22,7 @@ type ClipboardShapes struct {
 type Shape struct {
 	Type             int                `json:"type"`
 	Uid              string             `json:"uid"`
-	Bounds           Bounds             `json:"bounds"`
+	Bounds           *Bounds            `json:"bounds"`
 	ConnectionPoints []*ConnectionPoint `json:"connectionPoints,omitempty"`
 	Attr             []*Attr            `json:"attr,omitempty"`
 	CategoryName     string             `json:"categoryName,omitempty"`
