@@ -12,15 +12,11 @@ func (g *DGraph) BreakLongEdges() {
 	}
 
 	v := 1
-	i := 0
-loop:
-	for i < len(g.Edges) {
+	for i := 0; i < len(g.Edges); i++ {
 		e := g.Edges[i]
-		i++
 		if e.To.Layer-e.From.Layer > 1 {
 			g.breakLongEdge(e, v)
 			v++
-			goto loop
 		}
 	}
 }
