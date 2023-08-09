@@ -8,7 +8,10 @@ import (
 // todo: to decrease coupling between client code and the graph types used here, the layout could take as params
 // a simple adjacency list and a struct or map with the node properties (width, height, etc.)
 // then the graph package could become internal
-func Layout(graph *graph.DGraph, opts ...option) *graph.DGraph {
+
+// todo: document somewhere that the coordinate system resembles that of SVG, with origin at top-left corner
+
+func Layout(graph *graph.DGraph, opts ...Option) *graph.DGraph {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
 		opt(&layoutOpts)

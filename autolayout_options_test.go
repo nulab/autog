@@ -39,7 +39,7 @@ func TestOptions(t *testing.T) {
 	assert.NotNil(t, opts.params.Monitor)
 }
 
-func testOptions(opts ...option) options {
+func testOptions(opts ...Option) options {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
 		opt(&layoutOpts)

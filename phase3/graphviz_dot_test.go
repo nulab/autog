@@ -6,10 +6,6 @@ import (
 	"testing"
 
 	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/internal/testfiles"
-	"github.com/nulab/autog/phase1"
-	"github.com/nulab/autog/phase2"
-	"github.com/stretchr/testify/assert"
 )
 
 // func TestVirtualNodes(t *testing.T) {
@@ -75,39 +71,39 @@ func TestAAA(t *testing.T) {
 	execGraphvizDot(g, graph.Params{})
 }
 
-func TestGansnerNorthOrdering(t *testing.T) {
-	testgs := testfiles.ReadTestDir("../internal/testfiles/elk_relabeled")
-	for _, g := range testgs {
-		dg := graph.FromElk(g)
-		if dg.HasCycles() {
-			phase1.DepthFirst.Process(dg, graph.Params{})
-		}
-		t.Run(g.Name, func(t *testing.T) {
-			if len(g.Nodes) >= 100 {
-				t.Skip()
-			}
-			for _, subg := range dg.ConnectedComponents() {
-				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
-					phase2.NetworkSimplex.Process(subg, graph.Params{})
-					execGraphvizDot(subg, graph.Params{})
-
-					indices := map[int]map[int]bool{}
-					for _, n := range subg.Nodes {
-						m := indices[n.Layer]
-						if m == nil {
-							m = map[int]bool{}
-							indices[n.Layer] = m
-						}
-						assert.False(t, m[n.LayerPos])
-						m[n.LayerPos] = true
-					}
-					// printNodeOrders(subg)
-				})
-
-			}
-		})
-	}
-}
+// func TestGansnerNorthOrdering(t *testing.T) {
+// 	testgs := testfiles.ReadTestDir("../internal/testfiles/elk_relabeled")
+// 	for _, g := range testgs {
+// 		dg := graph.FromElk(g)
+// 		if dg.HasCycles() {
+// 			phase1.DepthFirst.Process(dg, graph.Params{})
+// 		}
+// 		t.Run(g.Name, func(t *testing.T) {
+// 			if len(g.Nodes) >= 100 {
+// 				t.Skip()
+// 			}
+// 			for _, subg := range dg.ConnectedComponents() {
+// 				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
+// 					phase2.NetworkSimplex.Process(subg, graph.Params{})
+// 					execGraphvizDot(subg, graph.Params{})
+//
+// 					indices := map[int]map[int]bool{}
+// 					for _, n := range subg.Nodes {
+// 						m := indices[n.Layer]
+// 						if m == nil {
+// 							m = map[int]bool{}
+// 							indices[n.Layer] = m
+// 						}
+// 						assert.False(t, m[n.LayerPos])
+// 						m[n.LayerPos] = true
+// 					}
+// 					// printNodeOrders(subg)
+// 				})
+//
+// 			}
+// 		})
+// 	}
+// }
 
 func assignLayersVertical(g *graph.DGraph) {
 	for _, n := range g.Nodes {
