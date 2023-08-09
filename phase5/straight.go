@@ -11,7 +11,11 @@ func execStraightRouting(g *graph.DGraph) {
 
 		switch e.Type() {
 		case edgeTypeNoneVirtual:
-			e.Points = [][2]float64{startPoint(e), endPoint(e)}
+			if e.IsFlat() {
+				e.Points = [][2]float64{flatStartPoint(e), flatEndPoint(e)}
+			} else {
+				e.Points = [][2]float64{startPoint(e), endPoint(e)}
+			}
 
 		case edgeTypeOneVirtual:
 			if e.From.IsVirtual {
@@ -63,6 +67,34 @@ func execStraightRouting(g *graph.DGraph) {
 			i--
 		}
 	}
+}
+
+func flatStartPoint(e *graph.Edge) [2]float64 {
+	var x, y float64
+	if e.From.LayerPos < e.To.LayerPos {
+		// middle of right side
+		x = e.From.X + e.From.W
+		y = e.From.Y + e.From.H/2
+	} else {
+		// middle of left side
+		x = e.From.X
+		y = e.From.Y + e.From.H/2
+	}
+	return [2]float64{x, y}
+}
+
+func flatEndPoint(e *graph.Edge) [2]float64 {
+	var x, y float64
+	if e.From.LayerPos < e.To.LayerPos {
+		// middle of left side
+		x = e.To.X
+		y = e.To.Y + e.To.H/2
+	} else {
+		// middle of right side
+		x = e.To.X + e.To.W
+		y = e.To.Y + e.To.H/2
+	}
+	return [2]float64{x, y}
 }
 
 func startPoint(e *graph.Edge) [2]float64 {

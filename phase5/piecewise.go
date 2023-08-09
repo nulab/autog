@@ -11,7 +11,11 @@ func execPieceWiseRouting(g *graph.DGraph) {
 
 		switch e.Type() {
 		case edgeTypeNoneVirtual:
-			e.Points = [][2]float64{startPoint(e), endPoint(e)}
+			if e.IsFlat() {
+				e.Points = [][2]float64{flatStartPoint(e), flatEndPoint(e)}
+			} else {
+				e.Points = [][2]float64{startPoint(e), endPoint(e)}
+			}
 
 		case edgeTypeOneVirtual:
 			if e.From.IsVirtual {
