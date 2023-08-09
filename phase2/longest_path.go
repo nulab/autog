@@ -1,6 +1,8 @@
 package phase2
 
 import (
+	"sort"
+
 	"github.com/nulab/autog/graph"
 )
 
@@ -10,9 +12,16 @@ func execLongestPath(g *graph.DGraph) {
 	for _, n := range g.Nodes {
 		height[n] = -1
 	}
+	nodes := make([]*graph.Node, len(g.Nodes))
+	copy(nodes, g.Nodes)
+
+	sort.Slice(nodes, func(i, j int) bool {
+		return nodes[i].Outdeg() > nodes[j].Outdeg() ||
+			(nodes[i].Outdeg() == nodes[j].Outdeg() && nodes[i].Indeg() < nodes[j].Indeg())
+	})
 
 	nlayers := 0
-	for _, n := range g.Nodes {
+	for _, n := range nodes {
 		followLongestPath(n, height, &nlayers)
 	}
 }
