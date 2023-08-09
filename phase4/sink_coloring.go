@@ -76,6 +76,9 @@ func setColor(n *graph.Node, colors graph.NodeMap, roots graph.NodeMap) (*graph.
 			e = f
 		}
 	}
+	for i := 0; (e.SelfLoops() || e.IsFlat()) && i < len(n.In); i++ {
+		e = n.In[i]
+	}
 
 	if e == n.In[mid] && len(n.In)%2 == 0 {
 		// todo: shift n right
