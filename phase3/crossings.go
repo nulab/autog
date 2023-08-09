@@ -8,6 +8,10 @@ import (
 // "Simple and Efficient Bilayer Cross Counting", Journal of Graph Algorithms and Applications, 26 August 2002
 // https://pdfs.semanticscholar.org/272d/73edce86bcfac3c82945042cf6733ad281a0.pdf
 func countCrossings(l1, l2 *graph.Layer) int {
+	// with one or zero nodes in one layer there can be no bilayer crossing
+	if l1.Len() < 2 || l2.Len() < 2 {
+		return 0
+	}
 	upper, lower := orderedLayers(l1, l2)
 	edges := inLayerEdges(upper, lower)
 
