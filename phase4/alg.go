@@ -25,6 +25,9 @@ const (
 	// SinkColoring is a variant of BrandesKöpf that aligns nodes based on vertical blocks starting from the bottom.
 	// It results in a larger drawing but with more long vertical edge paths. Runs in O(2kn) with 1 <= k <= maxshifts.
 	SinkColoring
+
+	// PackRight aligns nodes to the right.
+	PackRight
 	_endAlg
 )
 
@@ -35,7 +38,7 @@ func (alg Alg) IsValid() bool {
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	switch alg {
 	case NoPositioning:
-		return
+		// no-op, but assign Y coordinates
 	case VerticalAlign:
 		execVerticalAlign(g, params)
 	case BrandesKoepf:
@@ -44,6 +47,8 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 		execNetworkSimplex(g, params)
 	case SinkColoring:
 		execSinkColoring(g, params)
+	case PackRight:
+		execPackRight(g, params)
 	default:
 		panic("positioning: unknown alg value")
 	}
