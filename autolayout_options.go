@@ -38,63 +38,63 @@ var defaultOptions = options{
 	},
 }
 
-type option func(*options)
+type Option func(*options)
 
-func WithCycleBreaking(alg cbreaking.Alg) option {
+func WithCycleBreaking(alg cbreaking.Alg) Option {
 	return func(o *options) {
 		o.p1 = alg
 	}
 }
 
-func WithLayering(alg layering.Alg) option {
+func WithLayering(alg layering.Alg) Option {
 	return func(o *options) {
 		o.p2 = alg
 	}
 }
 
-func WithOrdering(alg ordering.Alg) option {
+func WithOrdering(alg ordering.Alg) Option {
 	return func(o *options) {
 		o.p3 = alg
 	}
 }
 
-func WithPositioning(alg positioning.Alg) option {
+func WithPositioning(alg positioning.Alg) Option {
 	return func(o *options) {
 		o.p4 = alg
 	}
 }
 
-func WithEdgeRouting(alg routing.Alg) option {
+func WithEdgeRouting(alg routing.Alg) Option {
 	return func(o *options) {
 		o.p5 = alg
 	}
 }
 
-func WithNetworkSimplexThoroughness(thoroughness uint) option {
+func WithNetworkSimplexThoroughness(thoroughness uint) Option {
 	return func(o *options) {
 		o.params.NetworkSimplexThoroughness = thoroughness
 	}
 }
 
-func WithNetworkSimplexBalance(balance bool) option {
+func WithNetworkSimplexBalance(balance bool) Option {
 	return func(o *options) {
 		o.params.NetworkSimplexBalance = balance
 	}
 }
 
-func WithLayerSpacing(spacing float64) option {
+func WithLayerSpacing(spacing float64) Option {
 	return func(o *options) {
 		o.params.LayerSpacing = spacing
 	}
 }
 
-func WithNodeSpacing(spacing float64) option {
+func WithNodeSpacing(spacing float64) Option {
 	return func(o *options) {
 		o.params.NodeSpacing = spacing
 	}
 }
 
-func WithMonitor(monitor monitor.Monitor) option {
+func WithMonitor(monitor monitor.Monitor) Option {
 	return func(o *options) {
 		o.params.Monitor = monitor
 	}
