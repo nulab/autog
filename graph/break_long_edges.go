@@ -5,23 +5,26 @@ import (
 )
 
 func (g *DGraph) BreakLongEdges() {
-	for _, e := range g.Edges {
-		if e.From.Layer > e.To.Layer {
-			panic("edge breaker: upward edge: " + e.From.ID + " -> " + e.To.ID)
-		}
-	}
-
 	v := 1
 	for i := 0; i < len(g.Edges); i++ {
 		e := g.Edges[i]
 		if e.To.Layer-e.From.Layer > 1 {
+			// long edge pointing downward, break regularly
 			g.breakLongEdge(e, v)
 			v++
+		} else if e.From.Layer-e.To.Layer > 1 {
+			// long edge pointing upward, temporarily reverse
+			e.Reverse()
+			e, f := g.breakLongEdge(e, v)
+			v++
+			// restore direction to both parts
+			e.Reverse()
+			f.Reverse()
 		}
 	}
 }
 
-func (g *DGraph) breakLongEdge(e *Edge, v int) {
+func (g *DGraph) breakLongEdge(e *Edge, v int) (*Edge, *Edge) {
 	from, to := e.From, e.To
 	// create virtual node
 	// note that the size of the virtual node may affect positioning algorithms
@@ -51,4 +54,5 @@ func (g *DGraph) breakLongEdge(e *Edge, v int) {
 	g.Edges = append(g.Edges, f)
 	g.Nodes = append(g.Nodes, virtualNode)
 	g.Layers[virtualNode.Layer].Nodes = append(g.Layers[virtualNode.Layer].Nodes, virtualNode)
+	return e, f
 }
