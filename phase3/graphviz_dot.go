@@ -174,9 +174,13 @@ func (p *graphvizDotProcessor) initPositionsFlatEdges(n *graph.Node, visited gra
 	h, i := p.fixedPositions.head(n)
 	if i > 0 {
 		for h != nil && h != n {
+			if visited[h] {
+				goto next
+			}
 			visited[h] = true
 			p.setPos(h, indices[h.Layer])
 			indices[h.Layer]++
+		next:
 			h = p.fixedPositions.mustBefore[h]
 		}
 	}
