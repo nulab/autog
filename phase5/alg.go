@@ -10,6 +10,7 @@ const (
 	NoRouting Alg = iota
 
 	// Straight computes the start and end point of each edge. With only two points, edges can be drawn as straight lines.
+	// Unsuitable for graphs with many long edges or flat edges between non-consecutive nodes as edges may overlap nodes.
 	Straight
 
 	// PieceWise computes the start, end and bend points of each edge. Bend point coordinates are where virtual nodes would be.

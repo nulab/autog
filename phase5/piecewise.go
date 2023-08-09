@@ -1,6 +1,10 @@
 package phase5
 
-import "github.com/nulab/autog/graph"
+import (
+	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/internal/num"
+	"golang.org/x/exp/slices"
+)
 
 func execPieceWiseRouting(g *graph.DGraph) {
 	longEdgesTarget := map[*graph.Node]*graph.Edge{}
@@ -12,7 +16,11 @@ func execPieceWiseRouting(g *graph.DGraph) {
 		switch e.Type() {
 		case edgeTypeNoneVirtual:
 			if e.IsFlat() {
-				e.Points = [][2]float64{flatStartPoint(e), flatEndPoint(e)}
+				if num.Abs(e.From.LayerPos-e.To.LayerPos) > 1 {
+					e.Points = flatNonConsecutive(e, g.Layers[e.From.Layer].H)
+				} else {
+					e.Points = [][2]float64{flatStartPoint(e), flatEndPoint(e)}
+				}
 			} else {
 				e.Points = [][2]float64{startPoint(e), endPoint(e)}
 			}
@@ -74,4 +82,29 @@ func bendPoint(n *graph.Node, layerHeight float64) [2]float64 {
 	x = n.X + n.W/2
 	y = n.Y + layerHeight/2
 	return [2]float64{x, y}
+}
+
+func flatNonConsecutive(e *graph.Edge, layerH float64) [][2]float64 {
+	// at first assume typical left-right direction
+	anchorXOffset := 20.0
+	dist := num.Abs(e.From.LayerPos - e.To.LayerPos)
+	startx := e.From.X + e.From.W
+	starty := e.From.Y + e.From.H/2
+	endx := e.To.X
+	endy := e.To.Y + e.To.H/2
+	top := min(starty-layerH/2, endy-layerH/2) - (10 + float64(dist)*5)
+
+	points := [][2]float64{
+		{startx, starty},
+		{startx + anchorXOffset, starty},
+		{startx + anchorXOffset, top},
+		{endx - anchorXOffset, top},
+		{endx - anchorXOffset, endy},
+		{endx, endy},
+	}
+	if e.From.LayerPos < e.To.LayerPos {
+		return points
+	}
+	slices.Reverse(points)
+	return points
 }
