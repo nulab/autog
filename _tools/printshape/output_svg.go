@@ -54,37 +54,13 @@ func svgFile(g *graph.DGraph) {
 			xs = append(xs, int(p[0])+spacing)
 			ys = append(ys, int(p[1])+spacing*2)
 		}
-		canvas.Polyline(xs, ys, "stroke-width:2;fill:none;stroke:black")
+
+		marker := "marker-end"
+		if e.From.Layer > e.To.Layer {
+			marker = "marker-start"
+		}
+		canvas.Polyline(xs, ys, "stroke-width:2;fill:none;stroke:black;"+marker+":url(#arrowhead)")
 	}
-	// for _, e := range g.Edges {
-	// 	start, end := e.From, e.To
-	//
-	// 	marker := "marker-end"
-	// 	reversed := false
-	// 	if start.Layer > end.Layer {
-	// 		start, end = end, start
-	// 		marker = "marker-start"
-	// 		reversed = true
-	// 	}
-	// 	marker += ":url(#arrowhead)"
-	//
-	// 	startx := int(start.X + start.W/2 + spacing)
-	// 	starty := int(start.Y + start.H + spacing*2)
-	// 	endx := int(end.X + end.W/2 + spacing)
-	// 	endy := int(end.Y + spacing*2)
-	//
-	// 	if start.IsVirtual {
-	// 		starty += int(g.Layers[start.Layer].H / 2)
-	// 	}
-	// 	if end.IsVirtual {
-	// 		endy += int(g.Layers[end.Layer].H / 2)
-	// 	}
-	// 	if end.IsVirtual && !reversed || start.IsVirtual && reversed {
-	// 		marker = ""
-	// 	}
-	//
-	// 	canvas.Line(startx, starty, endx, endy, "stroke-width:2;fill:none;stroke:black;"+marker)
-	// }
 
 	canvas.End()
 }
