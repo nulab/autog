@@ -9,7 +9,6 @@ type DGraph struct {
 	Edges       EdgeList
 	HiddenEdges EdgeList
 	Layers      Layers
-	isCyclic    *bool
 }
 
 func FromEdgeSlice(edges [][]string) *DGraph {

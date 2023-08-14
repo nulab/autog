@@ -241,12 +241,12 @@ func (p *networkSimplexProcessor) postOrderTraversal(n *graph.Node, visited grap
 		panic("network simplex: must initialize postorder ordinal number")
 	}
 	lowest := math.MaxInt
-	for _, e := range n.Edges() {
+	n.VisitEdges(func(e *graph.Edge) {
 		if e.IsInSpanningTree && !visited[e] {
 			visited[e] = true
 			lowest = min(lowest, p.postOrderTraversal(e.ConnectedNode(n), visited))
 		}
-	}
+	})
 	p.lim[n] = p.poIndex
 	p.low[n] = min(lowest, p.poIndex)
 	p.poIndex++
