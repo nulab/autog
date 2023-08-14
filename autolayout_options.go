@@ -23,7 +23,7 @@ var defaultOptions = options{
 	p1: cbreaking.Greedy,
 	p2: layering.NetworkSimplex,
 	p3: ordering.GraphvizDot,
-	p4: positioning.SinkColoring,
+	p4: positioning.BrandesKoepf,
 	p5: routing.PieceWise,
 	params: graph.Params{
 		NetworkSimplexThoroughness:               28,

@@ -128,6 +128,7 @@ func placeBlock(g *graph.DGraph, layerMaxLen int, spacing float64, blockmax, blo
 			}
 		}
 	}
+	// todo: prevent degeneracy in case of crossing blocks
 	if shift {
 		placeBlock(g, layerMaxLen, spacing, blockmax, blockwidth, xcoord, roots)
 	}
