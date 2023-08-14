@@ -112,10 +112,19 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 		}
 	}
 
+	lmargin := 0.0
 	for _, l := range g.Layers {
 		for _, n := range l.Nodes {
-			n.X = finalLayout[n] // + (params.NodeSpacing+params.NodeMargin*2)*float64(i)
+			n.X = finalLayout[n]
+			lmargin = min(lmargin, n.X)
 			l.H = max(l.H, n.H)
+		}
+	}
+	// normalize negative xs
+	if lmargin < 0 {
+		lmargin = math.Abs(lmargin)
+		for _, n := range g.Nodes {
+			n.X += lmargin
 		}
 	}
 }
