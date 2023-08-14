@@ -1,11 +1,11 @@
 package graph
 
 import (
-	"github.com/nulab/autog/internal/pragma"
+	"sync"
 )
 
 type Edge struct {
-	pragma.NotCopiable
+	_ [0]sync.Mutex
 	edge
 }
 
