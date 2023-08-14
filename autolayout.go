@@ -9,7 +9,7 @@ import (
 // a simple adjacency list and a struct or map with the node properties (width, height, etc.)
 // then the graph package could become internal
 
-// todo: document somewhere that the coordinate system resembles that of SVG, with origin at top-left corner
+// todo: add interactive layout
 
 func Layout(graph *graph.DGraph, opts ...Option) *graph.DGraph {
 	layoutOpts := defaultOptions

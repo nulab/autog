@@ -12,6 +12,9 @@ type Node struct {
 	Layer     int
 	LayerPos  int
 	IsVirtual bool
+
+	// Size stores the dimensions of the node and its computed (x,y) coordinates.
+	// The point (x,y) is the top-left corner of the node, and (0,0) is the top-left corner of the drawing plane.
 	Size
 }
 
