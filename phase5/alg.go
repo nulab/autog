@@ -7,6 +7,7 @@ import (
 type Alg uint8
 
 const (
+	// NoRouting does not compute edge points.
 	NoRouting Alg = iota
 
 	// Straight computes the start and end point of each edge. With only two points, edges can be drawn as straight lines.
@@ -30,6 +31,12 @@ func (alg Alg) IsValid() bool {
 }
 
 func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
+	// restore any
+	for _, e := range g.HiddenEdges {
+		g.Edges.Add(e)
+	}
+	g.HiddenEdges = nil
+
 	switch alg {
 	case NoRouting:
 		return

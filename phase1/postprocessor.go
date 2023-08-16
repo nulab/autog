@@ -17,8 +17,4 @@ func (postProcessor) Process(g *graph.DGraph, _ graph.Params) {
 			e.Reverse()
 		}
 	}
-	for _, e := range g.HiddenEdges {
-		g.Edges.Add(e)
-	}
-	g.HiddenEdges = graph.EdgeList{}
 }
