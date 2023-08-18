@@ -28,6 +28,9 @@ const (
 
 	// PackRight aligns nodes to the right.
 	PackRight
+
+	// TreeTraversal aligns nodes with a depth-first traversal. Suitable for tree-like structures.
+	TreeTraversal
 	_endAlg
 )
 
@@ -49,6 +52,8 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 		execSinkColoring(g, params)
 	case PackRight:
 		execPackRight(g, params)
+	case TreeTraversal:
+		execTreeTraversal(g, params)
 	default:
 		panic("positioning: unknown alg value")
 	}
