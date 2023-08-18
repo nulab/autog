@@ -32,8 +32,7 @@ var defaultOptions = options{
 		GraphvizDotMaxIter:                       24,
 		NetworkSimplexAuxiliaryGraphWeightFactor: 4,
 		LayerSpacing:                             150.0,
-		NodeMargin:                               20.0,
-		NodeSpacing:                              40.0,
+		NodeSpacing:                              60.0,
 		Monitor:                                  monitor.NewNoop(),
 	},
 }

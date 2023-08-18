@@ -49,7 +49,6 @@ type brandesKoepfPositioner struct {
 	markedEdges graph.EdgeSet
 	neighbors   map[*graph.Node]map[direction][]pair
 	layerFor    func(*graph.Node) *graph.Layer
-	nodeMargin  float64
 	nodeSpacing float64
 }
 
@@ -61,7 +60,6 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 	p := &brandesKoepfPositioner{
 		markedEdges: graph.EdgeSet{},
 		neighbors:   neighbors(g),
-		nodeMargin:  params.NodeMargin,
 		nodeSpacing: params.NodeSpacing,
 
 		layerFor: func(n *graph.Node) *graph.Layer {
@@ -93,12 +91,12 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 
 	finalLayout := balanceLayouts(xcoords, g.Nodes)
 
-	if !verifyLayout(finalLayout, g.Layers, params.NodeMargin) {
+	if !verifyLayout(finalLayout, g.Layers, params.NodeSpacing) {
 		changed := false
 		smallest, _, _ := finalLayout.Size()
 
 		for _, xc := range xcoords {
-			if verifyLayout(xc, g.Layers, params.NodeMargin) {
+			if verifyLayout(xc, g.Layers, params.NodeSpacing) {
 				if w, _, _ := xc.Size(); w < smallest {
 					smallest = w
 					finalLayout = xc
@@ -440,7 +438,7 @@ func previousNodeInLayer(n *graph.Node, nodes []*graph.Node, dir direction) *gra
 }
 
 func (p *brandesKoepfPositioner) space(n *graph.Node) float64 {
-	return n.W + p.nodeSpacing + p.nodeMargin*2
+	return n.W + p.nodeSpacing
 }
 
 func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordinates {
@@ -479,13 +477,15 @@ func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordin
 	return medianx
 }
 
-// todo: account for node margin/spacing
-func verifyLayout(layout xcoordinates, layers map[int]*graph.Layer, nodeMargin float64) bool {
+// todo: it could be worth it to allow for some slack here by considering valid layouts where the nodes
+//
+//	don't overlap with a fraction of the spacing between them, instead of mandating full spacing
+func verifyLayout(layout xcoordinates, layers map[int]*graph.Layer, nodeSpacing float64) bool {
 	for _, layer := range layers {
 		pos := math.Inf(-1)
 		for _, n := range layer.Nodes {
-			left := layout[n] - nodeMargin
-			right := layout[n] + n.W + nodeMargin
+			left := layout[n]
+			right := layout[n] + n.W + nodeSpacing
 
 			if left > pos && right > pos {
 				pos = right
