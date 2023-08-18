@@ -8,7 +8,7 @@ func execPackRight(g *graph.DGraph, params graph.Params) {
 		x := 0.0
 		iter := nodesIterator(l.Nodes, left)
 		for n := iter(); n != nil; n = iter() {
-			x -= n.W + params.NodeMargin + params.NodeSpacing
+			x -= n.W + params.NodeSpacing
 			n.X = x
 		}
 		leftBound = min(leftBound, x)

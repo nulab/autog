@@ -29,9 +29,8 @@ func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 
 	for _, l := range g.Layers {
 		for i, n := range l.Nodes {
-			l.W += params.NodeMargin*2 + n.W
 			l.H = max(l.H, n.H)
-			n.X = float64(p.nodes[n.ID].Layer) + ((params.NodeMargin + params.NodeSpacing) * float64(i))
+			n.X = float64(p.nodes[n.ID].Layer) + (params.NodeSpacing * float64(i))
 		}
 	}
 }

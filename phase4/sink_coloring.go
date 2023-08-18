@@ -35,7 +35,7 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 		x := 0.0
 		for _, n := range layer.Nodes {
 			xcoord[n] = x
-			x += blockwidth[roots[n]] + params.NodeMargin + params.NodeSpacing
+			x += blockwidth[roots[n]] + params.NodeSpacing
 		}
 	}
 
@@ -50,7 +50,7 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 		lmax = max(lmax, l.Len())
 	}
 
-	spacing := params.NodeSpacing + params.NodeMargin
+	spacing := params.NodeSpacing
 	placeBlock(g, lmax, spacing, blockmax, blockwidth, xcoord, roots)
 
 	for _, l := range g.Layers {

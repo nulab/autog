@@ -23,11 +23,9 @@ type Params struct {
 
 	// ---- phase4 options ---
 
-	// Spacing between layers.
+	// Spacing between layers (above and below).
 	LayerSpacing float64
-	// Left and right margin between nodes.
-	NodeMargin float64
-	// Spacing between nodes, not including margin.
+	// Spacing between nodes (left and right).
 	NodeSpacing float64
 	// Weight factor for edges in the network simplex positioner.
 	NetworkSimplexAuxiliaryGraphWeightFactor int
