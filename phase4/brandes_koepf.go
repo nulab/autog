@@ -2,6 +2,7 @@ package phase4
 
 import (
 	"math"
+	"slices"
 	"sort"
 
 	"github.com/nulab/autog/graph"
@@ -21,18 +22,19 @@ const (
 	right
 )
 
-type layout struct {
-	v, h      direction
-	blockroot graph.NodeMap
-	alignment graph.NodeMap
-}
-
-type pair struct {
-	node *graph.Node
-	edge *graph.Edge
-}
-
-type xcoordinates graph.NodeFloatMap
+type (
+	layout struct {
+		v, h      direction
+		blockroot graph.NodeMap
+		alignment graph.NodeMap
+	}
+	pair struct {
+		node *graph.Node
+		edge *graph.Edge
+	}
+	xcoordinates graph.NodeFloatMap
+	neighbors    map[*graph.Node]map[direction][]pair
+)
 
 func (xc xcoordinates) Size() (w, minx, maxx float64) {
 	minx = math.Inf(+1)
@@ -47,7 +49,7 @@ func (xc xcoordinates) Size() (w, minx, maxx float64) {
 
 type brandesKoepfPositioner struct {
 	markedEdges graph.EdgeSet
-	neighbors   map[*graph.Node]map[direction][]pair
+	neighbors   neighbors
 	layerFor    func(*graph.Node) *graph.Layer
 	nodeSpacing float64
 }
@@ -56,17 +58,21 @@ type brandesKoepfPositioner struct {
 //   - "Ulrik Brandes and Boris Köpf, Fast and Simple Horizontal Coordinate Assignment"
 //     https://link.springer.com/content/pdf/10.1007/3-540-45848-4_3.pdf
 //   - ELK Java code at https://github.com/eclipse/elk/tree/master/plugins/org.eclipse.elk.alg.layered/src/org/eclipse/elk/alg/layered/p4nodes/bk
+//
+// note that ELK implements the Rüegg-Schulze extension to the original algorithm.
 func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
+	neighbors := initNeighbors(g)
+	markedEdges := markConflicts(g, neighbors)
+
 	p := &brandesKoepfPositioner{
-		markedEdges: graph.EdgeSet{},
-		neighbors:   neighbors(g),
+		markedEdges: markedEdges,
+		neighbors:   neighbors,
 		nodeSpacing: params.NodeSpacing,
 
 		layerFor: func(n *graph.Node) *graph.Layer {
 			return g.Layers[n.Layer]
 		},
 	}
-	p.markConflicts(g)
 
 	layouts := [4]layout{
 		{v: bottom, h: right},
@@ -128,9 +134,10 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 }
 
 // marks edges that cross inner edges, i.e. type 1 and type 2 conflicts as defined in B&K
-func (p *brandesKoepfPositioner) markConflicts(g *graph.DGraph) {
+func markConflicts(g *graph.DGraph, neighbors neighbors) graph.EdgeSet {
+	markedEdges := graph.EdgeSet{}
 	if len(g.Layers) < 4 {
-		return
+		return markedEdges
 	}
 	// sweep layers from top to bottom except the first and the last
 	for i := 1; i < len(g.Layers)-1; i++ {
@@ -142,7 +149,7 @@ func (p *brandesKoepfPositioner) markConflicts(g *graph.DGraph) {
 				// if v belongs to an inner edge, to the leftmost upper neighbor of v
 				k1 := g.Layers[i].Len() - 1
 				if ksrc >= 0 {
-					k1 = p.neighbors[v][bottom][0].node.LayerPos
+					k1 = neighbors[v][bottom][0].node.LayerPos
 				}
 				// range over same layer nodes until v included
 				for l2, w := range g.Layers[i+1].Nodes {
@@ -154,7 +161,7 @@ func (p *brandesKoepfPositioner) markConflicts(g *graph.DGraph) {
 							continue
 						}
 						if e.From.LayerPos < k0 || e.From.LayerPos > k1 {
-							p.markedEdges[e] = true
+							markedEdges[e] = true
 						}
 					}
 				}
@@ -162,9 +169,11 @@ func (p *brandesKoepfPositioner) markConflicts(g *graph.DGraph) {
 			}
 		}
 	}
+	return markedEdges
 }
 
-func neighbors(g *graph.DGraph) map[*graph.Node]map[direction][]pair {
+func initNeighbors(g *graph.DGraph) neighbors {
+	// use the unnamed type here so that subsequent make/append calls are more easily understood
 	neighbors := map[*graph.Node]map[direction][]pair{}
 	for _, n := range g.Nodes {
 		neighbors[n] = make(map[direction][]pair, 2)
@@ -176,7 +185,7 @@ func neighbors(g *graph.DGraph) map[*graph.Node]map[direction][]pair {
 				}
 			}
 			// when sweeping layers downward, we want to examine upper neighbors
-			neighbors[n][bottom] = ps
+			neighbors[n][bottom] = slices.Clip(ps)
 		}
 
 		if n.Layer < len(g.Layers)-1 {
@@ -187,7 +196,7 @@ func neighbors(g *graph.DGraph) map[*graph.Node]map[direction][]pair {
 				}
 			}
 			// when sweeping layers upward, we want to examine lower neighbors
-			neighbors[n][top] = ps
+			neighbors[n][top] = slices.Clip(ps)
 		}
 	}
 	return neighbors
@@ -477,9 +486,10 @@ func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordin
 	return medianx
 }
 
-// todo: it could be worth it to allow for some slack here by considering valid layouts where the nodes
-//
-//	don't overlap with a fraction of the spacing between them, instead of mandating full spacing
+// todo:
+// it could be worth it to allow for some slack here by considering valid layouts where the nodes
+// don't overlap with a fraction of the spacing between them, instead of mandating full spacing
+// however on failure ELK returns the first layout, we still return the average.
 func verifyLayout(layout xcoordinates, layers map[int]*graph.Layer, nodeSpacing float64) bool {
 	for _, layer := range layers {
 		pos := math.Inf(-1)
