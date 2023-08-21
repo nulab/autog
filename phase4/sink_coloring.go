@@ -18,12 +18,17 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 		roots[n] = n
 	}
 
+	// init edge conflicts
+	// unlike B&K here we consider edge priorities
+	edgePriority := map[int][]*graph.Edge{}
+
 	// paint nodes, and remember the maximum same-color block width, O(n)
 	blockwidth := graph.NodeFloatMap{}
+
 	iter := layersIterator(g, top)
 	for layer := iter(); layer != nil; layer = iter() {
 		for _, n := range layer.Nodes {
-			_, w := setColor(n, colors, roots)
+			_, w := setColor(n, colors, roots, edgePriority)
 			blockwidth[roots[n]] = max(blockwidth[roots[n]], w)
 		}
 	}
@@ -61,43 +66,50 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 	}
 }
 
-func setColor(n *graph.Node, colors graph.NodeMap, roots graph.NodeMap) (*graph.Node, float64) {
+func setColor(n *graph.Node, colors graph.NodeMap, roots graph.NodeMap, priority map[int][]*graph.Edge) (*graph.Node, float64) {
 	if colors[n] != n || len(n.In) == 0 {
+		// already painted or source node
 		return n, n.W
 	}
 
-	// candidate edge; this assumes the edge is viable, i.e. doesn't self-loop and is not flat
-	mid := len(n.In) / 2
-	e := n.In[mid]
+	// candidate edge
+	var e *graph.Edge
 
+	// prioritize edges connecting to virtual nodes
 	for _, f := range n.In {
-		// prefer edges connecting to virtual nodes
-		v := e.ConnectedNode(n)
-		u := f.ConnectedNode(n)
-		if u.IsVirtual {
-			// issue#1 this is a hack to force choosing the leftmost type 1 edge in case of conflicts
-			// it is still possible that e will end up crossing an edge in a block to the left of this block
-			// thus, not solving the stack overflow caused by infinite right shifts;
-			// that is why Brandes-Köpf does a preliminary pass to mark edge conflicts
-			// even if sink coloring is slowly reinventing B&K, the current output appears to be visually
-			// compelling, and it accounts for node size, so for now we keep sink coloring as an option.
-			// it shall be noted that for relatively simple graphs, min-cross phase should prevent
-			// bad crossings between differently colored node sets, however 1) min-cross is still an heuristic
-			// and 2) the global optimum could be >0 anyway, so we can't rely on this assumption.
-			if !v.IsVirtual || v.LayerPos > u.LayerPos {
-				e = f
-			}
+		if f.ConnectedNode(n).IsVirtual {
+			e = f
 		}
 	}
-	for i := 0; (e.SelfLoops() || e.IsFlat()) && i < len(n.In); i++ {
+
+	// make sure the edge is viable, i.e. that connects to an upper neighbor with no conflicts
+	i := 0
+	for e == nil || e.SelfLoops() || e.IsFlat() {
+		if i >= len(n.In) {
+			// no viable edges, n is a block root (possibly with cardinality 1)
+			return n, n.W
+		}
 		e = n.In[i]
+		i++
 	}
 
+	// walk up the edge
 	m := e.ConnectedNode(n)
 	if colors[m] != m {
+		// already colored, n is a block root (possibly with cardinality 1)
 		return n, n.W
 	}
-	root, rootw := setColor(m, colors, roots)
+
+	// check if e crosses an edge with priority
+	for _, f := range priority[n.Layer] {
+		if crosses(e, f) {
+			return n, n.W
+		}
+	}
+	priority[n.Layer] = append(priority[n.Layer], e)
+
+	root, rootw := setColor(m, colors, roots, priority)
+	// set m's color to n's, so that eventually each block has the color of its farthest sink node
 	colors[m] = n
 	roots[n] = root
 	return root, max(n.W, rootw)
@@ -138,8 +150,17 @@ func placeBlock(g *graph.DGraph, layerMaxLen int, spacing float64, blockmax, blo
 			}
 		}
 	}
-	// this could degenerate into infinite recursion in case of colored sets that with a crossing
 	if shift {
 		placeBlock(g, layerMaxLen, spacing, blockmax, blockwidth, xcoord, roots)
 	}
+}
+
+func crosses(e, f *graph.Edge) bool {
+	if e.From.Layer != f.From.Layer || e.To.Layer != f.To.Layer {
+		panic("sink coloring: unexpected layer mismatch")
+	}
+	etop, ebtm := e.From, e.To
+	ftop, fbtm := f.From, f.To
+	return (etop.LayerPos < ftop.LayerPos && ebtm.LayerPos > fbtm.LayerPos) ||
+		(etop.LayerPos > ftop.LayerPos && ebtm.LayerPos < fbtm.LayerPos)
 }
