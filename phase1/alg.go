@@ -32,20 +32,17 @@ func removeTwoNodeCycles(g *graph.DGraph) {
 	type pair [2]*graph.Node
 
 	seen := map[pair]bool{}
-	hide := graph.EdgeSet{}
+	rev := graph.EdgeSet{}
 
 	for _, e := range g.Edges {
 		a, b := e.From, e.To
 		if seen[pair{a, b}] || seen[pair{b, a}] {
-			hide[e] = true
+			rev[e] = true
 		} else {
 			seen[pair{a, b}] = true
 		}
 	}
-	for e := range hide {
-		e.From.Out.Remove(e)
-		e.To.In.Remove(e)
-		g.Edges.Remove(e)
-		g.HiddenEdges.Add(e)
+	for e := range rev {
+		e.Reverse()
 	}
 }

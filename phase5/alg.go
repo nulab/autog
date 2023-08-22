@@ -31,12 +31,6 @@ func (alg Alg) IsValid() bool {
 }
 
 func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
-	// restore any
-	for _, e := range g.HiddenEdges {
-		g.Edges.Add(e)
-	}
-	g.HiddenEdges = nil
-
 	switch alg {
 	case NoRouting:
 		return

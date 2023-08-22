@@ -5,10 +5,9 @@ import (
 )
 
 type DGraph struct {
-	Nodes       []*Node
-	Edges       EdgeList
-	HiddenEdges EdgeList
-	Layers      Layers
+	Nodes  []*Node
+	Edges  EdgeList
+	Layers Layers
 }
 
 func FromEdgeSlice(edges [][]string) *DGraph {
@@ -45,9 +44,8 @@ func FromEdgeSlice(edges [][]string) *DGraph {
 	}
 
 	return &DGraph{
-		Nodes:       nodeList,
-		Edges:       edgeList,
-		HiddenEdges: EdgeList{},
+		Nodes: nodeList,
+		Edges: edgeList,
 	}
 }
 
