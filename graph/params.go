@@ -29,6 +29,11 @@ type Params struct {
 	NodeSpacing float64
 	// Weight factor for edges in the network simplex positioner.
 	NetworkSimplexAuxiliaryGraphWeightFactor int
+	// Allows choosing one of the four B&K layouts. The accepted values are: 0: bottom-right, 1: bottom-left, 2: top-right, 3: top-left.
+	// The directions refer to the direction in which the algorithm sweeps layers and nodes. Different directions
+	// result in different aligmnent priorities, and therefore in different positioning.
+	// In case the inequality 0 <= v < 4 doesn't hold, the default balanced layout is used instead.
+	BrandesKoepfLayout int
 
 	// ---- other options ---
 

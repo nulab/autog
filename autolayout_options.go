@@ -33,6 +33,7 @@ var defaultOptions = options{
 		NetworkSimplexAuxiliaryGraphWeightFactor: 4,
 		LayerSpacing:                             150.0,
 		NodeSpacing:                              60.0,
+		BrandesKoepfLayout:                       -1,
 		Monitor:                                  monitor.NewNoop(),
 	},
 }
@@ -90,6 +91,12 @@ func WithLayerSpacing(spacing float64) Option {
 func WithNodeSpacing(spacing float64) Option {
 	return func(o *options) {
 		o.params.NodeSpacing = spacing
+	}
+}
+
+func WithBrandesKoepfLayout(i int) Option {
+	return func(o *options) {
+		o.params.BrandesKoepfLayout = i
 	}
 }
 

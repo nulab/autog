@@ -116,6 +116,11 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 		}
 	}
 
+	// override default choice if user specified a preference
+	if params.BrandesKoepfLayout >= 0 && params.BrandesKoepfLayout < 4 {
+		finalLayout = xcoords[params.BrandesKoepfLayout]
+	}
+
 	lmargin := 0.0
 	for _, l := range g.Layers {
 		for _, n := range l.Nodes {

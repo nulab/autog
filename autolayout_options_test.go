@@ -24,6 +24,7 @@ func TestOptions(t *testing.T) {
 		WithNetworkSimplexBalance(false),
 		WithLayerSpacing(75.5),
 		WithNodeSpacing(10.0),
+		WithBrandesKoepfLayout(2),
 		WithMonitor(monitor.New(nil)),
 	)
 
@@ -36,6 +37,7 @@ func TestOptions(t *testing.T) {
 	assert.False(t, opts.params.NetworkSimplexBalance)
 	assert.Equal(t, 75.5, opts.params.LayerSpacing)
 	assert.Equal(t, 10.0, opts.params.NodeSpacing)
+	assert.Equal(t, 2, opts.params.BrandesKoepfLayout)
 	assert.NotNil(t, opts.params.Monitor)
 }
 
