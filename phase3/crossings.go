@@ -32,6 +32,12 @@ func countCrossings(l1, l2 *graph.Layer) int {
 
 	crosscount := 0
 	for _, n := range nodes {
+		if n == nil {
+			// nil can occur in case of identical edges (same source, same target) because the radix sort
+			// matrix can hold only one item at position (i,j)
+			// identical edges arise from breaking 2-node cycles, like A -> B and B -> A
+			continue
+		}
 		i := n.LayerPos + k
 		tree[i]++
 		for i > 0 {
