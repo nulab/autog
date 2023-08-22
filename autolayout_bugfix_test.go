@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/monitor"
 	"github.com/nulab/autog/phase4"
 	"github.com/stretchr/testify/assert"
 )
@@ -56,6 +57,35 @@ func TestLayoutCrashers(t *testing.T) {
 			})
 			assert.NotPanics(t, func() {
 				g = Layout(g)
+			})
+		})
+
+		t.Run("wrong initialization of flat edges", func(t *testing.T) {
+			g := graph.FromEdgeSlice([][]string{
+				{"gql", "acc"},
+				{"gql", "dia"},
+				{"gql", "edt"},
+				{"gql", "fld"},
+				{"gql", "itg"},
+				{"gql", "ntf"},
+				{"gql", "org"},
+				{"gql", "sub"},
+				{"gql", "spt"},
+				{"gql", "tmp"},
+				{"acc", "lgc"},
+				{"acc", "sub"},
+				{"dia", "acc"},
+				{"dia", "fld"},
+				{"dia", "lgc"},
+				{"dia", "org"},
+				{"dia", "sub"},
+				{"fld", "acc"},
+				{"fld", "dia"},
+				{"fld", "org"},
+				{"fld", "sub"},
+			})
+			assert.NotPanics(t, func() {
+				g = Layout(g, WithMonitor(monitor.NewStdout()))
 			})
 		})
 	})
