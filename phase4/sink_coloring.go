@@ -156,8 +156,8 @@ func placeBlock(g *graph.DGraph, layerMaxLen int, spacing float64, blockmax, blo
 }
 
 func crosses(e, f *graph.Edge) bool {
-	if e.From.Layer != f.From.Layer || e.To.Layer != f.To.Layer {
-		panic("sink coloring: unexpected layer mismatch")
+	if !(e.From.Layer == f.From.Layer && e.To.Layer == f.To.Layer) {
+		return false
 	}
 	etop, ebtm := e.From, e.To
 	ftop, fbtm := f.From, f.To
