@@ -184,7 +184,7 @@ func (p *networkSimplexProcessor) incidentNonTreeEdge(treeNodes graph.NodeSet) *
 		})
 	}
 	if candidate == nil {
-		panic("network simplex: did not find adjacent non-tree edge with min slack")
+		panic("network simplex: did not find adjacent non-tree edge with min slack: make sure the graph is connected")
 	}
 	return candidate
 }
