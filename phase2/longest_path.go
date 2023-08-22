@@ -45,16 +45,3 @@ func followLongestPath(n *graph.Node, height graph.NodeIntMap, nlayers *int) int
 	height[n] = nodeh
 	return nodeh
 }
-
-func fillLayers(g *graph.DGraph) {
-	highest := 0
-	for i := range g.Layers {
-		highest = max(highest, i)
-	}
-	for i := 0; i < highest; i++ {
-		_, ok := g.Layers[i]
-		if !ok {
-			g.Layers[i] = &graph.Layer{Index: i}
-		}
-	}
-}

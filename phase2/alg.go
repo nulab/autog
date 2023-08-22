@@ -26,7 +26,6 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	switch alg {
 	case LongestPath:
 		execLongestPath(g)
-		defer fillLayers(g)
 	case NetworkSimplex:
 		execNetworkSimplex(g, params)
 	default:
@@ -43,4 +42,18 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 		m[n.Layer] = layer
 	}
 	g.Layers = m
+	fillLayers(g)
+}
+
+func fillLayers(g *graph.DGraph) {
+	highest := 0
+	for i := range g.Layers {
+		highest = max(highest, i)
+	}
+	for i := 0; i < highest; i++ {
+		_, ok := g.Layers[i]
+		if !ok {
+			g.Layers[i] = &graph.Layer{Index: i}
+		}
+	}
 }
