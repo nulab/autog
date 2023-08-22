@@ -26,11 +26,37 @@ func TestLayoutCrashers(t *testing.T) {
 			assert.NotPanics(t, func() {
 				g = Layout(g, WithPositioning(phase4.SinkColoring))
 			})
-			assertInvariants(t, g)
 		})
 	})
-}
 
-func assertInvariants(t *testing.T, g *graph.DGraph) {
-	// todo
+	t.Run("phase3 GraphvizDot", func(t *testing.T) {
+		t.Run("identical edge segfault in cross counting", func(t *testing.T) {
+			g := graph.FromEdgeSlice([][]string{
+				{"gql", "acc"},
+				{"gql", "dia"},
+				{"gql", "edt"},
+				{"gql", "fld"},
+				{"gql", "itg"},
+				{"gql", "ntf"},
+				{"gql", "org"},
+				{"gql", "sub"},
+				{"gql", "spt"},
+				{"gql", "tmp"},
+				{"acc", "lgc"},
+				{"acc", "sub"},
+				{"fld", "acc"},
+				{"fld", "dia"},
+				{"fld", "org"},
+				{"fld", "sub"},
+				{"dia", "acc"},
+				{"dia", "fld"},
+				{"dia", "lgc"},
+				{"dia", "org"},
+				{"dia", "sub"},
+			})
+			assert.NotPanics(t, func() {
+				g = Layout(g)
+			})
+		})
+	})
 }
