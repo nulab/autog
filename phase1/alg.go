@@ -18,6 +18,9 @@ func (alg Alg) IsValid() bool {
 
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	removeTwoNodeCycles(g)
+	if !hasCycles(g) {
+		return
+	}
 	switch alg {
 	case Greedy:
 		execGreedy(g)
