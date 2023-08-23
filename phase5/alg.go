@@ -17,6 +17,11 @@ const (
 	// PieceWise computes the start, end and bend points of each edge. Bend point coordinates are where virtual nodes would be.
 	// Edges can be drawn as polylines or with curved elbows if bend points are considered bezier control points.
 	PieceWise
+
+	// Ortho draws edges as piecewise orthogonal segments, i.e. all edges bend at 90 degrees.
+	// Dense graphs look tidier, but it's harder to understand where edges start and finish.
+	// Suitable when there's few sets of edges with the same target node.
+	Ortho
 	_endAlg
 )
 
@@ -30,7 +35,9 @@ func (alg Alg) IsValid() bool {
 	return alg < _endAlg
 }
 
-func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
+// todo: improve code reuse of routing algos
+
+func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	switch alg {
 	case NoRouting:
 		return
@@ -38,6 +45,8 @@ func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
 		execStraightRouting(g)
 	case PieceWise:
 		execPieceWiseRouting(g)
+	case Ortho:
+		execOrthoRouting(g, params)
 	default:
 		panic("routing: unknown alg value")
 	}
