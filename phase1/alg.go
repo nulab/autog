@@ -29,6 +29,9 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	default:
 		panic("cyclebreaking: unknown alg value")
 	}
+	if hasCycles(g) {
+		panic("cyclebreaking: graph is still cyclic")
+	}
 }
 
 func removeTwoNodeCycles(g *graph.DGraph) {
