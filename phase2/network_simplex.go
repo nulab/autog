@@ -315,23 +315,22 @@ func vbalance(g *graph.DGraph) {
 	}
 	for _, n := range g.Nodes {
 		if n.Indeg() == n.Outdeg() {
-			l := n.Layer
+			newl := n.Layer
 
 			span := feasibleSpan(n)
 			// if the node has only flat edges, or in/out-span 1, or is source/sink with span 1, this does nothing
 			// otherwise it may shift the node
-			for i := l - span[0] + 1; i < l+span[1]; i++ {
-				if lsize[i] < lsize[l] {
-					l = i
+			for i := n.Layer - span[0] + 1; i < n.Layer+span[1]; i++ {
+				if lsize[i] < lsize[newl] {
+					newl = i
 				}
 			}
 			// node could've moved back to the original layer
-			if lsize[l] < lsize[n.Layer] {
+			if lsize[newl] < lsize[n.Layer] {
 				lsize[n.Layer]--
-				lsize[l]++
-				n.Layer = l
+				lsize[newl]++
+				n.Layer = newl
 			}
-
 		}
 	}
 }
