@@ -47,10 +47,15 @@ func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph) *graph.DGraph 
 
 	for _, n := range g.Nodes {
 		m := &graph.Node{ID: n.ID}
+		m.W = n.W
+		m.H = n.H
 		p.nodes[m.ID] = m
 		g1.Nodes = append(g1.Nodes, m)
 	}
 	for i, e := range g.Edges {
+		if e.SelfLoops() || e.IsFlat() {
+			continue
+		}
 		ne := &graph.Node{ID: "NE" + strconv.Itoa(i)}
 		p.nodes[ne.ID] = ne
 		g1.Nodes = append(g1.Nodes, ne)
