@@ -361,3 +361,43 @@ func feasibleSpan(n *graph.Node) (span [2]int) {
 	span[1] = minOutSpan
 	return
 }
+
+func (p *networkSimplexProcessor) hbalance(g *graph.DGraph) {
+	for _, e := range g.Edges {
+		if e.IsInSpanningTree && e.CutValue == 0 {
+			f := p.minSlackNonTreeEdge(g.Edges, e)
+			if f == nil {
+				continue
+			}
+			d := slack(f)
+			if d <= 1 {
+				continue
+			}
+			if p.lim[e.From] < p.lim[e.To] {
+				p.rerank(e.From, d/2)
+			} else {
+				p.rerank(e.To, -d/2)
+			}
+		}
+	}
+}
+
+func (p *networkSimplexProcessor) rerank(n *graph.Node, delta int) {
+	n.Layer -= delta
+	for _, e := range n.Out {
+		if !e.IsInSpanningTree {
+			continue
+		}
+		if p.lim[n] < p.lim[e.ConnectedNode(n)] {
+			p.rerank(e.To, delta)
+		}
+	}
+	for _, e := range n.In {
+		if !e.IsInSpanningTree {
+			continue
+		}
+		if p.lim[n] < p.lim[e.ConnectedNode(n)] {
+			p.rerank(e.From, delta)
+		}
+	}
+}
