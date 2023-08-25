@@ -41,6 +41,10 @@ func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 			break
 		}
 		f := p.minSlackNonTreeEdge(g.Edges, e)
+		// todo: figure out why this could be nil
+		if f == nil {
+			break
+		}
 		p.exchange(e, f, g)
 		e = negCutValueTreeEdge(g.Edges)
 		i++
@@ -170,6 +174,7 @@ func tightTree(n *graph.Node, visitedEdges graph.EdgeSet, visitedNodes graph.Nod
 func (p *networkSimplexProcessor) incidentNonTreeEdge(treeNodes graph.NodeSet) *graph.Edge {
 	var minSlack = math.MaxInt
 	var candidate *graph.Edge
+	// todo: range on map non-deterministic
 	for n := range treeNodes {
 		n.VisitEdges(func(e *graph.Edge) {
 			if e.SelfLoops() {
@@ -195,11 +200,24 @@ func (p *networkSimplexProcessor) inHeadComponent(n *graph.Node, e *graph.Edge) 
 	if !e.IsInSpanningTree {
 		panic("network simplex: breaking tree around non-tree edge")
 	}
-	u, _ := p.postorderOf(e)
-	// Note that lim(n) < lim(u) means that n was visited before u in postorder traversal
-	// The first condition alone is not enough because n could belong to a tree branch to the left of e.
-	inTail := p.low[u] <= p.lim[n] && p.lim[n] <= p.lim[u]
-	return !inTail
+	u, v := e.From, e.To
+
+	// this block is copied straight from ELK, including code comments
+	// the conditions can be formalized as (a && b) XOR c
+	if p.low[u] <= p.lim[n] && p.lim[n] <= p.lim[u] &&
+		p.low[v] <= p.lim[n] && p.lim[n] <= p.lim[v] {
+		// node is in a descending path in the DFS-Tree
+		if p.lim[u] < p.lim[v] {
+			// root is in the head component
+			return false
+		}
+		return true
+	}
+	if p.lim[u] < p.lim[v] {
+		// root is in the head component
+		return true
+	}
+	return false
 }
 
 func (p *networkSimplexProcessor) exchange(e, f *graph.Edge, g *graph.DGraph) {
@@ -210,17 +228,13 @@ func (p *networkSimplexProcessor) exchange(e, f *graph.Edge, g *graph.DGraph) {
 		panic("network simplex: exchange: non-tree-edge already in spanning tree")
 	}
 
-	ftail, fhead := p.postorderOf(f)
-
-	d := ftail.Layer - fhead.Layer - e.Delta
-	if !p.inHeadComponent(ftail, e) {
-		d *= -1
-	}
-
-	// adjust the layer of nodes in e's tail component
-	for _, n := range g.Nodes {
-		if !p.inHeadComponent(n, e) {
-			n.Layer += d
+	d := slack(f)
+	if d > 0 {
+		// adjust the layer of nodes in e's tail component
+		for _, n := range g.Nodes {
+			if !p.inHeadComponent(n, e) {
+				n.Layer -= d
+			}
 		}
 	}
 
@@ -250,68 +264,33 @@ func (p *networkSimplexProcessor) postOrderTraversal(n *graph.Node, visited grap
 	return lim + 1
 }
 
-// Gansner et al.:
-// "For each tree edge, [the cut value] is computed by marking the nodes as belonging to the head or tail component,
-// and then performing the sum of the signed weights of all edges whose [source] and [target] nodes are in different components,
-// the sign [of the weight] being negative for those edges going from the head to the tail component."
+// The cut value is defined as x - y where:
+//   - x = sum of the weights of all edges going from the tail to the head component, including the tree edge itself
+//   - y = sum of the weights of all edges from the head to the tail component
 func (p *networkSimplexProcessor) setCutValues(g *graph.DGraph) {
 	// todo naive implementation, optimize
-
-	// The cut value is:
-	// sum of the weights of all edges going from the tail to the head component, including the tree edge itself
-	// minus
-	// sum of the weights of all edges from the head to the tail component.
 	for _, e := range g.Edges {
 		if !e.IsInSpanningTree {
 			continue
 		}
-		th := 0
-		ht := 0
-
-		th += e.Weight // e goes from tail to head by construction
-		// no other tree edge connects different components
+		e.CutValue += e.Weight // e itself goes from tail to head by definition
 
 		for _, f := range g.Edges {
+			// no other tree edge connects different components, otherwise we'd have two paths to e's target
 			if f.IsInSpanningTree {
 				continue
 			}
-			if p.lim[f.To] <= p.lim[e.From] /* f.To is in tail component */ {
-				if p.lim[f.From] >= p.lim[e.To] /* f.From is in head component */ {
-					ht -= e.Weight
-				}
-
-			} else /* f.To is in head component */ {
-				if p.lim[f.From] <= p.lim[e.From] /* f.From is in tail component */ {
-					th += e.Weight
-				}
+			if !p.inHeadComponent(f.From, e) && p.inHeadComponent(f.To, e) {
+				e.CutValue += f.Weight
+			} else if p.inHeadComponent(f.From, e) && !p.inHeadComponent(f.To, e) {
+				e.CutValue -= f.Weight
 			}
 		}
-		e.CutValue = th - ht
 	}
 }
 
 func slack(e *graph.Edge) int {
 	return e.To.Layer - e.From.Layer - e.Delta
-}
-
-// The definition of head and tail in Gansner et al.'s paper are relative to the root of the postorder traversal:
-// after "deleting" the edge e, the head component is the one that contains the root of the tree.
-// Therefore, the direction of the *graph.Edge (From->To) in the source graph doesn't necessarily
-// reflect the direction of the edge in postorder traversal.
-// The postorder direction depends on direction of the inequality between lim(a) and lim(b).
-// Gansner et al. p.219: "For example, if e = (u,v) is a tree edge and vroot is in the head component of the edge (i.e., lim(u) < lim(v)),
-// then a node w is in the tail component of e if and only if low(u) <= lim(w) <= lim(u)".
-//
-// Also, the quote above intuitively means that w is in the tail component if it has u as ancestor in postorder direction.
-//
-// Now, a node u is in the tail component of e if lim(u) < lim(v)
-// so among the *graph.Edge x and y poles, u is whichever of the two has a lower lim()
-func (p *networkSimplexProcessor) postorderOf(e *graph.Edge) (tailNode, headNode *graph.Node) {
-	x, y := e.From, e.To
-	if p.lim[x] < p.lim[y] {
-		return x, y
-	}
-	return y, x
 }
 
 // shifts all layers up so that the lowest layer is 0
