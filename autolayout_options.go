@@ -28,7 +28,7 @@ var defaultOptions = options{
 	params: graph.Params{
 		NetworkSimplexThoroughness:               28,
 		NetworkSimplexMaxIterFactor:              0,
-		NetworkSimplexBalance:                    true,
+		NetworkSimplexBalance:                    1,
 		GraphvizDotMaxIter:                       24,
 		NetworkSimplexAuxiliaryGraphWeightFactor: 4,
 		LayerSpacing:                             150.0,
@@ -76,7 +76,7 @@ func WithNetworkSimplexThoroughness(thoroughness uint) Option {
 	}
 }
 
-func WithNetworkSimplexBalance(balance bool) Option {
+func WithNetworkSimplexBalance(balance int) Option {
 	return func(o *options) {
 		o.params.NetworkSimplexBalance = balance
 	}

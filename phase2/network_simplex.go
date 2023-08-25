@@ -1,7 +1,6 @@
 package phase2
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/nulab/autog/graph"
@@ -47,8 +46,11 @@ func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 		i++
 	}
 	normalize(g)
-	if params.NetworkSimplexBalance {
-		balance(g)
+	switch params.NetworkSimplexBalance {
+	case 1:
+		vbalance(g)
+	case 2:
+		// todo: horizontal balancing used in p4
 	}
 }
 
@@ -327,7 +329,7 @@ func normalize(g *graph.DGraph) {
 }
 
 // nodes are shifted to less crowded layers if the shift preserves feasibility (edge length >= edge delta)
-func balance(g *graph.DGraph) {
+func vbalance(g *graph.DGraph) {
 	lsize := map[int]int{}
 	for _, n := range g.Nodes {
 		lsize[n.Layer]++

@@ -1,6 +1,7 @@
 package phase4
 
 import (
+	"math"
 	"strconv"
 
 	"github.com/nulab/autog/graph"
@@ -8,7 +9,9 @@ import (
 )
 
 type networkSimplexProcessor struct {
-	nodes map[string]*graph.Node
+	nodes            map[string]*graph.Node
+	edgeWeightFactor int
+	nodeSpacing      float64
 }
 
 // Positioning algorithm used in Graphviz Dot and described in:
@@ -19,23 +22,27 @@ type networkSimplexProcessor struct {
 // It constructs an auxiliary graph and runs network simplex on it. The resulting layers are the X coordinates of the main graph.
 func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 	p := &networkSimplexProcessor{
-		nodes: map[string]*graph.Node{},
+		nodes:            map[string]*graph.Node{},
+		edgeWeightFactor: params.NetworkSimplexAuxiliaryGraphWeightFactor,
+		nodeSpacing:      params.NodeSpacing,
 	}
-	aux := p.auxiliaryGraph(g, params.NetworkSimplexAuxiliaryGraphWeightFactor)
+
+	// todo: if there are flat edges, dot adds auxiliary edges
+	aux := p.auxiliaryGraph(g)
 
 	params.NetworkSimplexMaxIterFactor = len(g.Nodes)
-	params.NetworkSimplexBalance = false
+	params.NetworkSimplexBalance = 2
 	phase2.NetworkSimplex.Process(aux, params)
 
 	for _, l := range g.Layers {
-		for i, n := range l.Nodes {
+		for _, n := range l.Nodes {
 			l.H = max(l.H, n.H)
-			n.X = float64(p.nodes[n.ID].Layer) + (params.NodeSpacing * float64(i))
+			n.X = float64(p.nodes[n.ID].Layer)
 		}
 	}
 }
 
-func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph, edgeWeightFactor int) *graph.DGraph {
+func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph) *graph.DGraph {
 	g1 := &graph.DGraph{}
 
 	for _, n := range g.Nodes {
@@ -48,7 +55,7 @@ func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph, edgeWeightFact
 		p.nodes[ne.ID] = ne
 		g1.Nodes = append(g1.Nodes, ne)
 
-		weight := e.Weight * omega(e) * edgeWeightFactor
+		weight := e.Weight * omega(e) * p.edgeWeightFactor
 
 		u, v := p.nodes[e.From.ID], p.nodes[e.To.ID]
 
@@ -69,7 +76,7 @@ func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph, edgeWeightFact
 			v := p.nodes[l.Nodes[i].ID]
 			w := p.nodes[l.Nodes[i+1].ID]
 			f := graph.NewEdge(v, w, 0)
-			f.Delta = int(rho(v, w)) // probably not correct, conversion to int amounts to a floor()
+			f.Delta = int(math.Round(p.distCenterPoints(v, w)))
 			g1.Edges = append(g1.Edges, f)
 
 			v.Out = append(v.Out, f)
@@ -79,8 +86,8 @@ func (p *networkSimplexProcessor) auxiliaryGraph(g *graph.DGraph, edgeWeightFact
 	return g1
 }
 
-func rho(a, b *graph.Node) float64 {
-	return (a.W+b.W)/2 + 100 // 100 should be default node spacing?
+func (p *networkSimplexProcessor) distCenterPoints(a, b *graph.Node) float64 {
+	return (a.W / 2) + (b.W / 2) + p.nodeSpacing
 }
 
 // todo this could be merged with Edge.Type

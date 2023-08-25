@@ -14,7 +14,7 @@ type Params struct {
 	// Otherwise, ignored.
 	NetworkSimplexMaxIterFactor int
 	// If true, balances the network simplex layering by moving nodes to less crowded layers.
-	NetworkSimplexBalance bool
+	NetworkSimplexBalance int // todo: make enum
 
 	// ---- phase3 options ---
 
