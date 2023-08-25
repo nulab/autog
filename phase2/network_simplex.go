@@ -1,15 +1,15 @@
 package phase2
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/nulab/autog/graph"
 )
 
 type networkSimplexProcessor struct {
-	poIndex int              // node post-order traversal index
-	lim     graph.NodeIntMap // Gansner et al.: number from a root node in spanning tree postorder traversal
-	low     graph.NodeIntMap // Gansner et al.: lowest postorder traversal number among nodes reachable from the input node
+	lim graph.NodeIntMap // Gansner et al.: number from a root node in spanning tree postorder traversal
+	low graph.NodeIntMap // Gansner et al.: lowest postorder traversal number among nodes reachable from the input node
 }
 
 // todo: exec alg on single connected components?
@@ -106,8 +106,8 @@ func (p *networkSimplexProcessor) feasibleTree(g *graph.DGraph) {
 			n.Layer += d
 		}
 	}
-	p.poIndex = 1
-	p.postOrderTraversal(g.Nodes[0], graph.EdgeSet{})
+
+	p.postOrderTraversal(g.Nodes[0], graph.EdgeSet{}, 1)
 	p.setCutValues(g)
 }
 
@@ -170,8 +170,8 @@ func (p *networkSimplexProcessor) incidentNonTreeEdge(treeNodes graph.NodeSet) *
 	var candidate *graph.Edge
 	for n := range treeNodes {
 		n.VisitEdges(func(e *graph.Edge) {
-			if e.ConnectedNode(n) == n {
-				return // avoid self-loops
+			if e.SelfLoops() {
+				return
 			}
 			if e.IsInSpanningTree || treeNodes[e.ConnectedNode(n)] {
 				return
@@ -227,8 +227,7 @@ func (p *networkSimplexProcessor) exchange(e, f *graph.Edge, g *graph.DGraph) {
 	f.IsInSpanningTree = true
 
 	// recalculate the postorder numbers and edges' cut values
-	p.poIndex = 1
-	p.postOrderTraversal(g.Nodes[0], graph.EdgeSet{})
+	p.postOrderTraversal(g.Nodes[0], graph.EdgeSet{}, 1)
 	p.setCutValues(g)
 }
 
@@ -236,21 +235,17 @@ func (p *networkSimplexProcessor) exchange(e, f *graph.Edge, g *graph.DGraph) {
 // Same as a topological sorting; in addition, each node is mapped to a number low(n)
 // which is the lowest postorder number in the subtree rooted in n.
 // The root node will have low(n) = 1 and lim(n) = |V|; leaf nodes will have lim(n) = low(n).
-func (p *networkSimplexProcessor) postOrderTraversal(n *graph.Node, visited graph.EdgeSet) int {
-	if len(visited) == 0 && p.poIndex != 1 {
-		panic("network simplex: must initialize postorder ordinal number")
-	}
-	lowest := math.MaxInt
+func (p *networkSimplexProcessor) postOrderTraversal(n *graph.Node, visited graph.EdgeSet, low int) int {
+	p.low[n] = low
+	lim := low
 	n.VisitEdges(func(e *graph.Edge) {
 		if e.IsInSpanningTree && !visited[e] {
 			visited[e] = true
-			lowest = min(lowest, p.postOrderTraversal(e.ConnectedNode(n), visited))
+			lim = p.postOrderTraversal(e.ConnectedNode(n), visited, lim)
 		}
 	})
-	p.lim[n] = p.poIndex
-	p.low[n] = min(lowest, p.poIndex)
-	p.poIndex++
-	return p.low[n]
+	p.lim[n] = lim
+	return lim + 1
 }
 
 // Gansner et al.:
