@@ -14,8 +14,6 @@ const (
 	// Works best for tree-like graphs with no back-edges.
 	VerticalAlign
 
-	MedianAlign
-
 	// BrandesKoepf aligns nodes based on blocks and classes in O(V+E).
 	// It results in a compact drawing but with less long straight edges.
 	BrandesKoepf
@@ -43,8 +41,6 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 		// no-op, but assign Y coordinates
 	case VerticalAlign:
 		execVerticalAlign(g, params)
-	case MedianAlign:
-		execMedianAlign(g, params)
 	case BrandesKoepf:
 		execBrandesKoepf(g, params)
 	case NetworkSimplex:
