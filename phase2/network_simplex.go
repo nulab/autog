@@ -310,22 +310,31 @@ func normalize(g *graph.DGraph) {
 // nodes are shifted to less crowded layers if the shift preserves feasibility (edge length >= edge delta)
 func vbalance(g *graph.DGraph) {
 	lsize := map[int]int{}
+	lmax := 0
 	for _, n := range g.Nodes {
 		lsize[n.Layer]++
+		lmax = max(lmax, n.Layer)
 	}
+
 	for _, n := range g.Nodes {
 		if n.Indeg() == n.Outdeg() {
-			newl := n.Layer
+			low := 0
+			high := lmax
+			for _, e := range n.In {
+				low = max(low, e.From.Layer+e.Delta)
+			}
+			for _, e := range n.Out {
+				high = min(high, e.To.Layer-e.Delta)
+			}
+			newl := low
 
-			span := feasibleSpan(n)
 			// if the node has only flat edges, or in/out-span 1, or is source/sink with span 1, this does nothing
 			// otherwise it may shift the node
-			for i := n.Layer - span[0] + 1; i < n.Layer+span[1]; i++ {
+			for i := low + 1; i <= high; i++ {
 				if lsize[i] < lsize[newl] {
 					newl = i
 				}
 			}
-			// node could've moved back to the original layer
 			if lsize[newl] < lsize[n.Layer] {
 				lsize[n.Layer]--
 				lsize[newl]++
@@ -333,32 +342,6 @@ func vbalance(g *graph.DGraph) {
 			}
 		}
 	}
-}
-
-func feasibleSpan(n *graph.Node) (span [2]int) {
-	minInSpan := math.MaxInt
-	minOutSpan := math.MaxInt
-
-	n.VisitEdges(func(e *graph.Edge) {
-		edgespan := e.To.Layer - e.From.Layer
-		switch {
-		case e.To == n && edgespan < minInSpan:
-			minInSpan = edgespan
-
-		case e.From == n && edgespan < minOutSpan:
-			minOutSpan = edgespan
-		}
-	})
-	if minInSpan == math.MaxInt {
-		minInSpan = -1
-	}
-	if minOutSpan == math.MaxInt {
-		minOutSpan = -1
-	}
-
-	span[0] = minInSpan
-	span[1] = minOutSpan
-	return
 }
 
 func (p *networkSimplexProcessor) hbalance(g *graph.DGraph) {
