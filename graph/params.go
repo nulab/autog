@@ -1,7 +1,5 @@
 package graph
 
-import "github.com/nulab/autog/monitor"
-
 // Params holds parameters and options that are used by the layout algorithms
 // and don't strictly belong to the graph itself
 type Params struct {
@@ -34,9 +32,4 @@ type Params struct {
 	// result in different aligmnent priorities, and therefore in different positioning.
 	// In case the inequality 0 <= v < 4 doesn't hold, the default balanced layout is used instead.
 	BrandesKoepfLayout int
-
-	// ---- other options ---
-
-	// Algorithm monitor, receives traces and logs during algorithm execution.
-	Monitor monitor.Monitor
 }

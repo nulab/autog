@@ -3,7 +3,6 @@ package autog
 import (
 	"testing"
 
-	"github.com/nulab/autog/monitor"
 	"github.com/nulab/autog/phase1"
 	"github.com/nulab/autog/phase2"
 	"github.com/nulab/autog/phase3"
@@ -25,7 +24,6 @@ func TestOptions(t *testing.T) {
 		WithLayerSpacing(75.5),
 		WithNodeSpacing(10.0),
 		WithBrandesKoepfLayout(2),
-		WithMonitor(monitor.New(nil)),
 	)
 
 	assert.Equal(t, phase1.DepthFirst, opts.p1)
@@ -38,7 +36,7 @@ func TestOptions(t *testing.T) {
 	assert.Equal(t, 75.5, opts.params.LayerSpacing)
 	assert.Equal(t, 10.0, opts.params.NodeSpacing)
 	assert.Equal(t, 2, opts.params.BrandesKoepfLayout)
-	assert.NotNil(t, opts.params.Monitor)
+	assert.Nil(t, opts.monitor)
 }
 
 func testOptions(opts ...Option) options {

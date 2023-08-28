@@ -2,7 +2,7 @@ package autog
 
 import (
 	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/monitor"
+	imonitor "github.com/nulab/autog/internal/monitor"
 	cbreaking "github.com/nulab/autog/phase1"
 	layering "github.com/nulab/autog/phase2"
 	ordering "github.com/nulab/autog/phase3"
@@ -11,12 +11,13 @@ import (
 )
 
 type options struct {
-	p1     cbreaking.Alg
-	p2     layering.Alg
-	p3     ordering.Alg
-	p4     positioning.Alg
-	p5     routing.Alg
-	params graph.Params
+	p1      cbreaking.Alg
+	p2      layering.Alg
+	p3      ordering.Alg
+	p4      positioning.Alg
+	p5      routing.Alg
+	params  graph.Params
+	monitor imonitor.Monitor
 }
 
 var defaultOptions = options{
@@ -34,8 +35,8 @@ var defaultOptions = options{
 		LayerSpacing:                             150.0,
 		NodeSpacing:                              60.0,
 		BrandesKoepfLayout:                       -1,
-		Monitor:                                  monitor.NewNoop(),
 	},
+	monitor: nil,
 }
 
 type Option func(*options)
@@ -100,8 +101,8 @@ func WithBrandesKoepfLayout(i int) Option {
 	}
 }
 
-func WithMonitor(monitor monitor.Monitor) Option {
+func WithMonitor(monitor imonitor.Monitor) Option {
 	return func(o *options) {
-		o.params.Monitor = monitor
+		o.monitor = monitor
 	}
 }
