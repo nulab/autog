@@ -167,7 +167,7 @@ func TestLayoutCrashers(t *testing.T) {
 					g,
 					WithPositioning(0),
 					WithEdgeRouting(0),
-					WithMonitor(imonitor.NewFilteredChan(c, imonitor.MatchAll(3, "graphviz dot", "crossings"))),
+					WithMonitor(imonitor.NewFilteredChan(c, imonitor.MatchAll(3, "gvdot", "crossings"))),
 				)
 			})
 
