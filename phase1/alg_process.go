@@ -5,6 +5,7 @@ import (
 	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
+// Process runs this cycle breaking algorithm on the input graph. The graph must be connected.
 func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
 	imonitor.PrefixFor(alg)
 	// preprocessing
