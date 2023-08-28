@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/nulab/autog/graph"
+	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
 type initDirection uint8
@@ -35,8 +36,6 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 	// insert virtual nodes so that edges with length >1 have length 1
 	g.BreakLongEdges()
 
-	p3monitor := phase3monitor{"graphvizdot", params.Monitor}
-
 	maxiter := int(params.GraphvizDotMaxIter)
 	fixedPositions := initFixedPositions(g.Edges)
 
@@ -53,7 +52,7 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 		bestx, bestp = bestx_btm, bestpos_btm
 	}
 
-	p3monitor.Send("crossings", bestx)
+	imonitor.Log("crossings", bestx)
 
 	// reset the best node positions using the saved bestp
 	for _, n := range g.Nodes {
