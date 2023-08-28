@@ -1,9 +1,11 @@
-package autog
+package processor
 
 import (
 	"github.com/nulab/autog/graph"
 )
 
-type processor interface {
+type P interface {
+	Phase() int
+	String() string
 	Process(*graph.DGraph, graph.Params)
 }
