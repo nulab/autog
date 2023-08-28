@@ -1,10 +1,5 @@
 package phase3
 
-import (
-	"github.com/nulab/autog/graph"
-	imonitor "github.com/nulab/autog/internal/monitor"
-)
-
 type Alg uint8
 
 func (alg Alg) Phase() int {
@@ -30,16 +25,4 @@ func (alg Alg) String() (s string) {
 		s = "<invalid>"
 	}
 	return
-}
-
-func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
-	imonitor.PrefixFor(alg)
-	switch alg {
-	case NoOrdering:
-		return
-	case GraphvizDot:
-		execGraphvizDot(g, params)
-	default:
-		panic("ordering: unknown alg value")
-	}
 }
