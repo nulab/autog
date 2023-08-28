@@ -2,25 +2,38 @@ package phase3
 
 import (
 	"github.com/nulab/autog/graph"
+	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
 type Alg uint8
+
+func (alg Alg) Phase() int {
+	return 3
+}
 
 const (
 	// NoOrdering does nothing. Nodes won't be reordered in their layers to minimize edge crossings.
 	NoOrdering Alg = iota
 
 	// GraphvizDot implements the mincross heuristic used in dot. It attempts to minimize bilayer edge crossings
-	// by sweeping up and down the layers and applying ordering nodes based on their weighted medians.
+	// by sweeping up and down the layers and ordering nodes based on their weighted medians.
 	GraphvizDot
-	_endAlg
 )
 
-func (alg Alg) IsValid() bool {
-	return alg < _endAlg
+func (alg Alg) String() (s string) {
+	switch alg {
+	case NoOrdering:
+		s = "noop"
+	case GraphvizDot:
+		s = "graphviz dot"
+	default:
+		s = "<invalid>"
+	}
+	return
 }
 
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
+	imonitor.PrefixFor(alg)
 	switch alg {
 	case NoOrdering:
 		return

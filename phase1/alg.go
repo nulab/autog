@@ -2,21 +2,35 @@ package phase1
 
 import (
 	"github.com/nulab/autog/graph"
+	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
 type Alg uint8
 
+func (alg Alg) Phase() int {
+	return 1
+}
+
 const (
 	Greedy Alg = iota // todo: document that this is non-deterministic
 	DepthFirst
-	_endAlg
 )
 
-func (alg Alg) IsValid() bool {
-	return alg < _endAlg
+func (alg Alg) String() (s string) {
+	switch alg {
+	case Greedy:
+		s = "greedy"
+	case DepthFirst:
+		s = "dfs"
+	default:
+		s = "<invalid>"
+	}
+	return
 }
 
-func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
+func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
+	imonitor.PrefixFor(alg)
+	// preprocessing
 	removeTwoNodeCycles(g)
 	if !hasCycles(g) {
 		return
@@ -29,6 +43,7 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	default:
 		panic("cyclebreaking: unknown alg value")
 	}
+
 	if hasCycles(g) {
 		panic("cyclebreaking: graph is still cyclic")
 	}

@@ -6,6 +6,14 @@ import (
 
 type postProcessor uint8
 
+func (p postProcessor) Phase() int {
+	return 1
+}
+
+func (p postProcessor) String() string {
+	return "restore edges"
+}
+
 const (
 	RestoreEdges postProcessor = iota
 )

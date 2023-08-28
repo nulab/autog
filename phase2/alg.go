@@ -2,9 +2,14 @@ package phase2
 
 import (
 	"github.com/nulab/autog/graph"
+	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
 type Alg uint8
+
+func (alg Alg) Phase() int {
+	return 2
+}
 
 const (
 	// LongestPath computes a partition of the graph in layers by traversing nodes in topological order.
@@ -15,14 +20,22 @@ const (
 	// NetworkSimplex computes a partition of the graph in layers by minimizing total edge length.
 	// It results in few virtual nodes and usually no flat edges, but runs in Θ(VE). Worst case seems to be O(V^2*E)
 	NetworkSimplex
-	_endAlg
 )
 
-func (alg Alg) IsValid() bool {
-	return alg < _endAlg
+func (alg Alg) String() (s string) {
+	switch alg {
+	case LongestPath:
+		s = "longest path"
+	case NetworkSimplex:
+		s = "network simplex"
+	default:
+		s = "<invalid>"
+	}
+	return
 }
 
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
+	imonitor.PrefixFor(alg)
 	switch alg {
 	case LongestPath:
 		execLongestPath(g)

@@ -2,9 +2,34 @@ package phase4
 
 import (
 	"github.com/nulab/autog/graph"
+	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
 type Alg uint8
+
+func (alg Alg) Phase() int {
+	return 4
+}
+
+func (alg Alg) String() (s string) {
+	switch alg {
+	case NoPositioning:
+		s = "noop"
+	case VerticalAlign:
+		s = "vertical align"
+	case BrandesKoepf:
+		s = "b&k"
+	case NetworkSimplex:
+		s = "network simplex"
+	case SinkColoring:
+		s = "sink coloring"
+	case PackRight:
+		s = "pack right"
+	default:
+		s = "<invalid>"
+	}
+	return
+}
 
 const (
 	// NoPositioning does nothing. Nodes won't be assigned any coordinates.
@@ -28,14 +53,10 @@ const (
 
 	// PackRight aligns nodes to the right.
 	PackRight
-	_endAlg
 )
 
-func (alg Alg) IsValid() bool {
-	return alg < _endAlg
-}
-
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
+	imonitor.PrefixFor(alg)
 	switch alg {
 	case NoPositioning:
 		// no-op, but assign Y coordinates

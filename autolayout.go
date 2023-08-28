@@ -2,6 +2,8 @@ package autog
 
 import (
 	"github.com/nulab/autog/graph"
+	imonitor "github.com/nulab/autog/internal/monitor"
+	"github.com/nulab/autog/internal/processor"
 	"github.com/nulab/autog/phase1"
 )
 
@@ -16,9 +18,11 @@ func Layout(graph *graph.DGraph, opts ...Option) *graph.DGraph {
 	for _, opt := range opts {
 		opt(&layoutOpts)
 	}
-	defer layoutOpts.params.Monitor.Close()
 
-	pipeline := [...]processor{
+	imonitor.Set(layoutOpts.monitor)
+	defer imonitor.Reset()
+
+	pipeline := [...]processor.P{
 		layoutOpts.p1, // cycle breaking
 		layoutOpts.p2, // layering
 		layoutOpts.p3, // ordering

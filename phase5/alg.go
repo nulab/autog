@@ -2,9 +2,30 @@ package phase5
 
 import (
 	"github.com/nulab/autog/graph"
+	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
 type Alg uint8
+
+func (alg Alg) Phase() int {
+	return 5
+}
+
+func (alg Alg) String() (s string) {
+	switch alg {
+	case NoRouting:
+		s = "noop"
+	case Straight:
+		s = "straight"
+	case PieceWise:
+		s = "piecewise"
+	case Ortho:
+		s = "ortho"
+	default:
+		s = "<invalid>"
+	}
+	return s
+}
 
 const (
 	// NoRouting does not compute edge points.
@@ -22,7 +43,6 @@ const (
 	// Dense graphs look tidier, but it's harder to understand where edges start and finish.
 	// Suitable when there's few sets of edges with the same target node.
 	Ortho
-	_endAlg
 )
 
 const (
@@ -31,13 +51,10 @@ const (
 	edgeTypeBothVirtual
 )
 
-func (alg Alg) IsValid() bool {
-	return alg < _endAlg
-}
-
 // todo: improve code reuse of routing algos
 
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
+	imonitor.PrefixFor(alg)
 	switch alg {
 	case NoRouting:
 		return
