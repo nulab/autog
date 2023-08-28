@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/monitor"
+	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/phase4"
 	"github.com/stretchr/testify/assert"
 )
@@ -161,18 +161,17 @@ func TestLayoutCrashers(t *testing.T) {
 				{"23", "T1"},
 			})
 
-			c := make(chan monitor.Log, 1)
+			c := make(chan any, 1)
 			assert.NotPanics(t, func() {
 				g = Layout(
 					g,
 					WithPositioning(0),
 					WithEdgeRouting(0),
-					WithMonitor(monitor.New(c)),
+					WithMonitor(imonitor.NewFilteredChan(c, imonitor.MatchAll(3, "graphviz dot", "crossings"))),
 				)
 			})
 
-			l := <-c
-			assert.Equal(t, 46, l.Value.AsInt())
+			assert.Equal(t, 46, <-c)
 
 			want := expectedLayersAbstract()
 			for _, n := range g.Nodes {
