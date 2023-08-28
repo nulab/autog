@@ -237,6 +237,9 @@ func medianOf(adpos []int) float64 {
 	default:
 		left := fpos[mid-1] - fpos[0]
 		right := fpos[len(fpos)-1] - fpos[mid]
+		if left == right {
+			return (fpos[mid-1] + fpos[mid]) / 2
+		}
 		return (fpos[mid-1]*right + fpos[mid]*left) / (left + right)
 	}
 }
@@ -259,24 +262,47 @@ func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*gr
 }
 
 func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians graph.NodeFloatMap) {
-	sort.Slice(nodes, func(i, j int) bool {
-		a, aitr := p.fixedPositions.head(nodes[i])
-		b, bitr := p.fixedPositions.head(nodes[j])
-
-		if (aitr != 0 || bitr != 0) && a == b {
-			return aitr < bitr
+	ep := len(nodes) // end pointer
+	// back iteration slightly more efficient because it compares the iteration variable to zero
+	for iter := len(nodes) - 1; iter >= 0; iter-- {
+		lp := 0 // left pointer
+		rp := 0 // right pointer
+		for lp < ep {
+			for lp < ep && medians[nodes[lp]] == -1 {
+				lp++
+			}
+			if lp >= ep {
+				break
+			}
+			canSwap := true
+			for rp = lp + 1; rp < ep; rp++ {
+				// todo: this probably isn't enough to handle flat edges
+				if h, i := p.fixedPositions.head(nodes[rp]); i > 0 && h == nodes[lp] {
+					canSwap = false
+					break
+				}
+				if medians[nodes[rp]] >= 0 {
+					break
+				}
+			}
+			if rp >= ep {
+				// no swap candidate
+				break
+			}
+			if canSwap {
+				ml := medians[nodes[lp]]
+				mr := medians[nodes[rp]]
+				if ml > mr || (ml == mr && p.flipEqual) {
+					p.swap(nodes[lp], nodes[rp])
+					nodes[lp], nodes[rp] = nodes[rp], nodes[lp]
+				}
+			}
+			lp = rp
 		}
-		a_before_b := p.getPos(a) < p.getPos(b)
-		b_before_a := p.getPos(b) < p.getPos(a)
-		afixed := medians[a] == -1 && a_before_b
-		bfixed := medians[b] == -1 && b_before_a
-
-		flipIfNotInClosure := p.flipEqual && aitr == 0 && bitr == 0 && medians[a] == medians[b] && b_before_a
-
-		return afixed || bfixed || medians[a] < medians[b] || flipIfNotInClosure
-	})
-	for i, n := range nodes {
-		p.setPos(n, i)
+		// todo: hasfixed in dot is true if there are flat edges in this layer
+		if /*!hasfixed &&*/ !p.flipEqual {
+			ep--
+		}
 	}
 }
 
