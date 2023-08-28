@@ -5,6 +5,7 @@ import (
 	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
+// Process runs this positioning algorithm on the input graph. The graph nodes must be layered and ordered.
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	imonitor.PrefixFor(alg)
 	switch alg {
