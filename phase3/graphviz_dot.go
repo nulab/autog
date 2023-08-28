@@ -107,6 +107,9 @@ func graphvizRun(g *graph.DGraph, params graphvizRunParams) (int, graph.NodeIntM
 
 	bestx := crossings(layers)
 	bestp := p.positions.Clone()
+	if bestx == 0 {
+		return bestx, bestp
+	}
 
 	for i := 0; i < params.maxiter; i++ {
 		// Depending on the parity of the current iteration
