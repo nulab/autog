@@ -10,7 +10,7 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	imonitor.PrefixFor(alg)
 	switch alg {
 	case NoPositioning:
-		// no-op, but assign Y coordinates
+		return
 	case VerticalAlign:
 		execVerticalAlign(g, params)
 	case BrandesKoepf:
