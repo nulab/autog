@@ -30,4 +30,6 @@ const (
 	// NetworkSimplex computes a partition of the graph in layers by minimizing total edge length.
 	// It results in few virtual nodes and usually no flat edges, but runs in Θ(VE). Worst case seems to be O(V^2*E)
 	NetworkSimplex
+
+	_endAlg
 )
