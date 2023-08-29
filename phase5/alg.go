@@ -38,4 +38,6 @@ const (
 	// Dense graphs look tidier, but it's harder to understand where edges start and finish.
 	// Suitable when there's few sets of edges with the same target node.
 	Ortho
+
+	_endAlg
 )
