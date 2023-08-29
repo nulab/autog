@@ -1,4 +1,28 @@
 
+v0.3.0 / 2023-08-29
+==================
+
+  * [p5] Add alg unit test
+  * [p4] Add alg unit test
+  * [p3] Add alg unit test
+  * [p2] Add alg unit test
+  * [p1] Add alg unit test
+  * [p1] Document exported methods and consts
+  * [p2] Document exported methods
+  * [p3] Document exported methods
+  * [p4-noop] Don't assign Y coordinates to match documentation
+  * [p4] Document exported methods
+  * Move all algs Process methods into separate files
+  * [monitor] Add monitor helpers for unit tests
+  * Implement processor.P interface with all algs to set monitor prefixes
+  * Move monitor option out of graph params
+  * [monitor] Move monitor to internal package and simplify API
+  * Move processor interface into internal package
+  * [p3-graphviz] Fix sorting of -1 values in wmedian
+  * [p3-graphviz] Return early if crossings is zero after init
+  * [p2-nsimplex] Improve clarity of feasible span in vbalance
+  * [p2-nsimplex] Fix vertical balancing incorrectly reusing updated var in loop stop condition
+
 v0.2.2 / 2023-08-25
 ==================
 
