@@ -28,4 +28,6 @@ const (
 	// DepthFirst removes cycles using the classical DFS strategy. It gives acceptable results in a short time, but the feedback arc set
 	// may be larger compared to the greedy heuristic. It is deterministic.
 	DepthFirst
+
+	_endAlg
 )
