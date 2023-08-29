@@ -202,22 +202,21 @@ func (p *networkSimplexProcessor) inHeadComponent(n *graph.Node, e *graph.Edge) 
 	}
 	u, v := e.From, e.To
 
-	// this block is copied straight from ELK, including code comments
-	// the conditions can be formalized as (a && b) XOR c
-	if p.low[u] <= p.lim[n] && p.lim[n] <= p.lim[u] &&
-		p.low[v] <= p.lim[n] && p.lim[n] <= p.lim[v] {
-		// node is in a descending path in the DFS-Tree
-		if p.lim[u] < p.lim[v] {
-			// root is in the head component
+	// the following boolean logic follows Graphviz's paper:
+	// "For example, if e = (u,v) is a tree edge and vroot is in the head component of the edge (i.e., lim(u) < lim(v)),
+	// then a node w is in the tail component of e if and only if low(u) ≤ lim(w) ≤ lim(u)."
+	if p.lim[u] < p.lim[v] {
+		if p.low[u] <= p.lim[n] && p.lim[n] <= p.lim[u] {
+			// this inequality means that n is in the subtree rooted in u;
+			// because of e's direction, it also implies that n is in the subtree rooted in v
 			return false
 		}
 		return true
 	}
-	if p.lim[u] < p.lim[v] {
-		// root is in the head component
-		return true
-	}
-	return false
+	// else vroot is in the tail component and v is lower than u in the DFS tree
+	// if n is in a subtree rooted in v, it is also in a subtree rooted in u
+	// hence it's in the head component
+	return p.low[v] <= p.lim[n] && p.lim[n] <= p.lim[v]
 }
 
 func (p *networkSimplexProcessor) exchange(e, f *graph.Edge, g *graph.DGraph) {
