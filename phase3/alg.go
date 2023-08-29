@@ -28,4 +28,6 @@ const (
 	// GraphvizDot implements the mincross heuristic used in dot. It attempts to minimize bilayer edge crossings
 	// by sweeping up and down the layers and ordering nodes based on their weighted medians.
 	GraphvizDot
+
+	_endAlg
 )
