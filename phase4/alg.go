@@ -51,4 +51,6 @@ const (
 
 	// PackRight aligns nodes to the right.
 	PackRight
+
+	_endAlg
 )
