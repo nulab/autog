@@ -1,3 +1,5 @@
+//go:build unit
+
 package testfiles
 
 // This file contains graph adjancency lists used in regression tests
@@ -61,7 +63,7 @@ var cacooArch2 = [][]string{
 	{"fld", "sub"},
 }
 
-var dotAbstract = [][]string{
+var DotAbstract = [][]string{
 	{"S24", "27"},
 	{"S24", "25"},
 	{"S1", "10"},
