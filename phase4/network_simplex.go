@@ -30,9 +30,14 @@ func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 	// todo: if there are flat edges, dot adds auxiliary edges
 	aux := p.auxiliaryGraph(g)
 
-	params.NetworkSimplexMaxIterFactor = len(g.Nodes)
-	params.NetworkSimplexBalance = 2
-	phase2.NetworkSimplex.Process(aux, params)
+	phase2.NetworkSimplex.Process(
+		aux,
+		graph.Params{
+			NetworkSimplexThoroughness:  params.NetworkSimplexThoroughness,
+			NetworkSimplexMaxIterFactor: len(g.Nodes),
+			NetworkSimplexBalance:       graph.OptionNsBalanceH,
+		},
+	)
 
 	for _, l := range g.Layers {
 		for _, n := range l.Nodes {

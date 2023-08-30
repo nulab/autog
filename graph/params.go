@@ -1,5 +1,15 @@
 package graph
 
+// OptionNsBalance controls which balancing strategy to use in the network simplex layerer.
+type OptionNsBalance uint8
+
+const (
+	// OptionNsBalanceV represents vertical balancing in network simplex solver. Default value used in phase 2.
+	OptionNsBalanceV OptionNsBalance = iota + 1
+	// OptionNsBalanceH represents horizontal balancing in network simplex solver. Used in phase 4 NetworkSimplex positioner.
+	OptionNsBalanceH
+)
+
 // Params holds parameters and options that are used by the layout algorithms
 // and don't strictly belong to the graph itself
 type Params struct {
@@ -11,8 +21,8 @@ type Params struct {
 	// If positive, factor by which thoroughness is multiplied to determine the maximum number of iterations.
 	// Otherwise, ignored.
 	NetworkSimplexMaxIterFactor int
-	// If true, balances the network simplex layering by moving nodes to less crowded layers.
-	NetworkSimplexBalance int // todo: make enum
+	// Controls which balancing strategy to use in the network simplex layering by moving nodes to less crowded layers.
+	NetworkSimplexBalance OptionNsBalance
 
 	// ---- phase3 options ---
 

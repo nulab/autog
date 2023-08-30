@@ -3,6 +3,7 @@ package autog
 import (
 	"testing"
 
+	"github.com/nulab/autog/graph"
 	"github.com/nulab/autog/phase1"
 	"github.com/nulab/autog/phase2"
 	"github.com/nulab/autog/phase3"
@@ -20,7 +21,7 @@ func TestOptions(t *testing.T) {
 		WithPositioning(phase4.VerticalAlign),
 		WithEdgeRouting(phase5.Straight),
 		WithNetworkSimplexThoroughness(30),
-		WithNetworkSimplexBalance(0),
+		WithNetworkSimplexBalance(graph.OptionNsBalanceH),
 		WithLayerSpacing(75.5),
 		WithNodeSpacing(10.0),
 		WithBrandesKoepfLayout(2),
@@ -32,7 +33,7 @@ func TestOptions(t *testing.T) {
 	assert.Equal(t, phase4.VerticalAlign, opts.p4)
 	assert.Equal(t, phase5.Straight, opts.p5)
 	assert.Equal(t, uint(30), opts.params.NetworkSimplexThoroughness)
-	assert.Equal(t, 0, opts.params.NetworkSimplexBalance)
+	assert.Equal(t, graph.OptionNsBalanceH, opts.params.NetworkSimplexBalance)
 	assert.Equal(t, 75.5, opts.params.LayerSpacing)
 	assert.Equal(t, 10.0, opts.params.NodeSpacing)
 	assert.Equal(t, 2, opts.params.BrandesKoepfLayout)
