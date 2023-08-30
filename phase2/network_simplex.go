@@ -54,7 +54,7 @@ func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 	case 1:
 		vbalance(g)
 	case 2:
-		// todo: horizontal balancing used in p4
+		p.hbalance(g)
 	}
 }
 
@@ -113,7 +113,7 @@ func (p *networkSimplexProcessor) feasibleTree(g *graph.DGraph) {
 		}
 	}
 
-	p.postOrderTraversal(g.Nodes[0], graph.EdgeSet{}, 1)
+	p.setStreeValues(g.Nodes[0])
 	p.setCutValues(g)
 }
 
@@ -243,21 +243,27 @@ func (p *networkSimplexProcessor) exchange(e, f *graph.Edge, g *graph.DGraph) {
 	f.IsInSpanningTree = true
 
 	// recalculate the postorder numbers and edges' cut values
-	p.postOrderTraversal(g.Nodes[0], graph.EdgeSet{}, 1)
+	p.setStreeValues(g.Nodes[0])
 	p.setCutValues(g)
+}
+
+func (p *networkSimplexProcessor) setStreeValues(n *graph.Node) {
+	clear(p.lim)
+	clear(p.low)
+	p.walkStreeDfs(n, graph.EdgeSet{}, 1)
 }
 
 // Visits the nodes of the spanning tree in postorder traversal, assigning increasing indices.
 // Same as a topological sorting; in addition, each node is mapped to a number low(n)
 // which is the lowest postorder number in the subtree rooted in n.
 // The root node will have low(n) = 1 and lim(n) = |V|; leaf nodes will have lim(n) = low(n).
-func (p *networkSimplexProcessor) postOrderTraversal(n *graph.Node, visited graph.EdgeSet, low int) int {
+func (p *networkSimplexProcessor) walkStreeDfs(n *graph.Node, visited graph.EdgeSet, low int) int {
 	p.low[n] = low
 	lim := low
 	n.VisitEdges(func(e *graph.Edge) {
 		if e.IsInSpanningTree && !visited[e] {
 			visited[e] = true
-			lim = p.postOrderTraversal(e.ConnectedNode(n), visited, lim)
+			lim = p.walkStreeDfs(e.ConnectedNode(n), visited, lim)
 		}
 	})
 	p.lim[n] = lim
@@ -346,40 +352,43 @@ func vbalance(g *graph.DGraph) {
 
 func (p *networkSimplexProcessor) hbalance(g *graph.DGraph) {
 	for _, e := range g.Edges {
-		if e.IsInSpanningTree && e.CutValue == 0 {
+		if !e.IsInSpanningTree {
+			continue
+		}
+		if e.CutValue == 0 {
 			f := p.minSlackNonTreeEdge(g.Edges, e)
 			if f == nil {
 				continue
 			}
 			d := slack(f)
-			if d <= 1 {
+			if d < 1 {
 				continue
 			}
 			if p.lim[e.From] < p.lim[e.To] {
-				p.rerank(e.From, d/2)
+				p.adjustLayers(e.From, d)
 			} else {
-				p.rerank(e.To, -d/2)
+				p.adjustLayers(e.To, -d)
 			}
 		}
 	}
 }
 
-func (p *networkSimplexProcessor) rerank(n *graph.Node, delta int) {
+func (p *networkSimplexProcessor) adjustLayers(n *graph.Node, delta int) {
 	n.Layer -= delta
 	for _, e := range n.Out {
 		if !e.IsInSpanningTree {
 			continue
 		}
-		if p.lim[n] < p.lim[e.ConnectedNode(n)] {
-			p.rerank(e.To, delta)
+		if !(p.lim[n] < p.lim[e.ConnectedNode(n)]) {
+			p.adjustLayers(e.To, delta)
 		}
 	}
 	for _, e := range n.In {
 		if !e.IsInSpanningTree {
 			continue
 		}
-		if p.lim[n] < p.lim[e.ConnectedNode(n)] {
-			p.rerank(e.From, delta)
+		if !(p.lim[n] < p.lim[e.ConnectedNode(n)]) {
+			p.adjustLayers(e.From, delta)
 		}
 	}
 }
