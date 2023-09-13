@@ -4,7 +4,6 @@ import (
 	"github.com/nulab/autog/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
-	"github.com/nulab/autog/phase1"
 )
 
 // todo: to decrease coupling between client code and the graph types used here, the layout could take as params
@@ -28,7 +27,6 @@ func Layout(graph *graph.DGraph, opts ...Option) *graph.DGraph {
 		layoutOpts.p3, // ordering
 		layoutOpts.p4, // positioning
 		layoutOpts.p5, // edge routing
-		phase1.RestoreEdges,
 	}
 
 	for _, phase := range pipeline {
