@@ -2,7 +2,8 @@ package phase5
 
 import "github.com/nulab/autog/internal/graph"
 
-func execStraightRouting(g *graph.DGraph) {
+func execStraightRouting(g *graph.DGraph, routes []route) {
+
 	longEdgesTarget := map[*graph.Node]*graph.Edge{}
 	longEdgesSource := map[*graph.Node]*graph.Edge{}
 

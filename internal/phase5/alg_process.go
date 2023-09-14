@@ -15,11 +15,17 @@ const (
 
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	imonitor.PrefixFor(alg)
+
+	// side effects: this call merges long edges, basically undoes DGraph.BreakLongEdges
+	// virtual nodes which the edges go through are collected into route structs
+	// after this call, graph traversals that follow directed edges won't see virtual nodes anymore
+	rinfo := mergeLongEdges(g)
+
 	switch alg {
 	case NoRouting:
 		return
 	case Straight:
-		execStraightRouting(g)
+		execStraightRouting(g, rinfo)
 	case PieceWise:
 		execPieceWiseRouting(g)
 	case Ortho:
