@@ -1,19 +1,12 @@
 package autog
 
 import (
-	"github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
 func WithNetworkSimplexThoroughness(thoroughness uint) Option {
 	return func(o *options) {
 		o.params.NetworkSimplexThoroughness = thoroughness
-	}
-}
-
-func WithNetworkSimplexBalance(balance graph.OptionNsBalance) Option {
-	return func(o *options) {
-		o.params.NetworkSimplexBalance = balance
 	}
 }
 
