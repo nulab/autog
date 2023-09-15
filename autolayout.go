@@ -2,14 +2,14 @@ package autog
 
 import (
 	"github.com/nulab/autog/graph"
-	igraph "github.com/nulab/autog/internal/graph"
+	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
 )
 
 // todo: add interactive layout
 
-func Layout(source graph.Source, opts ...Option) *igraph.DGraph {
+func Layout(source graph.Source, opts ...Option) graph.Layout {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
 		opt(&layoutOpts)
@@ -26,13 +26,25 @@ func Layout(source graph.Source, opts ...Option) *igraph.DGraph {
 		layoutOpts.p5, // edge routing
 	}
 
-	// obtain the graph struct
-	g := source.Generate()
+	// populate the graph struct from the graph source
+	g := &ig.DGraph{}
+	source.Populate(g)
 
 	// run it through the pipeline
 	for _, phase := range pipeline {
 		phase.Process(g, layoutOpts.params)
 	}
 
-	return g
+	// return only relevant data to the caller
+	out := graph.Layout{
+		Nodes: make([]graph.Node, len(g.Nodes)),
+		Edges: make([]graph.Edge, len(g.Edges)),
+	}
+	for i, n := range g.Nodes {
+		out.Nodes[i] = graph.Node{ID: n.ID, Size: n.Size}
+	}
+	for i, _ := range g.Edges {
+		out.Edges[i] = graph.Edge{}
+	}
+	return out
 }
