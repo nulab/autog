@@ -13,7 +13,7 @@ import (
 func TestNoRegression(t *testing.T) {
 	for _, testcase := range elkTestGraphs {
 		t.Run(testcase.name, func(t *testing.T) {
-			assert.NotPanics(t, func() { autog.Layout(graph.FromEdgeSlice(testcase.adj)) })
+			assert.NotPanics(t, func() { autog.Layout(graph.EdgeSlice(testcase.adj)) })
 		})
 	}
 }

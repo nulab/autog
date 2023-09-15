@@ -1,7 +1,7 @@
 package processor
 
 import (
-	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/internal/graph"
 )
 
 type P interface {

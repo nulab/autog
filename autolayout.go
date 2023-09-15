@@ -2,18 +2,14 @@ package autog
 
 import (
 	"github.com/nulab/autog/graph"
+	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
-	"github.com/nulab/autog/phase1"
 )
-
-// todo: to decrease coupling between client code and the graph types used here, the layout could take as params
-// a simple adjacency list and a struct or map with the node properties (width, height, etc.)
-// then the graph package could become internal
 
 // todo: add interactive layout
 
-func Layout(graph *graph.DGraph, opts ...Option) *graph.DGraph {
+func Layout(source graph.Source, opts ...Option) graph.Layout {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
 		opt(&layoutOpts)
@@ -28,12 +24,27 @@ func Layout(graph *graph.DGraph, opts ...Option) *graph.DGraph {
 		layoutOpts.p3, // ordering
 		layoutOpts.p4, // positioning
 		layoutOpts.p5, // edge routing
-		phase1.RestoreEdges,
 	}
 
+	// populate the graph struct from the graph source
+	g := &ig.DGraph{}
+	source.Populate(g)
+
+	// run it through the pipeline
 	for _, phase := range pipeline {
-		phase.Process(graph, layoutOpts.params)
+		phase.Process(g, layoutOpts.params)
 	}
 
-	return graph
+	// return only relevant data to the caller
+	out := graph.Layout{
+		Nodes: make([]graph.Node, len(g.Nodes)),
+		Edges: make([]graph.Edge, len(g.Edges)),
+	}
+	for i, n := range g.Nodes {
+		out.Nodes[i] = graph.Node{ID: n.ID, Size: n.Size}
+	}
+	for i, _ := range g.Edges {
+		out.Edges[i] = graph.Edge{}
+	}
+	return out
 }
