@@ -34,7 +34,7 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 	}
 
 	// insert virtual nodes so that edges with length >1 have length 1
-	g.BreakLongEdges()
+	breakLongEdges(g)
 
 	maxiter := int(params.GraphvizDotMaxIter)
 	fixedPositions := initFixedPositions(g.Edges)
