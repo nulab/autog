@@ -10,48 +10,9 @@ type DGraph struct {
 	Layers Layers
 }
 
-// implements graph.Source by returning itself as a compatibility step
+// Generate implements graph.Source by returning itself as a compatibility step
 func (g *DGraph) Generate() *DGraph {
 	return g
-}
-
-func FromEdgeSlice(edges [][]string) *DGraph {
-	nodeMap := map[string]*Node{}
-
-	nodeList := []*Node{}
-	edgeList := []*Edge{}
-
-	for _, e := range edges {
-		if len(e) != 2 {
-			panic("graph init: edge must have one source and one target node")
-		}
-		sourceId := e[0]
-		targetId := e[1]
-
-		sourceNode := nodeMap[sourceId]
-		if sourceNode == nil {
-			sourceNode = &Node{ID: sourceId}
-			nodeList = append(nodeList, sourceNode)
-			nodeMap[sourceId] = sourceNode
-		}
-		targetNode := nodeMap[targetId]
-		if targetNode == nil {
-			targetNode = &Node{ID: targetId}
-			nodeList = append(nodeList, targetNode)
-			nodeMap[targetId] = targetNode
-		}
-
-		e := NewEdge(sourceNode, targetNode, 1)
-		edgeList = append(edgeList, e)
-
-		targetNode.In = append(targetNode.In, e)
-		sourceNode.Out = append(sourceNode.Out, e)
-	}
-
-	return &DGraph{
-		Nodes: nodeList,
-		Edges: edgeList,
-	}
 }
 
 // todo: sources and sinks don't yet account for isolated nodes with a self-loop
