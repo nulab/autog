@@ -11,8 +11,8 @@ type DGraph struct {
 }
 
 // Generate implements graph.Source by returning itself as a compatibility step
-func (g *DGraph) Generate() *DGraph {
-	return g
+func (g *DGraph) Populate(dst *DGraph) {
+	*dst = *g
 }
 
 func (g *DGraph) GetNodes() []*Node {

@@ -5,13 +5,14 @@ package phase2
 import (
 	"testing"
 
+	egraph "github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/graph"
 	"github.com/nulab/autog/internal/testfiles"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSpanningTree(t *testing.T) {
-	g := graph.FromEdgeSlice([][]string{
+	g := fromEdgeSlice([][]string{
 		{"a", "b"},
 		{"b", "d"},
 		{"b", "e"},
@@ -123,7 +124,7 @@ func findEdge(g *graph.DGraph, from, to string) *graph.Edge {
 }
 
 func TestNSLayering(t *testing.T) {
-	g := graph.FromEdgeSlice(testfiles.DotAbstract)
+	g := fromEdgeSlice(testfiles.DotAbstract)
 	execNetworkSimplex(g, graph.Params{NetworkSimplexThoroughness: 28, NetworkSimplexBalance: 1})
 
 	want := expectedLayersAbstract()
@@ -150,4 +151,10 @@ func expectedLayersAbstract() map[string]int {
 		"T1": 7, "T24": 7, "7": 7,
 		"T8": 8,
 	}
+}
+
+func fromEdgeSlice(es [][]string) *graph.DGraph {
+	g := &graph.DGraph{}
+	egraph.EdgeSlice(es).Populate(g)
+	return g
 }

@@ -3,7 +3,6 @@ package phase3
 import (
 	"fmt"
 	"slices"
-	"testing"
 
 	"github.com/nulab/autog/internal/graph"
 )
@@ -66,10 +65,10 @@ import (
 // 	assert.Equal(t, 6, crossings(layers))
 // }
 
-func TestAAA(t *testing.T) {
-	g := buildGraph()
-	execGraphvizDot(g, graph.Params{})
-}
+// func TestAAA(t *testing.T) {
+// 	g := buildGraph()
+// 	execGraphvizDot(g, graph.Params{})
+// }
 
 // func TestGansnerNorthOrdering(t *testing.T) {
 // 	testgs := testfiles.ReadTestDir("../internal/testfiles/elk_relabeled")

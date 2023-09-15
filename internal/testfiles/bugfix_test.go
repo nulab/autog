@@ -8,8 +8,8 @@ import (
 
 	"github.com/nulab/autog"
 	"github.com/nulab/autog/graph"
+	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
-	"github.com/nulab/autog/internal/phase4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func TestCrashers(t *testing.T) {
 	t.Run("phase4 SinkColoring", func(t *testing.T) {
 		t.Run("#1 and #4", func(t *testing.T) {
 			src := graph.EdgeSlice(issues1and4)
-			assert.NotPanics(t, func() { _ = autog.Layout(src, autog.WithPositioning(phase4.SinkColoring)) })
+			assert.NotPanics(t, func() { _ = autog.Layout(src, autog.WithPositioningSinkColoring()) })
 		})
 	})
 
@@ -37,8 +37,8 @@ func TestCrashers(t *testing.T) {
 			assert.NotPanics(t, func() {
 				_ = autog.Layout(
 					graph.EdgeSlice(DotAbstract),
-					autog.WithPositioning(0),
-					autog.WithEdgeRouting(0),
+					autog.WithPositioningNoop(),
+					autog.WithEdgeRoutingNoop(),
 					autog.WithMonitor(imonitor.NewFilteredChan(c, imonitor.MatchAll(3, "gvdot", "crossings"))),
 				)
 			})
@@ -48,15 +48,16 @@ func TestCrashers(t *testing.T) {
 	})
 
 	t.Run("phase4 NetworkSimplex", func(t *testing.T) {
-		g := graph.EdgeSlice(DotAbstract).Generate()
+		g := &ig.DGraph{}
+		graph.EdgeSlice(DotAbstract).Populate(g)
 		for _, n := range g.Nodes {
 			n.W, n.H = 100, 100
 		}
 		assert.NotPanics(t, func() {
-			g = autog.Layout(
+			_ = autog.Layout(
 				g,
-				autog.WithPositioning(phase4.NetworkSimplex),
-				autog.WithEdgeRouting(0),
+				autog.WithPositioningNetworkSimplex(),
+				autog.WithEdgeRoutingNoop(),
 			)
 		})
 
