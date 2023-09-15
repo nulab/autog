@@ -3,12 +3,12 @@ package autog
 import (
 	"testing"
 
-	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/phase1"
-	"github.com/nulab/autog/phase2"
-	"github.com/nulab/autog/phase3"
-	"github.com/nulab/autog/phase4"
-	"github.com/nulab/autog/phase5"
+	"github.com/nulab/autog/internal/graph"
+	"github.com/nulab/autog/internal/phase1"
+	"github.com/nulab/autog/internal/phase2"
+	"github.com/nulab/autog/internal/phase3"
+	"github.com/nulab/autog/internal/phase4"
+	"github.com/nulab/autog/internal/phase5"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/nulab/autog"
-	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/internal/graph"
 	"github.com/stretchr/testify/assert"
 )
 

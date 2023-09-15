@@ -3,12 +3,13 @@
 package testfiles
 
 import (
+	"math"
 	"testing"
 
 	"github.com/nulab/autog"
-	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
-	"github.com/nulab/autog/phase4"
+	"github.com/nulab/autog/internal/phase4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -65,7 +66,7 @@ func TestCrashers(t *testing.T) {
 				cur := g.Layers[i].Nodes[j]
 				prv := g.Layers[i].Nodes[j-1]
 				// todo: this isn't a strict inequality bc virtual nodes have size 0x0
-				assert.Truef(t, cur.X-(prv.X+prv.W) >= 0, "%s(X:%.2f) overlaps %s(X:%.2f)", cur, cur.X, prv, prv.X)
+				assert.Truef(t, math.Abs(prv.X+prv.W-cur.X) >= 0, "%s(X:%.2f) overlaps %s(X:%.2f)", cur, cur.X, prv, prv.X)
 			}
 		}
 	})

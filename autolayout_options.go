@@ -1,13 +1,13 @@
 package autog
 
 import (
-	"github.com/nulab/autog/graph"
+	"github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
-	cbreaking "github.com/nulab/autog/phase1"
-	layering "github.com/nulab/autog/phase2"
-	ordering "github.com/nulab/autog/phase3"
-	positioning "github.com/nulab/autog/phase4"
-	routing "github.com/nulab/autog/phase5"
+	cbreaking "github.com/nulab/autog/internal/phase1"
+	layering "github.com/nulab/autog/internal/phase2"
+	ordering "github.com/nulab/autog/internal/phase3"
+	positioning "github.com/nulab/autog/internal/phase4"
+	routing "github.com/nulab/autog/internal/phase5"
 )
 
 type options struct {

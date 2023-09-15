@@ -2,17 +2,14 @@ package autog
 
 import (
 	"github.com/nulab/autog/graph"
+	igraph "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
 )
 
-// todo: to decrease coupling between client code and the graph types used here, the layout could take as params
-// a simple adjacency list and a struct or map with the node properties (width, height, etc.)
-// then the graph package could become internal
-
 // todo: add interactive layout
 
-func Layout(graph *graph.DGraph, opts ...Option) *graph.DGraph {
+func Layout(source graph.Source, opts ...Option) *igraph.DGraph {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
 		opt(&layoutOpts)
@@ -29,9 +26,13 @@ func Layout(graph *graph.DGraph, opts ...Option) *graph.DGraph {
 		layoutOpts.p5, // edge routing
 	}
 
+	// obtain the graph struct
+	g := source.Generate()
+
+	// run it through the pipeline
 	for _, phase := range pipeline {
-		phase.Process(graph, layoutOpts.params)
+		phase.Process(g, layoutOpts.params)
 	}
 
-	return graph
+	return g
 }
