@@ -1,4 +1,37 @@
 
+v0.4.0 / 2023-09-19
+==================
+
+  * [p3] Remove traces of old phase 3 wmedian naming
+  * [p5-ortho] Compute edge control points using routable edges (fixes #13)
+  * [p5-poly] Compute edge control points using routable edges
+  * [p5] Fix route merging, append non-terminal nodes correctly
+  * [p3-wmedian] Rename graphviz dot ordering to wmedian to reflect actual theory
+  * [p5-poly] Rename piecewise edge routing strategy to polyline
+  * [options] Extract alg constants into public API with documentation and refactor alg functional options accordingly
+  * Fix edge merging, ensure mapping between edges and route info
+  * Output only graph items with minimum set of fields necessary to draw the layout
+  * [graph] Add temp option to control global node size
+  * [graph] Add flag to remember where to draw the arrowhead
+  * Move public graph's node and edge definitions in their own files
+  * [graph] Delete connected components routine, currently unused
+  * [p5] Merge long edges as a preprocessing step before routing
+  * Fix or skip existing unit tests so that the current regression set passes
+  * Change exported type to Layout and expose only fields relevant to the user
+  * Remove NS balancing from functional options
+  * Refactor functional options to avoid using internal consts; this also prevents accidentally passing invalid numerical values
+  * Define EdgeSlice as implementation of graph.Source
+  * Move BreakLongEdges into phase3 package as top-level func
+  * Make all phase and graph packages internal
+  * [p1,p5] Restore reverted edges as a post-processing step of phase 5
+  * Update README with implementation details
+  * [p2-nsimplex] Rewrite head component boolean logic to follow Graphviz's paper
+  * Change network simplex balancing strategy to typed enum
+  * [p2-nsimplex] Fix and reenable horizontal balancing used in p4 (fixes #10)
+  * Add basic Makefile with test target
+  * Move test adjacency lists into non-test file for reuse in other packages with test-only build tag
+  * Move layout tests into internal package
+
 v0.3.0 / 2023-08-29
 ==================
 
