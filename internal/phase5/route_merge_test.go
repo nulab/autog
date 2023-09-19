@@ -1,20 +1,35 @@
-//go:build unit
-
 package phase5
 
 import (
 	"sort"
 	"testing"
 
-	"github.com/nulab/autog/graph"
-	"github.com/nulab/autog/internal/testfiles"
+	egraph "github.com/nulab/autog/graph"
+	"github.com/nulab/autog/internal/graph"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMergeLongEdges(t *testing.T) {
-	G := graph.FromEdgeSlice(testfiles.LongEdges)
+	G := fromEdgeSlice([][]string{
+		{"A", "B"},
+		{"B", "C"},
+		{"B", "D"},
+		{"B", "E"},
+		{"D", "F"},
+		{"A", "V1"}, {"V1", "V2"}, {"V2", "F"},
+		{"A", "V3"}, {"V3", "E"},
+		{"C", "G"},
+		{"B", "V4"}, {"V4", "G"},
+		{"G", "A"},
+	})
+	for _, n := range G.Nodes {
+		switch n.ID {
+		case "V1", "V2", "V3", "V4":
+			n.IsVirtual = true
+		}
+	}
 	for _, e := range G.Edges {
-		if isEdge(e, "C", "G") || isEdge(e, "B", "C") || isEdge(e, "B", "G") {
+		if isEdge(e, "C", "G") || isEdge(e, "B", "C") || isEdge(e, "B", "V4") || isEdge(e, "V4", "G") {
 			e.Reverse()
 		}
 	}
@@ -23,8 +38,6 @@ func TestMergeLongEdges(t *testing.T) {
 		setLayer(G, n)
 	}
 
-	assert.Len(t, G.Edges, 10)
-	G.BreakLongEdges()
 	assert.Len(t, G.Edges, 14)
 
 	vn := 0
@@ -107,4 +120,10 @@ func inIds(n *graph.Node) []string {
 		ids[i] = e.From.ID
 	}
 	return ids
+}
+
+func fromEdgeSlice(es [][]string) *graph.DGraph {
+	g := &graph.DGraph{}
+	egraph.EdgeSlice(es).Populate(g)
+	return g
 }

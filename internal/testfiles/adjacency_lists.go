@@ -134,19 +134,6 @@ var DotAbstract = [][]string{
 	{"23", "T1"},
 }
 
-var LongEdges = [][]string{
-	{"A", "B"},
-	{"B", "C"},
-	{"B", "D"},
-	{"B", "E"},
-	{"D", "F"},
-	{"A", "E"},
-	{"A", "F"},
-	{"C", "G"},
-	{"B", "G"},
-	{"G", "A"},
-}
-
 var elkTestGraphs = []struct {
 	name string
 	adj  [][]string

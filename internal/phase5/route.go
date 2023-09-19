@@ -2,6 +2,11 @@ package phase5
 
 import "github.com/nulab/autog/internal/graph"
 
+type routableEdge struct {
+	*graph.Edge
+	route
+}
+
 // holds information about the route an edge has to go through
 type route struct {
 	// nodes that the edges passes through

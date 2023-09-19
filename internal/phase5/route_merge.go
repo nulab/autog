@@ -8,26 +8,27 @@ import (
 
 // merge long edges and at the same time collect route information;
 // merged edges are removed from the graph edge list
-func mergeLongEdges(g *graph.DGraph) []route {
-	routeInfo := make([]route, 0, len(g.Edges))
+func mergeLongEdges(g *graph.DGraph) []routableEdge {
+	routes := make([]routableEdge, 0, len(g.Edges))
 	for _, e := range g.Edges {
 		switch e.Type() {
 		case edgeTypeNoneVirtual:
 			u, v := orderedNodes(e)
-			routeInfo = append(routeInfo, route{ns: []*graph.Node{u, v}})
+			e.ArrowHeadStart = e.IsReversed
+			routes = append(routes, routableEdge{e, route{[]*graph.Node{u, v}}})
 
 		case edgeTypeOneVirtual:
 			// process each chain of virtual nodes only in the direction of the edge
 			if e.From.IsVirtual {
 				continue
 			}
-			routeInfo = append(routeInfo, reduceForward(g, e))
+			routes = append(routes, routableEdge{e, route{reduceForward(g, e)}})
 
 		case edgeTypeBothVirtual:
 			// skip, eventually it will be processed when encountering a type 1 edge
 		}
 	}
-	return routeInfo
+	return routes
 }
 
 // returns the nodes adjacent to this edge in lexicographical order (lesser coordinates first)
@@ -49,8 +50,8 @@ func orderedNodes(e *graph.Edge) (u, v *graph.Node) {
 
 // merges a chain of edges connecting virtual nodes into the starting edge e and returns a route
 // containing the ordered list of nodes that this edge passes through
-func reduceForward(g *graph.DGraph, e *graph.Edge) (r route) {
-	r.ns = append(r.ns, e.From)
+func reduceForward(g *graph.DGraph, e *graph.Edge) (ns []*graph.Node) {
+	ns = append(ns, e.From)
 	for e.To.IsVirtual {
 		if len(e.To.Out) != 1 {
 			panic("edge routing: virtual node doesn't have exactly one exit edge")
@@ -60,14 +61,15 @@ func reduceForward(g *graph.DGraph, e *graph.Edge) (r route) {
 		v.In.Remove(f)
 		v.In.Add(e)
 		e.To = v
-		r.ns = append(r.ns, e.To)
+		ns = append(ns, e.To)
 
 		g.Edges.Remove(f)
 	}
-	r.ns = append(r.ns, e.To)
+	ns = append(ns, e.To)
 	u, v := orderedNodes(e)
-	if r.ns[0] == v && r.ns[len(r.ns)-1] == u {
-		slices.Reverse(r.ns)
+	e.ArrowHeadStart = e.IsReversed
+	if ns[0] == v && ns[len(ns)-1] == u {
+		slices.Reverse(ns)
 	}
-	return r
+	return ns
 }

@@ -2,80 +2,42 @@ package phase5
 
 import "github.com/nulab/autog/internal/graph"
 
-func execStraightRouting(g *graph.DGraph, routes []route) {
-
-	longEdgesTarget := map[*graph.Node]*graph.Edge{}
-	longEdgesSource := map[*graph.Node]*graph.Edge{}
-
-	for i := 0; i < len(g.Edges); i++ {
-		e := g.Edges[i]
-
-		switch e.Type() {
-		case edgeTypeNoneVirtual:
-			if e.IsFlat() {
-				e.Points = [][2]float64{flatStartPoint(e), flatEndPoint(e)}
-			} else {
-				e.Points = [][2]float64{startPoint(e), endPoint(e)}
-			}
-
-		case edgeTypeOneVirtual:
-			if e.From.IsVirtual {
-				// source is virtual, check if an edge with the same virtual node as target was encountered
-				f := longEdgesTarget[e.From]
-				if f != nil {
-					f.Points = append(f.Points, endPoint(e)) // e's endpoint becomes f's endpoint
-					f.To = e.To
-					g.Edges.Remove(e)
-					i--
-				} else {
-					e.Points = append(e.Points, endPoint(e))
-					longEdgesSource[e.From] = e
-				}
-			} else {
-				// target is virtual, check if an edge with the same virtual node as source was encountered
-				f := longEdgesSource[e.To]
-				if f != nil {
-					f.Points = append([][2]float64{startPoint(e)}, f.Points...) // e's startpoint becomes f's startpoint
-					f.From = e.From
-					g.Edges.Remove(e)
-					i--
-				} else {
-					e.Points = append(e.Points, startPoint(e))
-					longEdgesTarget[e.To] = e
-				}
-			}
-
-		case edgeTypeBothVirtual:
-			f := longEdgesTarget[e.From]
-			if f != nil {
-				// f.Points = append(f.Points, endPoint(e)) // e's endpoint becomes f's endpoint
-				f.To = e.To
-				longEdgesTarget[e.To] = f
-			} else {
-				// e.Points = append(e.Points, endPoint(e))
-				longEdgesTarget[e.To] = e
-			}
-			f = longEdgesSource[e.To]
-			if f != nil {
-				// f.Points = append([][2]float64{startPoint(e)}, f.Points...) // e's startpoint becomes f's startpoint
-				f.From = e.From
-				longEdgesSource[e.From] = f
-			} else {
-				// e.Points = append(e.Points, startPoint(e))
-				longEdgesSource[e.From] = e
-			}
-			g.Edges.Remove(e)
-			i--
+func execStraightRouting(routes []routableEdge) {
+	for _, r := range routes {
+		if r.IsFlat() {
+			r.Points = flatStraight(r.ns[0], r.ns[len(r.ns)-1])
+		} else {
+			r.Points = straight(r.ns[0], r.ns[len(r.ns)-1])
 		}
 	}
+}
+
+func flatStraight(from, to *graph.Node) [][2]float64 {
+	// middle of right side
+	x1 := from.X + from.W
+	y1 := from.Y + from.H/2
+	// middle of left side
+	x2 := to.X
+	y2 := to.Y + to.H/2
+	// return points
+	return [][2]float64{{x1, y1}, {x2, y2}}
+}
+
+func straight(from, to *graph.Node) [][2]float64 {
+	// middle of lower side
+	x1 := from.X + from.W/2
+	y1 := from.Y + from.H
+	// middle of upper side
+	x2 := to.X + to.W/2
+	y2 := to.Y
+	// return points
+	return [][2]float64{{x1, y1}, {x2, y2}}
 }
 
 func flatStartPoint(e *graph.Edge) [2]float64 {
 	var x, y float64
 	if e.From.LayerPos < e.To.LayerPos {
-		// middle of right side
-		x = e.From.X + e.From.W
-		y = e.From.Y + e.From.H/2
+
 	} else {
 		// middle of left side
 		x = e.From.X
@@ -87,9 +49,7 @@ func flatStartPoint(e *graph.Edge) [2]float64 {
 func flatEndPoint(e *graph.Edge) [2]float64 {
 	var x, y float64
 	if e.From.LayerPos < e.To.LayerPos {
-		// middle of left side
-		x = e.To.X
-		y = e.To.Y + e.To.H/2
+
 	} else {
 		// middle of right side
 		x = e.To.X + e.To.W
@@ -101,9 +61,7 @@ func flatEndPoint(e *graph.Edge) [2]float64 {
 func startPoint(e *graph.Edge) [2]float64 {
 	var x, y float64
 	if e.From.Layer < e.To.Layer {
-		// middle of lower side
-		x = e.From.X + e.From.W/2
-		y = e.From.Y + e.From.H
+
 	} else {
 		// middle of upper side
 		x = e.From.X + e.From.W/2
