@@ -14,10 +14,10 @@ import (
 func TestOptions(t *testing.T) {
 	// set some random options that are different from the defaults
 	opts := testOptions(
-		WithCycleBreakingDFS(),
-		WithOrderingNoop(),
-		WithPositioningVAlign(),
-		WithEdgeRoutingStraight(),
+		WithCycleBreaking(CycleBreakingDepthFirst),
+		WithOrdering(OrderingNoop),
+		WithPositioning(PositioningVAlign),
+		WithEdgeRouting(EdgeRoutingStraight),
 		WithNetworkSimplexThoroughness(30),
 		WithLayerSpacing(75.5),
 		WithNodeSpacing(10.0),

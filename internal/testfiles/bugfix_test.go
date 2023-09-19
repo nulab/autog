@@ -17,7 +17,7 @@ func TestCrashers(t *testing.T) {
 	t.Run("phase4 SinkColoring", func(t *testing.T) {
 		t.Run("#1 and #4", func(t *testing.T) {
 			src := graph.EdgeSlice(issues1and4)
-			assert.NotPanics(t, func() { _ = autog.Layout(src, autog.WithPositioningSinkColoring()) })
+			assert.NotPanics(t, func() { _ = autog.Layout(src, autog.WithPositioning(autog.PositioningSinkColoring)) })
 		})
 	})
 
@@ -37,8 +37,8 @@ func TestCrashers(t *testing.T) {
 			assert.NotPanics(t, func() {
 				_ = autog.Layout(
 					graph.EdgeSlice(DotAbstract),
-					autog.WithPositioningNoop(),
-					autog.WithEdgeRoutingNoop(),
+					autog.WithPositioning(autog.PositioningNoop),
+					autog.WithEdgeRouting(autog.EdgeRoutingNoop),
 					autog.WithMonitor(imonitor.NewFilteredChan(c, imonitor.MatchAll(3, "gvdot", "crossings"))),
 				)
 			})
@@ -56,8 +56,8 @@ func TestCrashers(t *testing.T) {
 		assert.NotPanics(t, func() {
 			_ = autog.Layout(
 				g,
-				autog.WithPositioningNetworkSimplex(),
-				autog.WithEdgeRoutingNoop(),
+				autog.WithPositioning(autog.PositioningNetworkSimplex),
+				autog.WithEdgeRouting(autog.EdgeRoutingNoop),
 			)
 		})
 
