@@ -11,7 +11,7 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	switch alg {
 	case NoOrdering:
 		return
-	case GraphvizDot:
+	case WMedian:
 		execGraphvizDot(g, params)
 	default:
 		panic("ordering: unknown alg value")

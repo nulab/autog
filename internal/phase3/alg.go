@@ -13,7 +13,7 @@ func (alg Alg) String() (s string) {
 	switch alg {
 	case NoOrdering:
 		s = "noop"
-	case GraphvizDot:
+	case WMedian:
 		s = "gvdot"
 	default:
 		s = "<invalid>"
@@ -23,6 +23,6 @@ func (alg Alg) String() (s string) {
 
 const (
 	NoOrdering Alg = iota
-	GraphvizDot
+	WMedian
 	_endAlg
 )

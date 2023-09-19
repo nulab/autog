@@ -23,7 +23,7 @@ type options struct {
 var defaultOptions = options{
 	p1: cbreaking.Greedy,
 	p2: layering.NetworkSimplex,
-	p3: ordering.GraphvizDot,
+	p3: ordering.WMedian,
 	p4: positioning.SinkColoring,
 	p5: routing.Polyline,
 	params: graph.Params{

@@ -37,7 +37,7 @@ const (
 	// OrderingWMedian implements a crossing minimization strategy based on Graphviz Dot's weighted median heuristic.
 	// It sweeps layers two by two and reorders nodes based on the weighted median of their upper or lower neighbors.
 	// It gives acceptable results in close to linear time.
-	OrderingWMedian = phase3.GraphvizDot // todo: eventually resolve naming mismatch, even though the end user doesn't see it
+	OrderingWMedian = phase3.WMedian
 )
 
 const (
