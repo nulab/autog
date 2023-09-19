@@ -12,17 +12,6 @@ func execStraightRouting(routes []routableEdge) {
 	}
 }
 
-func flatStraight(from, to *graph.Node) [][2]float64 {
-	// middle of right side
-	x1 := from.X + from.W
-	y1 := from.Y + from.H/2
-	// middle of left side
-	x2 := to.X
-	y2 := to.Y + to.H/2
-	// return points
-	return [][2]float64{{x1, y1}, {x2, y2}}
-}
-
 func straight(from, to *graph.Node) [][2]float64 {
 	return [][2]float64{startPoint(from), endPoint(to)}
 }

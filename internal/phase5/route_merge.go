@@ -6,6 +6,12 @@ import (
 	"github.com/nulab/autog/internal/graph"
 )
 
+const (
+	edgeTypeNoneVirtual = iota
+	edgeTypeOneVirtual
+	edgeTypeBothVirtual
+)
+
 // merge long edges and at the same time collect route information;
 // merged edges are removed from the graph edge list
 func mergeLongEdges(g *graph.DGraph) []routableEdge {

@@ -5,14 +5,6 @@ import (
 	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
-const (
-	edgeTypeNoneVirtual = iota
-	edgeTypeOneVirtual
-	edgeTypeBothVirtual
-)
-
-// todo: improve code reuse of routing algos
-
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	imonitor.PrefixFor(alg)
 
@@ -29,7 +21,7 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	case Polyline:
 		execPolylineRouting(g, routableEdges)
 	case Ortho:
-		execOrthoRouting(g, params)
+		execOrthoRouting(g, routableEdges, params)
 	default:
 		panic("routing: unknown alg value")
 	}
