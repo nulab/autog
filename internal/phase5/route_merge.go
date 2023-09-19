@@ -56,15 +56,16 @@ func reduceForward(g *graph.DGraph, e *graph.Edge) (ns []*graph.Node) {
 		if len(e.To.Out) != 1 {
 			panic("edge routing: virtual node doesn't have exactly one exit edge")
 		}
+		ns = append(ns, e.To)
+
 		f := e.To.Out[0]
 		v := f.To
 		v.In.Remove(f)
 		v.In.Add(e)
 		e.To = v
-		ns = append(ns, e.To)
-
 		g.Edges.Remove(f)
 	}
+	// append also the non-virtual end node
 	ns = append(ns, e.To)
 	u, v := orderedNodes(e)
 	e.ArrowHeadStart = e.IsReversed

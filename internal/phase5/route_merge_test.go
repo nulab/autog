@@ -58,6 +58,25 @@ func TestMergeLongEdges(t *testing.T) {
 		return routes[i].ns[0].ID < routes[j].ns[0].ID
 	})
 
+	wantRoutesIds := [][]string{
+		{"A", "B"},
+		{"A", "V1", "V2", "F"},
+		{"A", "V3", "E"},
+		{"B", "D"},
+		{"B", "E"},
+		{"C", "B"},
+		{"D", "F"},
+		{"G", "A"},
+		{"G", "A"},
+		{"G", "A"},
+		{"G", "A"},
+		{"G", "C"},
+		{"G", "V4", "B"},
+	}
+	for i, r := range routes {
+		assert.Equal(t, wantRoutesIds[i], nodeIds(r.ns))
+	}
+
 	a := findNode(G, "A")
 	assert.ElementsMatch(t, []string{"B", "E", "F"}, outIds(a))
 
@@ -104,6 +123,14 @@ func findNode(g *graph.DGraph, id string) *graph.Node {
 		}
 	}
 	return nil
+}
+
+func nodeIds(ns []*graph.Node) []string {
+	ids := make([]string, len(ns))
+	for i, n := range ns {
+		ids[i] = n.ID
+	}
+	return ids
 }
 
 func outIds(n *graph.Node) []string {
