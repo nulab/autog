@@ -30,6 +30,12 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 	g := &ig.DGraph{}
 	source.Populate(g)
 
+	if layoutOpts.params.NodeFixedSizeFunc != nil {
+		for _, n := range g.Nodes {
+			layoutOpts.params.NodeFixedSizeFunc(n)
+		}
+	}
+
 	// run it through the pipeline
 	for _, phase := range pipeline {
 		phase.Process(g, layoutOpts.params)

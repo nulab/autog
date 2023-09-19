@@ -14,6 +14,9 @@ const (
 // and don't strictly belong to the graph itself
 type Params struct {
 
+	// todo: docs
+	NodeFixedSizeFunc func(n *Node)
+
 	// ---- phase2 options ---
 
 	// Factor used in to determine the maximum number of iterations.
