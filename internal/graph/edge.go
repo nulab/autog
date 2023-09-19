@@ -9,16 +9,16 @@ type Edge struct {
 	edge
 }
 
+// todo: collapse flags into one bitmask field
 type edge struct {
-	From, To *Node
-	Delta    int // edge's minimum length
-	Weight   int // edge's weight (could be a float instead)
-
-	// variables not relevant to the final output
-	IsInSpanningTree bool
-	IsReversed       bool
-	CutValue         int
-	Points           [][2]float64
+	From, To         *Node
+	Delta            int          // edge's minimum length, used in network simplex layerer
+	Weight           int          // edge's weight, used in network simplex layerer
+	IsInSpanningTree bool         // whether the edge is in the graph spanning tree, used in network simplex layerer
+	IsReversed       bool         // whether the edge has been reversed to break cycles, set in phase 1
+	CutValue         int          // edge's cut value, used in network simplex layerer
+	Points           [][2]float64 // edge's control points, used in phase 5
+	ArrowHeadStart   bool         // arrowhead position, 0: start, 1: end
 }
 
 func NewEdge(from, to *Node, weight int) *Edge {

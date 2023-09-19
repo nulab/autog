@@ -1,6 +1,7 @@
 package autog
 
 import (
+	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
@@ -19,6 +20,15 @@ func WithLayerSpacing(spacing float64) Option {
 func WithNodeSpacing(spacing float64) Option {
 	return func(o *options) {
 		o.params.NodeSpacing = spacing
+	}
+}
+
+func WithNodeFixedSize(w, h float64) Option {
+	return func(o *options) {
+		o.params.NodeFixedSizeFunc = func(n *ig.Node) {
+			n.W = w
+			n.H = h
+		}
 	}
 }
 
