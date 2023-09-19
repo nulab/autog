@@ -27,7 +27,7 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	case Straight:
 		execStraightRouting(routableEdges)
 	case Polyline:
-		execPieceWiseRouting(g)
+		execPolylineRouting(g, routableEdges)
 	case Ortho:
 		execOrthoRouting(g, params)
 	default:

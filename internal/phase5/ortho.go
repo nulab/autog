@@ -79,7 +79,7 @@ func execOrthoRouting(g *graph.DGraph, params graph.Params) {
 
 func orthoPoints(e *graph.Edge, halfLayerSpacing float64) [][2]float64 {
 	if isVerticallyAligned(e) {
-		return [][2]float64{startPoint(e), endPoint(e)}
+		return [][2]float64{startPoint(e.From), endPoint(e.To)}
 	}
 
 	y := e.From.Y + e.From.H
@@ -99,4 +99,28 @@ func orthoPoints(e *graph.Edge, halfLayerSpacing float64) [][2]float64 {
 
 func isVerticallyAligned(e *graph.Edge) bool {
 	return e.From.X+e.From.W/2 == e.To.X+e.To.W/2
+}
+
+func flatStartPoint(e *graph.Edge) [2]float64 {
+	var x, y float64
+	if e.From.LayerPos < e.To.LayerPos {
+
+	} else {
+		// middle of left side
+		x = e.From.X
+		y = e.From.Y + e.From.H/2
+	}
+	return [2]float64{x, y}
+}
+
+func flatEndPoint(e *graph.Edge) [2]float64 {
+	var x, y float64
+	if e.From.LayerPos < e.To.LayerPos {
+
+	} else {
+		// middle of right side
+		x = e.To.X + e.To.W
+		y = e.To.Y + e.To.H/2
+	}
+	return [2]float64{x, y}
 }

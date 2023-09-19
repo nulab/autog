@@ -24,62 +24,19 @@ func flatStraight(from, to *graph.Node) [][2]float64 {
 }
 
 func straight(from, to *graph.Node) [][2]float64 {
-	// middle of lower side
-	x1 := from.X + from.W/2
-	y1 := from.Y + from.H
-	// middle of upper side
-	x2 := to.X + to.W/2
-	y2 := to.Y
-	// return points
-	return [][2]float64{{x1, y1}, {x2, y2}}
+	return [][2]float64{startPoint(from), endPoint(to)}
 }
 
-func flatStartPoint(e *graph.Edge) [2]float64 {
-	var x, y float64
-	if e.From.LayerPos < e.To.LayerPos {
-
-	} else {
-		// middle of left side
-		x = e.From.X
-		y = e.From.Y + e.From.H/2
-	}
+// middle of lower side
+func startPoint(n *graph.Node) [2]float64 {
+	x := n.X + n.W/2
+	y := n.Y + n.H
 	return [2]float64{x, y}
 }
 
-func flatEndPoint(e *graph.Edge) [2]float64 {
-	var x, y float64
-	if e.From.LayerPos < e.To.LayerPos {
-
-	} else {
-		// middle of right side
-		x = e.To.X + e.To.W
-		y = e.To.Y + e.To.H/2
-	}
-	return [2]float64{x, y}
-}
-
-func startPoint(e *graph.Edge) [2]float64 {
-	var x, y float64
-	if e.From.Layer < e.To.Layer {
-
-	} else {
-		// middle of upper side
-		x = e.From.X + e.From.W/2
-		y = e.From.Y
-	}
-	return [2]float64{x, y}
-}
-
-func endPoint(e *graph.Edge) [2]float64 {
-	var x, y float64
-	if e.From.Layer < e.To.Layer {
-		// middle of upper side
-		x = e.To.X + e.To.W/2
-		y = e.To.Y
-	} else {
-		// middle of lower side
-		x = e.To.X + e.To.W/2
-		y = e.To.Y + e.To.H
-	}
+// middle of upper side
+func endPoint(to *graph.Node) [2]float64 {
+	x := to.X + to.W/2
+	y := to.Y
 	return [2]float64{x, y}
 }
