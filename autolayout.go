@@ -47,10 +47,16 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		Edges: make([]graph.Edge, len(g.Edges)),
 	}
 	for i, n := range g.Nodes {
+		if n.IsVirtual {
+			continue
+		}
 		out.Nodes[i] = graph.Node{ID: n.ID, Size: n.Size}
 	}
-	for i, _ := range g.Edges {
-		out.Edges[i] = graph.Edge{}
+	for i, e := range g.Edges {
+		out.Edges[i] = graph.Edge{
+			Points:         e.Points,
+			ArrowHeadStart: e.ArrowHeadStart,
+		}
 	}
 	return out
 }
