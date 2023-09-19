@@ -12,7 +12,7 @@ func (alg Alg) String() (s string) {
 		s = "noop"
 	case Straight:
 		s = "straight"
-	case PieceWise:
+	case Polyline:
 		s = "piecewise"
 	case Ortho:
 		s = "ortho"
@@ -25,7 +25,7 @@ func (alg Alg) String() (s string) {
 const (
 	NoRouting Alg = iota
 	Straight
-	PieceWise
+	Polyline
 	Ortho
 	_endAlg
 )

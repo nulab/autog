@@ -77,12 +77,12 @@ const (
 	// as straight edges may end up crossing the nodes' interior.
 	EdgeRoutingStraight = phase5.Straight
 
-	// EdgeRoutingPieceWise outputs edges as polygonal paths.
+	// EdgeRoutingPolyline outputs edges as polygonal paths.
 	// Non-terminal points are located where the virtual nodes introduced in the layering phase would be.
 	// Edges can be drawn with curved elbows if non-terminal points are interpreted as
 	// the second control point of a quadratic bezier curve (P1),
 	// however the rendering code must determine the location of P0 and P2 to ensure curve continuity.
-	EdgeRoutingPieceWise = phase5.PieceWise // todo: rename to polyline
+	EdgeRoutingPolyline = phase5.Polyline
 
 	// EdgeRoutingOrtho outputs edges as polygonal paths with orthogonal segments only, i.e. all edges bend at 90 degrees.
 	// Dense graphs look tidier, but it's harder to understand where edges start and finish.
