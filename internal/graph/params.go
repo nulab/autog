@@ -29,8 +29,8 @@ type Params struct {
 
 	// ---- phase3 options ---
 
-	// Maximum number of iterations of the GraphvizDot orderer.
-	GraphvizDotMaxIter uint
+	// Maximum number of iterations of the WMedian orderer.
+	WMedianMaxIter uint
 
 	// ---- phase4 options ---
 

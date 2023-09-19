@@ -45,7 +45,7 @@ import (
 // 		1: {Index: 1, Nodes: []*graph.Node{nodes[4], nodes[5], nodes[6], nodes[7]}},
 // 	}
 //
-// 	p := &graphvizDotProcessor{positions: graph.NodeIntMap{}}
+// 	p := &wmedianProcessor{positions: graph.NodeIntMap{}}
 //
 // 	for _, l := range layers {
 // 		for i, n := range l.Nodes {
@@ -67,7 +67,7 @@ import (
 
 // func TestAAA(t *testing.T) {
 // 	g := buildGraph()
-// 	execGraphvizDot(g, graph.Params{})
+// 	execWeightedMedian(g, graph.Params{})
 // }
 
 // func TestGansnerNorthOrdering(t *testing.T) {
@@ -84,7 +84,7 @@ import (
 // 			for _, subg := range dg.ConnectedComponents() {
 // 				t.Run("component:"+subg.Nodes[0].ID, func(t *testing.T) {
 // 					phase2.NetworkSimplex.Process(subg, graph.Params{})
-// 					execGraphvizDot(subg, graph.Params{})
+// 					execWeightedMedian(subg, graph.Params{})
 //
 // 					indices := map[int]map[int]bool{}
 // 					for _, n := range subg.Nodes {

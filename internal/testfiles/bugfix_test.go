@@ -21,7 +21,7 @@ func TestCrashers(t *testing.T) {
 		})
 	})
 
-	t.Run("phase3 GraphvizDot", func(t *testing.T) {
+	t.Run("phase3 WMedian", func(t *testing.T) {
 		t.Run("identical edge segfault in cross counting", func(t *testing.T) {
 			src := graph.EdgeSlice(cacooArch)
 			assert.NotPanics(t, func() { _ = autog.Layout(src) })

@@ -14,7 +14,7 @@ const (
 	initDirectionBottom initDirection = 1
 )
 
-type graphvizDotProcessor struct {
+type wmedianProcessor struct {
 	positions      graph.NodeIntMap
 	flipEqual      bool
 	transposeEqual bool
@@ -27,7 +27,7 @@ type graphvizDotProcessor struct {
 //     https://www.researchgate.net/publication/3187542_A_Technique_for_Drawing_Directed_Graphs
 //
 // Note that ELK's implementation is based on the original algorithm proposed by Sugiyama et al. instead of Graphviz.
-func execGraphvizDot(g *graph.DGraph, params graph.Params) {
+func execWeightedMedian(g *graph.DGraph, params graph.Params) {
 	if len(g.Layers) == 1 {
 		// no crossings to reduce
 		return
@@ -36,11 +36,11 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 	// insert virtual nodes so that edges with length >1 have length 1
 	breakLongEdges(g)
 
-	maxiter := int(params.GraphvizDotMaxIter)
+	maxiter := int(params.WMedianMaxIter)
 	fixedPositions := initFixedPositions(g.Edges)
 
-	bestx_top, bestpos_top := graphvizRun(g, graphvizRunParams{maxiter, fixedPositions, initDirectionTop})
-	bestx_btm, bestpos_btm := graphvizRun(g, graphvizRunParams{maxiter, fixedPositions, initDirectionBottom})
+	bestx_top, bestpos_top := wmedianRun(g, wmedianRunParams{maxiter, fixedPositions, initDirectionTop})
+	bestx_btm, bestpos_btm := wmedianRun(g, wmedianRunParams{maxiter, fixedPositions, initDirectionBottom})
 
 	var (
 		bestx                  = 0
@@ -65,13 +65,13 @@ func execGraphvizDot(g *graph.DGraph, params graph.Params) {
 	}
 }
 
-type graphvizRunParams struct {
+type wmedianRunParams struct {
 	maxiter        int
 	fixedPositions fixedPositions
 	dir            initDirection
 }
 
-type graphvizInitFn func(n *graph.Node, visited graph.NodeSet, indices map[int]int)
+type wmedianInitFn func(n *graph.Node, visited graph.NodeSet, indices map[int]int)
 
 // node order is maintained in three different places:
 //   - in g.Layers.Nodes, which is a slice
@@ -80,8 +80,8 @@ type graphvizInitFn func(n *graph.Node, visited graph.NodeSet, indices map[int]i
 //
 // at each iteration, this algorithm will update the node positions in all three places
 // a copy of the best p.positions is kept and at the end it is propagated to g.Layers and node.LayerPos
-func graphvizRun(g *graph.DGraph, params graphvizRunParams) (int, graph.NodeIntMap) {
-	p := &graphvizDotProcessor{
+func wmedianRun(g *graph.DGraph, params wmedianRunParams) (int, graph.NodeIntMap) {
+	p := &wmedianProcessor{
 		positions:      graph.NodeIntMap{},
 		fixedPositions: params.fixedPositions,
 	}
@@ -134,7 +134,7 @@ func graphvizRun(g *graph.DGraph, params graphvizRunParams) (int, graph.NodeIntM
 	return bestx, bestp
 }
 
-func (p *graphvizDotProcessor) initPositions(g *graph.DGraph, layer *graph.Layer, fn graphvizInitFn) {
+func (p *wmedianProcessor) initPositions(g *graph.DGraph, layer *graph.Layer, fn wmedianInitFn) {
 	// initialize positions
 	visited := graph.NodeSet{}
 	indices := map[int]int{}
@@ -146,7 +146,7 @@ func (p *graphvizDotProcessor) initPositions(g *graph.DGraph, layer *graph.Layer
 	}
 }
 
-func (p *graphvizDotProcessor) initPositionsFromTop(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
+func (p *wmedianProcessor) initPositionsFromTop(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
 	if visited[n] {
 		return
 	}
@@ -159,7 +159,7 @@ func (p *graphvizDotProcessor) initPositionsFromTop(n *graph.Node, visited graph
 	}
 }
 
-func (p *graphvizDotProcessor) initPositionsFromBottom(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
+func (p *wmedianProcessor) initPositionsFromBottom(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
 	if visited[n] {
 		return
 	}
@@ -172,7 +172,7 @@ func (p *graphvizDotProcessor) initPositionsFromBottom(n *graph.Node, visited gr
 	}
 }
 
-func (p *graphvizDotProcessor) initPositionsFlatEdges(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
+func (p *wmedianProcessor) initPositionsFlatEdges(n *graph.Node, visited graph.NodeSet, indices map[int]int) {
 	h, i := p.fixedPositions.head(n)
 	if i > 0 {
 		for h != nil && h != n {
@@ -191,7 +191,7 @@ func (p *graphvizDotProcessor) initPositionsFlatEdges(n *graph.Node, visited gra
 // The weighted median routine assigns an order to each vertex in layer L(i) based on the current order
 // of adjacent nodes in the next rank. Next is L(i)-1 in top-bottom sweep, or L(i)+1 in bottom-top sweep.
 // Nodes with no adjacent nodes in the next layer are kept in place.
-func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
+func (p *wmedianProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 	medians := graph.NodeFloatMap{}
 	for r := 1; r < len(layers); r++ {
 		for _, v := range layers[r].Nodes {
@@ -201,7 +201,7 @@ func (p *graphvizDotProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 	}
 }
 
-func (p *graphvizDotProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
+func (p *wmedianProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
 	medians := graph.NodeFloatMap{}
 	for r := len(layers) - 1; r >= 0; r-- {
 		for _, v := range layers[r].Nodes {
@@ -245,7 +245,7 @@ func medianOf(adpos []int) float64 {
 
 // returns an ordered array of the present positions of the nodes
 // adjacent to v in the given adjacent rank.
-func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*graph.Edge, adjLayer int) []int {
+func (p *wmedianProcessor) adjacentNodesPositions(n *graph.Node, edges []*graph.Edge, adjLayer int) []int {
 	res := []int{}
 	for _, e := range edges {
 		if e.SelfLoops() {
@@ -260,7 +260,7 @@ func (p *graphvizDotProcessor) adjacentNodesPositions(n *graph.Node, edges []*gr
 	return res
 }
 
-func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians graph.NodeFloatMap) {
+func (p *wmedianProcessor) sortLayer(nodes []*graph.Node, medians graph.NodeFloatMap) {
 	ep := len(nodes) // end pointer
 	// back iteration slightly more efficient because it compares the iteration variable to zero
 	for iter := len(nodes) - 1; iter >= 0; iter-- {
@@ -308,7 +308,7 @@ func (p *graphvizDotProcessor) sortLayer(nodes []*graph.Node, medians graph.Node
 // transpose sweeps through layers in order and swaps pairs of adjacent nodes in the same layer;
 // it counts the number of crossings between L, L-1 and L+1, if there's an improvement it keeps looping
 // until no improvement is found.
-func (p *graphvizDotProcessor) transpose(layers map[int]*graph.Layer) {
+func (p *wmedianProcessor) transpose(layers map[int]*graph.Layer) {
 	improved := true
 	for improved {
 		improved = false
@@ -372,14 +372,14 @@ func crossingsAround(l int, layers map[int]*graph.Layer) int {
 	return countCrossings(layers[l-1], layers[l]) + countCrossings(layers[l], layers[l+1])
 }
 
-func (p *graphvizDotProcessor) swap(v, w *graph.Node) {
+func (p *wmedianProcessor) swap(v, w *graph.Node) {
 	iv := p.getPos(v)
 	iw := p.getPos(w)
 	p.setPos(v, iw)
 	p.setPos(w, iv)
 }
 
-func (p *graphvizDotProcessor) getPos(n *graph.Node) int {
+func (p *wmedianProcessor) getPos(n *graph.Node) int {
 	pos := p.positions[n]
 	if pos != n.LayerPos {
 		panic("gansner-north orderer: corrupted state: node in-layer position mismatch")
@@ -387,7 +387,7 @@ func (p *graphvizDotProcessor) getPos(n *graph.Node) int {
 	return pos
 }
 
-func (p *graphvizDotProcessor) setPos(n *graph.Node, pos int) {
+func (p *wmedianProcessor) setPos(n *graph.Node, pos int) {
 	p.positions[n] = pos
 	n.LayerPos = pos
 }

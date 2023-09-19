@@ -12,7 +12,7 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	case NoOrdering:
 		return
 	case WMedian:
-		execGraphvizDot(g, params)
+		execWeightedMedian(g, params)
 	default:
 		panic("ordering: unknown alg value")
 	}
