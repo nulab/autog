@@ -37,6 +37,7 @@ package main
 
 import (
     "fmt"
+	
     "github.com/nulab/autog"
     "github.com/nulab/autog/graph"
 )
@@ -47,17 +48,18 @@ func main() {
         {"N1", "N2"}, // edge from node N1 to node N2
         {"N2", "N3"}, // edge from node N2 to node N3
     }
-    g := graph.FromEdgeSlice(adj)
+	// obtain a graph.Source (here by converting the input to EdgeSlice) 
+	src := graph.EdgeSlice(adj)
     
     // run the default autolayout pipeline
-    autog.Layout(g)
+    layout := autog.Layout(src)
 	
     // print the computed node coordinates
-    for _, n := range g.Nodes {
+    for _, n := range layout.Nodes {
         fmt.Println(n.X, n.Y)
     }
     // print the computed edge control points
-    for _, e := range g.Edges {
+    for _, e := range layout.Edges {
         fmt.Println(e.Points)
     }
 }
@@ -81,11 +83,12 @@ However, it's possible to override individual defaults using functional options.
     autog.Layout(
         g,
         // override default phase4 implementation
-        autog.WithPositioning(positioning.VerticalAlign),
+        autog.WithPositioning(autog.PositioningVAlign),
     )
 ```
 You can also customize other algorithm parameters, such as max iterations and multiplying factors. 
-Refer to the documentation on the `graph.Params` type for details on available configurations.
+Refer to the documentation on the `"github.com/nulab/autog/internal/graph".Params` type for details on all configurable parameters or 
+inspect `autog.With*` functional options in `autolayout_options_params.go` to know which ones you can tweak.
 
 Different phase implementations can yield different final layouts, and the choice of phases may vary depending on your specific graph. 
 Consult the documentation for each phase constant for guidance on selecting the right one for your use case.
@@ -97,7 +100,10 @@ See the [References](#references) section for citations and links.
 
 ### Cycle breaking
 
-TODO
+- `Greedy`: This is a solution to the feedback arc set ported from [ELK] source code, which in turn builds on the work of Eades et al. and Di Battista et al.
+It may get stuck in local optima. I found it useful to break two-node cycles such as edge pairs A->B and B->A  before running this algorithm. 
+**NOTE:** The algorithm is non-deterministic; it arranges non-sink non-source nodes in the arc diagram randomly before reversing edges. Indeed this produces variable results. 
+This isn't great for testing/debugging, so as of v0 the random selection is disabled and replaced with `nodes[len(nodes)/2]`.
 
 ### Layering
 
@@ -108,16 +114,16 @@ The current Dot implementation in [GVDOT] has a few optimizations not mentioned 
 
 ### Ordering
 
-- `GraphvizDot`: This is the weighted median ordering described in [GKNV], called `mincross` in [GVDOT]. I find it easier to reason about. Whereas [ELK] implements something closer to the original Sugiyama method.
+- `WMedian`: This is the weighted median ordering routine described in [GKNV], also called `mincross` in [GVDOT]. I find it easier to reason about, whereas [ELK] implements something closer to the original Sugiyama method.
 autog's current implementation doesn't properly account for flat edges — i.e. edges between nodes in the same layer. That part is summarily described in [GKNV]. 
-In practice, even though flat edges are theoretically possible, the layering obtained with the network simplex strategy very rarely produces them.
+In practice, even though flat edges are theoretically possible, they rarely result from layering the graph with the network simplex method.
 Edge crossings are counted with the method described in [BM], which has a O(E log V) run time (V is the layer with fewer nodes). 
 [BM] omits the implementation of the preliminary radix sort step. autog attempts to implement a simple O(E+V) routine. 
 
 ### Positioning
 
-- `VerticalAlign`: This is a simple alignment of all nodes around the center of the largest layer.
-- `NetworkSimplex`: This is the network simplex positioning described in [GKNV], including the horizontal balancing step which is briefly mentioned in the paper but readily available in [GVDOT]. 
+- `VAlign` (Vertical Align): This is a simple alignment and equal spacing of all nodes around the center of the largest layer.
+- `NetworkSimplex`: This is the network simplex positioning described in [GKNV], including the horizontal balancing step which is only briefly mentioned in the paper but can be found in [GVDOT]. 
 Note that without the min-heap feasible tree and incremental cut values optimizations, this exhibits a poor run time. [GKNV] also mentions an index rotation strategy to choose the edge to replace, which autog doesn't implement.  
 - `BrandesKoepf`: This is the O(N) heuristic described in [BK]. The implementation in [ELK] is slightly harder to follow due to Java-style OOP and partially undocumented modifications introduced with [RSCH], therefore autog's implementation follows the original [BK].
 It's worth noting that [BK] indeed does not account for node size. Final layouts may present overlaps due to zero-sizes of vitual nodes or unequal sizes of real nodes. It should be extended to properly incorporate [RSCH]'s ideas. 
@@ -130,15 +136,15 @@ point where they start diverging. autog simplifies this a bit and computes each 
 see where an edge starts and finishes. Therefore, this routing strategy works best when the graph has few edges with common source/target nodes.
 - `Splines` (Work in Progress): This implements cubic Bezier curves as described in [DGKN]. A spline routing algorithm was originally described in [GKNV] but that has been superseded by [DGKN]. 
 The algorithm in [GVDOT] still computes bounding boxes with some resemblance to [GKNV], however I must admit the C sources are quite hard to read due to the amount of static variables and functions with side-effects. 
-The general idea does follow [DGKN]: it triangulates the polygon obtained by merging the bounding box rectangles together, finds a shortest path through this polygon using the edge's starting and end points, finally it fits a cubic Bezier spline to 
-the set of points in the shortest path. autog follows this general idea, but does things a little differently due to the scarcity of details in [DGKN] and in the available literature. 
+The general idea here does follow [DGKN]: it triangulates the polygon obtained by merging the bounding box rectangles together, finds a shortest path through this polygon using the edge's starting and end points, finally it fits a cubic Bezier spline to 
+the set of points in the shortest path. autog does things a little differently due to the scarcity of details in [DGKN] and in the available literature. 
 The biggest obstacle is that most resources about polygon triangulation assume the input is a **strictly** monotone polygon, whereas the shape obtained from merged rectangles is monotone but not strictly monotone. 
 More formally, for each point `P[i]` in a y-monotone polygon, O(N) triangulation assumes `P[i].Y > P[i-1].Y`, whereas with adjacent rectangles we have `P[i].Y >= P[i-1].Y`. The literature seems to confirm that non-strict monotonicity still admits linear time triangulation,
 however the details of how the algorithm must change to accomodate for equal Y coordinates are always omitted. My understanding is that strict monotonicity is used to guarantee linear time sorting of the points in the polygon's left-right or upper-lower chains, with a typical
 "merge sorted arrays" strategy. However, in a non-strictly monotone polygon, the two point chains are *not* sorted. An additional sorting step seems to be required, therefore we apparently fall back to O(N log N), which is the same running time of triangulation of arbitrary simple polygons, 
 which includes cutting the polygon in strictly monotone sub-polygons. Therefore, I decided to cut the knot in autog and triangulate the merged rectangles in linear time using a special-cased holistic approach, whose correctness I'm currently unable to prove. But it appears to work well in practice. 
 Bug reports will probably help refine this routine unless a different strategy is employed.
-Once the polygon is triangulated, autog finds the shortest path using a dequeue-based funnel algorithm. [GVDOT] seems to follow Lee and Preparata, while autog follows [HS]. The implementation is basically the same.
+Once the polygon is triangulated, autog finds the shortest path using a "funnel" algorithm based on a dequeue. [GVDOT] seems to follow Lee and Preparata, while autog follows [HS]. The implementation is basically the same.
 With the set of points defining the shortest path, both [GVDOT] and autog fit a cubic Bezier spline to it using the method in [Sch]. As [DGKN] mentions, this cubic Bezier is actually piece-wise and not a single cubic spline. As a matter of fact [Sch] is also 
 recursive: [Sch] does this to improve the fit to an arbitrary polygonal path, [GVDOT] instead attempts to fit the spline within the edges of the constraint polygon — [DGKN] calls them "barriers". After a first attempt at fitting the spline, the algorithm computes the maximum square distance
 between the input path points and the corresponding points on the parametric curve, cuts che curve at that point and then calls the same routine recursively on the two paths thus obtained.
