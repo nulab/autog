@@ -1,4 +1,11 @@
 
+v0.5.0 / 2024-06-20
+==================
+
+  * Upgrade to Go 1.22, remove exp/constraints package (#17)
+  * Update README based on latest API changes
+  * [p5,geom] Implement helper package for cubic bezier spline routing (#15)
+
 v0.4.0 / 2023-09-19
 ==================
 
