@@ -1,4 +1,14 @@
 
+v0.6.0 / 2024-06-21
+==================
+
+  * Remove ID property from graph.Edge
+  * Add ids of source and target nodes to graph.Edge
+  * Don't shallow copy DGraph into a new instance when it's used as a graph.Source
+  * Add layout option to keep virtual nodes in output
+  * Compact output layout.Nodes slice without virtual nodes (fixes #19)
+  * Delete unused test file
+
 v0.5.0 / 2024-06-20
 ==================
 
