@@ -15,6 +15,12 @@ var issues1and4 = [][]string{
 	{"N2", "Nd"},
 }
 
+var simpleVirtualNodes = [][]string{
+	{"N1", "N2"},
+	{"N2", "N3"},
+	{"N1", "N3"},
+}
+
 var cacooArch = [][]string{
 	{"gql", "acc"},
 	{"gql", "dia"},

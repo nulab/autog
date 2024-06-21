@@ -17,7 +17,12 @@ type options struct {
 	p4      positioning.Alg
 	p5      routing.Alg
 	params  graph.Params
+	output  output
 	monitor imonitor.Monitor
+}
+
+type output struct {
+	keepVirtualNodes bool
 }
 
 var defaultOptions = options{
@@ -37,6 +42,11 @@ var defaultOptions = options{
 		BrandesKoepfLayout:                       -1,
 	},
 	monitor: nil,
+	output:  defaultOutputOptions,
+}
+
+var defaultOutputOptions = output{
+	keepVirtualNodes: false,
 }
 
 type Option func(*options)

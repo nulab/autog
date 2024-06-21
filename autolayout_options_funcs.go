@@ -43,3 +43,9 @@ func WithMonitor(monitor imonitor.Monitor) Option {
 		o.monitor = monitor
 	}
 }
+
+func WithKeepVirtualNodes(keep bool) Option {
+	return func(o *options) {
+		o.output.keepVirtualNodes = keep
+	}
+}

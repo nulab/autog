@@ -10,9 +10,11 @@ type DGraph struct {
 	Layers Layers
 }
 
-// Generate implements graph.Source by returning itself as a compatibility step
-func (g *DGraph) Populate(dst *DGraph) {
-	*dst = *g
+func (g *DGraph) Populate(*DGraph) {
+	// DGraph implements graph.Source to facilitate unit testing.
+	// It is not meant to do anything because *DGraph can be obtained from graph.Source
+	// via type assertion.
+	// todo: instead of having a dummy implementation, a wrapper could be used instead in unit tests
 }
 
 func (g *DGraph) GetNodes() []*Node {
