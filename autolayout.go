@@ -43,20 +43,23 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 
 	// return only relevant data to the caller
 	out := graph.Layout{
-		Nodes: make([]graph.Node, len(g.Nodes)),
-		Edges: make([]graph.Edge, len(g.Edges)),
+		Nodes: make([]graph.Node, 0, len(g.Nodes)),
+		Edges: make([]graph.Edge, 0, len(g.Edges)),
 	}
-	for i, n := range g.Nodes {
+	for _, n := range g.Nodes {
 		if n.IsVirtual {
 			continue
 		}
-		out.Nodes[i] = graph.Node{ID: n.ID, Size: n.Size}
+		out.Nodes = append(out.Nodes, graph.Node{
+			ID:   n.ID,
+			Size: n.Size,
+		})
 	}
-	for i, e := range g.Edges {
-		out.Edges[i] = graph.Edge{
+	for _, e := range g.Edges {
+		out.Edges = append(out.Edges, graph.Edge{
 			Points:         e.Points,
-			ArrowHeadStart: e.ArrowHeadStart,
-		}
+			ArrowHeadStart: e.ArrowHeadStart},
+		)
 	}
 	return out
 }

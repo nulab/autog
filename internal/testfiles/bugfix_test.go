@@ -70,4 +70,15 @@ func TestCrashers(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("output layout empty nodes", func(t *testing.T) {
+		src := graph.EdgeSlice(simpleVirtualNodes)
+		layout := autog.Layout(
+			src,
+			autog.WithPositioning(autog.PositioningVAlign),
+			autog.WithEdgeRouting(autog.EdgeRoutingNoop),
+		)
+		assert.Len(t, layout.Nodes, 3)
+		assert.Len(t, layout.Edges, 3)
+	})
 }
