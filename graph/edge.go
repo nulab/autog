@@ -1,7 +1,6 @@
 package graph
 
 type Edge struct {
-	ID string
 	// Identifier of this edge's source node
 	FromID string
 	// Identifier of this edge's target node
