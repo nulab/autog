@@ -1,6 +1,8 @@
 package autog
 
 import (
+	"slices"
+
 	"github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
@@ -27,8 +29,7 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 	}
 
 	// populate the graph struct from the graph source
-	g := &ig.DGraph{}
-	source.Populate(g)
+	g := from(source)
 
 	if layoutOpts.params.NodeFixedSizeFunc != nil {
 		for _, n := range g.Nodes {
@@ -47,14 +48,19 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		Edges: make([]graph.Edge, 0, len(g.Edges)),
 	}
 	for _, n := range g.Nodes {
-		if n.IsVirtual {
+		if n.IsVirtual && !layoutOpts.output.keepVirtualNodes {
 			continue
 		}
 		out.Nodes = append(out.Nodes, graph.Node{
 			ID:   n.ID,
 			Size: n.Size,
 		})
+		// todo: clients can't reliably tell virtual nodes from concrete nodes
 	}
+	if !layoutOpts.output.keepVirtualNodes {
+		out.Nodes = slices.Clip(out.Nodes)
+	}
+
 	for _, e := range g.Edges {
 		out.Edges = append(out.Edges, graph.Edge{
 			Points:         e.Points,
@@ -62,4 +68,17 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		)
 	}
 	return out
+}
+
+func from(source graph.Source) *ig.DGraph {
+	switch t := source.(type) {
+	case *ig.DGraph:
+		// special case for when the graph source is already a DGraph
+		// this happens only during unit testing
+		return t
+	default:
+		g := &ig.DGraph{}
+		source.Populate(g)
+		return g
+	}
 }
