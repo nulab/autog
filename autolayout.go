@@ -63,9 +63,11 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 
 	for _, e := range g.Edges {
 		out.Edges = append(out.Edges, graph.Edge{
+			FromID:         e.From.ID,
+			ToID:           e.To.ID,
 			Points:         e.Points,
-			ArrowHeadStart: e.ArrowHeadStart},
-		)
+			ArrowHeadStart: e.ArrowHeadStart,
+		})
 	}
 	return out
 }
