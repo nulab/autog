@@ -5,6 +5,7 @@ import (
 
 	"github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
+	"github.com/nulab/autog/internal/graph/connected"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
 )
@@ -20,7 +21,7 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 	imonitor.Set(layoutOpts.monitor)
 	defer imonitor.Reset()
 
-	pipeline := [...]processor.P{
+	pipeline := []processor.P{
 		layoutOpts.p1, // cycle breaking
 		layoutOpts.p2, // layering
 		layoutOpts.p3, // ordering
@@ -29,45 +30,74 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 	}
 
 	// populate the graph struct from the graph source
-	g := from(source)
+	G := from(source)
 
 	if layoutOpts.params.NodeFixedSizeFunc != nil {
-		for _, n := range g.Nodes {
+		for _, n := range G.Nodes {
 			layoutOpts.params.NodeFixedSizeFunc(n)
 		}
 	}
 
-	// run it through the pipeline
-	for _, phase := range pipeline {
-		phase.Process(g, layoutOpts.params)
+	// return only relevant data to the caller
+	out := graph.Layout{}
+
+	// shift disconnected sub-graphs to the right
+	shift := 0.0
+
+	// process each connected components and collect results into the same layout output
+	for _, g := range connected.Components(G) {
+		out.Nodes = slices.Grow(out.Nodes, len(g.Nodes))
+		out.Edges = slices.Grow(out.Edges, len(g.Edges))
+
+		// run subgraph through the pipeline
+		for _, phase := range pipeline {
+			phase.Process(g, layoutOpts.params)
+		}
+
+		// collect nodes
+		for _, n := range g.Nodes {
+			if n.IsVirtual && !layoutOpts.output.keepVirtualNodes {
+				continue
+			}
+
+			m := graph.Node{
+				ID:   n.ID,
+				Size: n.Size,
+			}
+			// apply subgraph's left shift
+			m.X += shift
+
+			out.Nodes = append(out.Nodes, m)
+			// todo: clients can't reliably tell virtual nodes from concrete nodes
+		}
+
+		// collect edges
+		for _, e := range g.Edges {
+			f := graph.Edge{
+				FromID:         e.From.ID,
+				ToID:           e.To.ID,
+				Points:         slices.Clone(e.Points),
+				ArrowHeadStart: e.ArrowHeadStart,
+			}
+			// apply subgraph's left shift
+			for i := range f.Points {
+				f.Points[i][0] += shift
+			}
+
+			out.Edges = append(out.Edges, f)
+		}
+
+		// compute shift for subsequent subgraphs
+		rightmostX := 0.0
+		for _, l := range g.Layers {
+			n := l.Nodes[len(l.Nodes)-1]
+			rightmostX = max(rightmostX, n.X+n.W)
+		}
+		shift += rightmostX + layoutOpts.params.NodeSpacing
 	}
 
-	// return only relevant data to the caller
-	out := graph.Layout{
-		Nodes: make([]graph.Node, 0, len(g.Nodes)),
-		Edges: make([]graph.Edge, 0, len(g.Edges)),
-	}
-	for _, n := range g.Nodes {
-		if n.IsVirtual && !layoutOpts.output.keepVirtualNodes {
-			continue
-		}
-		out.Nodes = append(out.Nodes, graph.Node{
-			ID:   n.ID,
-			Size: n.Size,
-		})
-		// todo: clients can't reliably tell virtual nodes from concrete nodes
-	}
 	if !layoutOpts.output.keepVirtualNodes {
 		out.Nodes = slices.Clip(out.Nodes)
-	}
-
-	for _, e := range g.Edges {
-		out.Edges = append(out.Edges, graph.Edge{
-			FromID:         e.From.ID,
-			ToID:           e.To.ID,
-			Points:         e.Points,
-			ArrowHeadStart: e.ArrowHeadStart,
-		})
 	}
 	return out
 }
