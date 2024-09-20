@@ -8,6 +8,7 @@ import (
 	"github.com/nulab/autog/internal/graph/connected"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
+	"github.com/nulab/autog/internal/processor/preprocessor"
 )
 
 // Layout executes the layout algorithm on the graph G obtained from source. It panics if G contains no nodes.
@@ -56,10 +57,16 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		out.Nodes = slices.Grow(out.Nodes, len(g.Nodes))
 		out.Edges = slices.Grow(out.Edges, len(g.Edges))
 
+		// pre-processing
+		restoreSelfLoops := preprocessor.IgnoreSelfLoops(g)
+
 		// run subgraph through the pipeline
 		for _, phase := range pipeline {
 			phase.Process(g, layoutOpts.params)
 		}
+
+		// post-processing
+		restoreSelfLoops(g)
 
 		// collect nodes
 		for _, n := range g.Nodes {
