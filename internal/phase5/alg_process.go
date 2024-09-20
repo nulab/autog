@@ -33,12 +33,4 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	default:
 		panic("routing: unknown alg value")
 	}
-
-	// post-processing, restore all reversed edges
-	for _, e := range g.Edges {
-		if e.IsReversed {
-			// reverse back
-			e.Reverse()
-		}
-	}
 }

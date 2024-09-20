@@ -8,6 +8,7 @@ import (
 	"github.com/nulab/autog/internal/graph/connected"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
+	"github.com/nulab/autog/internal/processor/postprocessor"
 	"github.com/nulab/autog/internal/processor/preprocessor"
 )
 
@@ -67,6 +68,7 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 
 		// post-processing
 		restoreSelfLoops(g)
+		postprocessor.UnreverseEdges(g)
 
 		// collect nodes
 		for _, n := range g.Nodes {
