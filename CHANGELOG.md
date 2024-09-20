@@ -1,4 +1,17 @@
 
+v0.8.0 / 2024-09-20
+==================
+
+  * Add github workflow to run unit tests
+  * [docs] Mention commit guidelines in README
+  * [p5,postproc] Move code that restores reversed edges to a standalone post-processor
+  * [docs] Mention in README that self-loops aren't routed
+  * [preproc] Ignore self-loops during main pipeline (fixes #23)
+  * Add short circuiting to each phase for graphs with one node; panic with zero nodes, as that could be a bug in the connected graphs code
+  * Panic if the input graph has no nodes
+  * [monitor] Add log keys as const to standardize log output
+  * Skip empty layers when computing sub-graph shift after processing
+
 v0.7.0 / 2024-07-10
 ==================
 
