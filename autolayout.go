@@ -90,6 +90,10 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		// compute shift for subsequent subgraphs
 		rightmostX := 0.0
 		for _, l := range g.Layers {
+			if len(l.Nodes) == 0 {
+				// empty layers don't affect the shift
+				continue
+			}
 			n := l.Nodes[len(l.Nodes)-1]
 			rightmostX = max(rightmostX, n.X+n.W)
 		}
