@@ -10,8 +10,7 @@ import (
 	"github.com/nulab/autog/internal/processor"
 )
 
-// todo: add interactive layout
-
+// Layout executes the layout algorithm on the graph G obtained from source. It panics if G contains no nodes.
 func Layout(source graph.Source, opts ...Option) graph.Layout {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
@@ -31,6 +30,10 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 
 	// populate the graph struct from the graph source
 	G := from(source)
+
+	if len(G.Nodes) == 0 {
+		panic("autog: node set is empty")
+	}
 
 	if layoutOpts.params.NodeFixedSizeFunc != nil {
 		for _, n := range G.Nodes {
