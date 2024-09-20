@@ -8,6 +8,14 @@ import (
 // Process runs this cycle breaking algorithm on the input graph. The graph must be connected.
 func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
 	imonitor.PrefixFor(alg)
+
+	// self-loop edges are removed from the edge list in a preprocessing step
+	// if that changes, reevaluate whether short-circuiting still makes sense here
+	if len(g.Nodes) == 1 {
+		imonitor.Log(imonitor.KeySkip, "not enough nodes")
+		return
+	}
+
 	// preprocessing
 	removeTwoNodeCycles(g)
 	if !hasCycles(g) {

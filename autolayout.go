@@ -49,6 +49,10 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 
 	// process each connected components and collect results into the same layout output
 	for _, g := range connected.Components(G) {
+		if len(g.Nodes) == 0 {
+			panic("autog: connected sub-graph node set is empty: this might be a bug")
+		}
+
 		out.Nodes = slices.Grow(out.Nodes, len(g.Nodes))
 		out.Edges = slices.Grow(out.Edges, len(g.Edges))
 
