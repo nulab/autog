@@ -26,7 +26,7 @@ Unlike many similar projects that only provide a frontend in their language of c
 
 ## Usage
 
-autog is a Go library that can be added as a dependency to your project using standard Go module commands. It requires Go 1.21:
+autog is a Go library that can be added as a dependency to your project using standard Go module commands. It requires Go 1.22:
 
     $ go get -u github.com/nulab/autog@latest
 
@@ -166,6 +166,8 @@ The result is indeed a set of cubic Bezier control points.
 
 This project is actively under development, but it is currently in version 0. 
 Please be aware that the public API and exported methods may undergo changes.
+
+- Self-loops don't break the program any more ([issue #23](https://github.com/nulab/autog/issues/23)) but are not supported. The final layout includes self-loop edges but those edges are not routed (`e.Points` is `nil`)
 
 ## Bug reporting
 
