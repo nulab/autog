@@ -199,3 +199,14 @@ var pn_brockackerman_BrockAckerman = [][]string{
 	{"N15", "N16"},
 	{"N16", "N13"},
 }
+
+var singleSelfLoop = [][]string{
+	{"a", "a"},
+}
+
+var withSelfLoop = [][]string{
+	{"a", "b"},
+	{"b", "c"},
+	{"b", "b"},
+	{"a", "d"},
+}

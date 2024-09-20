@@ -81,4 +81,15 @@ func TestCrashers(t *testing.T) {
 		assert.Len(t, layout.Nodes, 3)
 		assert.Len(t, layout.Edges, 3)
 	})
+
+	t.Run("self-loop", func(t *testing.T) {
+		t.Run("program halts", func(t *testing.T) {
+			src := graph.EdgeSlice(withSelfLoop)
+			assert.NotPanics(t, func() { _ = autog.Layout(src) })
+		})
+		t.Run("successful with single node", func(t *testing.T) {
+			src := graph.EdgeSlice(singleSelfLoop)
+			assert.NotPanics(t, func() { _ = autog.Layout(src) })
+		})
+	})
 }

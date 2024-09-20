@@ -8,6 +8,14 @@ import (
 // Process runs this positioning algorithm on the input graph. The graph nodes must be layered and ordered.
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	imonitor.PrefixFor(alg)
+
+	if len(g.Nodes) == 1 {
+		// the node defaults to position (0,0) and the layer is as large as the node itself
+		g.Layers[0].W = g.Nodes[0].W
+		g.Layers[0].H = g.Nodes[0].H
+		return
+	}
+
 	switch alg {
 	case NoPositioning:
 		return

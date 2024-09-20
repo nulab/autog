@@ -8,10 +8,11 @@ import (
 	"github.com/nulab/autog/internal/graph/connected"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
+	"github.com/nulab/autog/internal/processor/postprocessor"
+	"github.com/nulab/autog/internal/processor/preprocessor"
 )
 
-// todo: add interactive layout
-
+// Layout executes the layout algorithm on the graph G obtained from source. It panics if G contains no nodes.
 func Layout(source graph.Source, opts ...Option) graph.Layout {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
@@ -32,6 +33,10 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 	// populate the graph struct from the graph source
 	G := from(source)
 
+	if len(G.Nodes) == 0 {
+		panic("autog: node set is empty")
+	}
+
 	if layoutOpts.params.NodeFixedSizeFunc != nil {
 		for _, n := range G.Nodes {
 			layoutOpts.params.NodeFixedSizeFunc(n)
@@ -46,13 +51,24 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 
 	// process each connected components and collect results into the same layout output
 	for _, g := range connected.Components(G) {
+		if len(g.Nodes) == 0 {
+			panic("autog: connected sub-graph node set is empty: this might be a bug")
+		}
+
 		out.Nodes = slices.Grow(out.Nodes, len(g.Nodes))
 		out.Edges = slices.Grow(out.Edges, len(g.Edges))
+
+		// pre-processing
+		restoreSelfLoops := preprocessor.IgnoreSelfLoops(g)
 
 		// run subgraph through the pipeline
 		for _, phase := range pipeline {
 			phase.Process(g, layoutOpts.params)
 		}
+
+		// post-processing
+		restoreSelfLoops(g)
+		postprocessor.UnreverseEdges(g)
 
 		// collect nodes
 		for _, n := range g.Nodes {
@@ -90,6 +106,10 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		// compute shift for subsequent subgraphs
 		rightmostX := 0.0
 		for _, l := range g.Layers {
+			if len(l.Nodes) == 0 {
+				// empty layers don't affect the shift
+				continue
+			}
 			n := l.Nodes[len(l.Nodes)-1]
 			rightmostX = max(rightmostX, n.X+n.W)
 		}

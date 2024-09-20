@@ -8,6 +8,12 @@ import (
 // Process runs this layering algorithm on the input graph. The graph must be acyclic.
 func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	imonitor.PrefixFor(alg)
+
+	if len(g.Nodes) == 1 {
+		// a single node defaults to layer zero
+		goto initLayers
+	}
+
 	switch alg {
 	case LongestPath:
 		execLongestPath(g)
@@ -17,6 +23,7 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 		panic("layering: unknown alg value")
 	}
 
+initLayers:
 	m := map[int]*graph.Layer{}
 	for _, n := range g.Nodes {
 		layer := m[n.Layer]
