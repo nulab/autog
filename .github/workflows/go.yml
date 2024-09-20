@@ -1,0 +1,19 @@
+name: Run Unit Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+        cache: false
+    - name: Run Tests
+      run: make test
