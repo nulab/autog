@@ -169,6 +169,22 @@ Please be aware that the public API and exported methods may undergo changes.
 
 - Self-loops don't break the program any more ([issue #23](https://github.com/nulab/autog/issues/23)) but are not supported. The final layout includes self-loop edges but those edges are not routed (`e.Points` is `nil`)
 
+## Commit guidelines
+
+Commits should be prefixed with a short name in square brackets (a tag) that summarizes 
+which main area of the code was changed. The prefixes may change as the repository structure changes. 
+
+The prefixes are:
+
+- `[pN-name]`: phase `N`, where `N` is a number from 1 to 5 and an optional `name` mnemonic indicating a phase N's algorithm
+- `[preproc]`: preprocessing code that runs before phase 1
+- `[postproc]`: postprocessing code that runs after phase 5
+- `[graph]`: the `graph` package(s), changes to the structures and types used throughout the program
+- `[monitor]`: the `monitor` package
+- `[geom]`: the `geom` package
+- `[docs]`: documentation, within the code (e.g. comments for godocs) or README
+- 
+
 ## Bug reporting
 
 If you encounter a bug, please open a new issue and include at least the input graph that triggered the bug to help us reproduce and address it.
