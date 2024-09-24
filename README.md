@@ -1,6 +1,6 @@
 # autog
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/nulab/autog)](https://goreportcard.com/report/github.com/nulab/autog) ![Unit Tests](https://github.com/nulab/autog/actions/workflows/go.yml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nulab/autog)](https://goreportcard.com/report/github.com/nulab/autog) ![Unit Tests](https://github.com/nulab/autog/actions/workflows/go.yml/badge.svg) [![Go Reference](https://pkg.go.dev/badge/github.com/nulab/autog.svg)](https://pkg.go.dev/github.com/nulab/autog)
 
 
 autog (auto-graph) is an open-source Go library designed to automatically create hierarchical diagrams. 
