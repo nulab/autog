@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"github.com/nulab/autog/internal/graph"
+	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
 // todo: make sure this accounts for node sizes and ports.
@@ -95,30 +96,32 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 		xcoords[i] = p.horizontalCompaction(g, a)
 	}
 
-	finalLayout := balanceLayouts(xcoords, g.Nodes)
+	var finalLayout xcoordinates
+	// override default choice if user specified a preference
+	// otherwise balance the four layouts together
+	forceLayout := params.BrandesKoepfLayout >= 0 && params.BrandesKoepfLayout < 4
+	if forceLayout {
+		finalLayout = xcoords[params.BrandesKoepfLayout]
+	} else {
+		finalLayout = balanceLayouts(xcoords, g.Nodes)
+		if !verifyLayout(finalLayout, g.Layers, params.NodeSpacing) {
+			changed := false
+			smallest, _, _ := finalLayout.Size()
 
-	if !verifyLayout(finalLayout, g.Layers, params.NodeSpacing) {
-		changed := false
-		smallest, _, _ := finalLayout.Size()
-
-		for _, xc := range xcoords {
-			if verifyLayout(xc, g.Layers, params.NodeSpacing) {
-				if w, _, _ := xc.Size(); w < smallest {
-					smallest = w
-					finalLayout = xc
-					changed = true
+			for _, xc := range xcoords {
+				if verifyLayout(xc, g.Layers, params.NodeSpacing) {
+					if w, _, _ := xc.Size(); w < smallest {
+						smallest = w
+						finalLayout = xc
+						changed = true
+					}
 				}
 			}
+			if !changed {
+				// keep balanced layout
+				imonitor.Log("layout verification", "no viable layout, keep balanced")
+			}
 		}
-		if !changed {
-			// keep balanced layout
-			// todo: monitor failure condition
-		}
-	}
-
-	// override default choice if user specified a preference
-	if params.BrandesKoepfLayout >= 0 && params.BrandesKoepfLayout < 4 {
-		finalLayout = xcoords[params.BrandesKoepfLayout]
 	}
 
 	lmargin := 0.0
