@@ -14,8 +14,11 @@ const (
 // and don't strictly belong to the graph itself
 type Params struct {
 
-	// todo: docs
+	// Sets the same width and height to all non-virtual nodes
 	NodeFixedSizeFunc func(n *Node)
+
+	// Sets a width and height to individual non-virtual nodes
+	NodeSizeFunc func(n *Node)
 
 	// ---- phase2 options ---
 

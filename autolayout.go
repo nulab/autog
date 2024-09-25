@@ -42,6 +42,11 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 			layoutOpts.params.NodeFixedSizeFunc(n)
 		}
 	}
+	if layoutOpts.params.NodeSizeFunc != nil {
+		for _, n := range G.Nodes {
+			layoutOpts.params.NodeSizeFunc(n)
+		}
+	}
 
 	// return only relevant data to the caller
 	out := graph.Layout{}

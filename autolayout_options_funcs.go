@@ -1,6 +1,7 @@
 package autog
 
 import (
+	"github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
 )
@@ -23,6 +24,17 @@ func WithNodeSpacing(spacing float64) Option {
 	}
 }
 
+// WithNodeSize sets a size to each node found in the supplied map. The map keys are the node ids.
+// Individual node sizes override the size set by WithNodeFixedSize.
+func WithNodeSize(sizes map[string]graph.Size) Option {
+	return func(o *options) {
+		o.params.NodeSizeFunc = func(n *ig.Node) {
+			n.Size = sizes[n.ID]
+		}
+	}
+}
+
+// WithNodeFixedSize sets the same size to all nodes in the source graph.
 func WithNodeFixedSize(w, h float64) Option {
 	return func(o *options) {
 		o.params.NodeFixedSizeFunc = func(n *ig.Node) {

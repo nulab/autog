@@ -66,6 +66,32 @@ func main() {
 }
 ```
 
+### Set node sizes
+
+To set node sizes, you can use the functional options `autog.WithNodeFixedSize`:
+
+```go
+// all nodes have size 50x50 
+_ = autog.Layout(
+    src,
+    autog.WithNodeFixedSize(50.0, 50.0),
+)
+```
+Or `autog.WithNodeSize` — this requires a mapping from node ids to their sizes:
+
+```go
+sizes := map[string]graph.Size{
+    "N1": {W: 60.0, H: 40.0},
+    "N2": {W: 80.0, H: 40.0},
+}
+
+// nodes N1 and N2 will have the specified size 
+_ = autog.Layout(
+    src,
+    autog.WithNodeSize(sizes)
+)
+```
+
 ## Overview
 
 Hierarchical graph layout algorithms typically involve five primary phases, executed sequentially:
@@ -80,12 +106,11 @@ The autog pipeline runs default implementations for each of these phases.
 However, it's possible to override individual defaults using functional options. For example:
 
 ```go
-    // import positioning "github.com/nulab/autog/phase4"
-    autog.Layout(
-        g,
-        // override default phase4 implementation
-        autog.WithPositioning(autog.PositioningVAlign),
-    )
+autog.Layout(
+    g,
+    // override default phase4 implementation
+    autog.WithPositioning(autog.PositioningVAlign),
+)
 ```
 You can also customize other algorithm parameters, such as max iterations and multiplying factors. 
 Refer to the documentation on the `"github.com/nulab/autog/internal/graph".Params` type for details on all configurable parameters or 

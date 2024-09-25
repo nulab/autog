@@ -17,8 +17,8 @@ type options struct {
 	p4      positioning.Alg
 	p5      routing.Alg
 	params  graph.Params
-	output  output
 	monitor imonitor.Monitor
+	output  output
 }
 
 type output struct {
