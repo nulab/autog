@@ -15,7 +15,7 @@ import (
 
 func TestCrashers(t *testing.T) {
 	t.Run("phase4 SinkColoring", func(t *testing.T) {
-		t.Run("#1 and #4", func(t *testing.T) {
+		t.Run("program hangs", func(t *testing.T) {
 			src := graph.EdgeSlice(issues1and4)
 			assert.NotPanics(t, func() { _ = autog.Layout(src, autog.WithPositioning(autog.PositioningSinkColoring)) })
 		})
@@ -61,14 +61,19 @@ func TestCrashers(t *testing.T) {
 			)
 		})
 
-		for i := 0; i < len(g.Layers); i++ {
-			for j := 1; j < g.Layers[i].Len(); j++ {
-				cur := g.Layers[i].Nodes[j]
-				prv := g.Layers[i].Nodes[j-1]
-				// todo: this isn't a strict inequality bc virtual nodes have size 0x0
-				assert.Truef(t, math.Abs(prv.X+prv.W-cur.X) >= 0, "%s(X:%.2f) overlaps %s(X:%.2f)", cur, cur.X, prv, prv.X)
+		assertNoOverlaps(t, g)
+	})
+
+	t.Run("phase4 B&K", func(t *testing.T) {
+		t.Run("no overlaps", func(t *testing.T) {
+			g := &ig.DGraph{}
+			graph.EdgeSlice(bkWrongAlignment).Populate(g)
+			for _, n := range g.Nodes {
+				n.W, n.H = 130, 60
 			}
-		}
+			_ = autog.Layout(g, autog.WithPositioning(autog.PositioningBrandesKoepf))
+			assertNoOverlaps(t, g)
+		})
 	})
 
 	t.Run("output layout empty nodes", func(t *testing.T) {
@@ -92,4 +97,15 @@ func TestCrashers(t *testing.T) {
 			assert.NotPanics(t, func() { _ = autog.Layout(src) })
 		})
 	})
+}
+
+func assertNoOverlaps(t *testing.T, g *ig.DGraph) {
+	for i := 0; i < len(g.Layers); i++ {
+		for j := 1; j < g.Layers[i].Len(); j++ {
+			cur := g.Layers[i].Nodes[j]
+			prv := g.Layers[i].Nodes[j-1]
+			// todo: this isn't a strict inequality bc virtual nodes have size 0x0
+			assert.Truef(t, math.Abs(prv.X+prv.W-cur.X) >= 0, "%s(X:%.2f) overlaps %s(X:%.2f)", cur, cur.X, prv, prv.X)
+		}
+	}
 }

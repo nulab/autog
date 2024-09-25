@@ -58,6 +58,8 @@ type brandesKoepfPositioner struct {
 // this implements an O(n) time x-coordinate assignment algorithm, based on:
 //   - "Ulrik Brandes and Boris Köpf, Fast and Simple Horizontal Coordinate Assignment"
 //     https://link.springer.com/content/pdf/10.1007/3-540-45848-4_3.pdf
+//   - "Brandes, Walter and Zink, Erratum: Fast and Simple Horizontal Coordinate Assignment"
+//     https://arxiv.org/pdf/2008.01252
 //   - ELK Java code at https://github.com/eclipse/elk/tree/master/plugins/org.eclipse.elk.alg.layered/src/org/eclipse/elk/alg/layered/p4nodes/bk
 //
 // note that ELK implements the Rüegg-Schulze extension to the original algorithm.
@@ -269,12 +271,50 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 		}
 	}
 
-	for _, n := range g.Nodes {
-		c.xcoord[n] = c.xcoord[layout.blockroot[n]]
-		if shift := c.xshift[c.sinks[layout.blockroot[n]]]; withinOutermostX(shift, layout.h) {
-			c.xcoord[n] = c.xcoord[n] + shift
+	iter = layersIterator(g, layout.v)
+	for layer := iter(); layer != nil; layer = iter() {
+		n := firstNodeInLayer(layer, layout.h)
+		if c.sinks[n] != n {
+			continue
+		}
+		if shift := c.xshift[c.sinks[n]]; shift == outermostX(layout.h) {
+			c.xshift[c.sinks[n]] = 0
+		}
+
+		iter2 := layersIterator(g, layout.v)
+		for lj := iter2(); lj != nil; {
+			iter := nodesIterator(lj.Nodes, layout.h)
+			for vk := iter(); vk != nil; vk = iter() {
+				v := vk
+				if c.sinks[v] != c.sinks[vk] {
+					break
+				}
+				for layout.alignment[v] != layout.blockroot[v] {
+					v = layout.alignment[v]
+					lj = iter2()
+					lv := g.Layers[v.Layer]
+					if v != firstNodeInLayer(lv, layout.h) {
+						u := prevNodeInLayer(v, lv.Nodes, layout.h)
+						switch layout.h {
+						case left:
+							s := c.xshift[c.sinks[v]] + c.xcoord[v] + (c.xcoord[u] + u.W + p.nodeSpacing)
+							c.xshift[c.sinks[u]] = max(c.xshift[c.sinks[u]], s)
+						case right:
+							s := c.xshift[c.sinks[v]] + c.xcoord[v] - (c.xcoord[u] + p.nodeSpacing)
+							c.xshift[c.sinks[u]] = min(c.xshift[c.sinks[u]], s)
+						}
+					}
+				}
+			}
 		}
 	}
+
+	for _, n := range g.Nodes {
+		if shift := c.xshift[c.sinks[n]]; withinOutermostX(shift, layout.h) {
+			c.xcoord[n] += c.xshift[c.sinks[n]]
+		}
+	}
+
 	return xcoordinates(c.xcoord)
 }
 
@@ -288,31 +328,24 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 	w := v
 	for {
 		wlayer := p.layerFor(w)
-		leftNotLast := layout.h == left && w.LayerPos > 0
-		rightNotLast := layout.h == right && w.LayerPos < len(wlayer.Nodes)-1
+		isLast := w == lastNodeInLayer(wlayer, layout.h)
 
-		if leftNotLast || rightNotLast {
-			u := previousNodeInLayer(w, wlayer.Nodes, layout.h)
+		if !isLast {
+			u := nextNodeInLayer(w, wlayer.Nodes, layout.h)
 			uroot := layout.blockroot[u]
 			p.placeBlock(uroot, c, layout)
 			if c.sinks[v] == v {
 				c.sinks[v] = c.sinks[uroot]
 			}
-			if c.sinks[v] != c.sinks[uroot] {
+			if c.sinks[v] == c.sinks[uroot] {
 				switch layout.h {
 				case left:
-					c.xshift[c.sinks[uroot]] = min(c.xshift[c.sinks[uroot]], c.xcoord[v]-c.xcoord[uroot]-p.space(u))
+					s := c.xcoord[uroot] + p.space(u)
+					c.xcoord[v] = max(c.xcoord[v], s)
 				case right:
-					c.xshift[c.sinks[uroot]] = max(c.xshift[c.sinks[uroot]], c.xcoord[v]-c.xcoord[uroot]+p.space(u))
+					s := c.xcoord[uroot] - p.space(v)
+					c.xcoord[v] = min(c.xcoord[v], s)
 				}
-			} else {
-				switch layout.h {
-				case left:
-					c.xcoord[v] = max(c.xcoord[v], c.xcoord[uroot]+p.space(u))
-				case right:
-					c.xcoord[v] = min(c.xcoord[v], c.xcoord[uroot]-p.space(u))
-				}
-
 			}
 		}
 		// the align map contains the next node in the block
@@ -321,6 +354,12 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 			// back at root
 			break
 		}
+	}
+
+	for layout.alignment[w] != v {
+		w = layout.alignment[w]
+		c.xcoord[w] = c.xcoord[v]
+		c.sinks[w] = c.sinks[v]
 	}
 }
 
@@ -443,12 +482,45 @@ func withinOutermostX(shift float64, dir direction) bool {
 	}
 }
 
-func previousNodeInLayer(n *graph.Node, nodes []*graph.Node, dir direction) *graph.Node {
+func firstNodeInLayer(l *graph.Layer, dir direction) *graph.Node {
+	switch dir {
+	case right:
+		return l.Head()
+	case left:
+		return l.Tail()
+	default:
+		panic("BK positioner: invalid horizontal direction")
+	}
+}
+
+func nextNodeInLayer(n *graph.Node, nodes []*graph.Node, dir direction) *graph.Node {
 	switch dir {
 	case right:
 		return nodes[n.LayerPos+1]
 	case left:
 		return nodes[n.LayerPos-1]
+	default:
+		panic("BK positioner: invalid horizontal direction")
+	}
+}
+
+func prevNodeInLayer(n *graph.Node, nodes []*graph.Node, dir direction) *graph.Node {
+	switch dir {
+	case right:
+		return nodes[n.LayerPos-1]
+	case left:
+		return nodes[n.LayerPos+1]
+	default:
+		panic("BK positioner: invalid horizontal direction")
+	}
+}
+
+func lastNodeInLayer(l *graph.Layer, dir direction) *graph.Node {
+	switch dir {
+	case right:
+		return l.Tail()
+	case left:
+		return l.Head()
 	default:
 		panic("BK positioner: invalid horizontal direction")
 	}

@@ -210,3 +210,14 @@ var withSelfLoop = [][]string{
 	{"b", "b"},
 	{"a", "d"},
 }
+
+var bkWrongAlignment = [][]string{
+	{"a", "b"},
+	{"b", "c"},
+	{"a", "f"},
+	{"f", "g"},
+	{"a", "u"},
+	{"f", "c"},
+	{"c", "k"},
+	{"f", "k"},
+}
