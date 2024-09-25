@@ -126,7 +126,7 @@ Edge crossings are counted with the method described in [BM], which has a O(E lo
 - `VAlign` (Vertical Align): This is a simple alignment and equal spacing of all nodes around the center of the largest layer.
 - `NetworkSimplex`: This is the network simplex positioning described in [GKNV], including the horizontal balancing step which is only briefly mentioned in the paper but can be found in [GVDOT]. 
 Note that without the min-heap feasible tree and incremental cut values optimizations, this exhibits a poor run time. [GKNV] also mentions an index rotation strategy to choose the edge to replace, which autog doesn't implement.  
-- `BrandesKoepf`: This is the O(N) heuristic described in [BK]. The implementation in [ELK] is slightly harder to follow due to Java-style OOP and partially undocumented modifications introduced with [RSCH], therefore autog's implementation follows the original [BK].
+- `BrandesKoepf`: This is the O(N) heuristic described in [BK] and errata'ed in [BK-Err]. The implementation in [ELK] is slightly harder to follow due to Java-style OOP and partially undocumented modifications introduced with [RSCH], therefore autog's implementation follows the original [BK].
 It's worth noting that [BK] indeed does not account for node size. Final layouts may present overlaps due to zero-sizes of vitual nodes or unequal sizes of real nodes. It should be extended to properly incorporate [RSCH]'s ideas. 
 - `SinkColoring`: This is an original (to my knowledge) algorithm based on [BK] which accounts for node sizes. It also prioritizes long straight segments and produces an overall more orthogonal layout. Useful as a size-aware solution until [BK] is properly finalized.
 
@@ -158,6 +158,7 @@ The result is indeed a set of cubic Bezier control points.
 - [DGKN] Dobkin, Gansner, Koutsofios, North, "Implementing a General-Purpose Edge Router", Princeton University and AT&T Bell Laboratories ([link](https://dpd.cs.princeton.edu/Papers/DGKN97.pdf))
 - [ELK] ELK source code at https://github.com/eclipse/elk
 - [BK] Brandes and Köpf, "Fast and Simple Horizontal Coordinate Assignment", Department of Computer & Information Science, University of Konstanz ([link](https://link.springer.com/content/pdf/10.1007/3-540-45848-4_3.pdf?pdf=inline%20link))
+- [BK-Err] Brandes, Walter and Zink, "Erratum: Fast and Simple Horizontal Coordinate Assignment", ETH Zürich and Universität Würzburg ([link](https://arxiv.org/abs/2008.01252))
 - [RSCH] Rüegg, Schulze, Carstens, von Hanxleden, "Size- and Port-Aware Horizontal Node Coordinate Assignment", Dept. of Computer Science, Christian-Albrechts-Universität zu Kiel ([link](https://rtsys.informatik.uni-kiel.de/~biblio/downloads/papers/gd15.pdf))
 - [BM] Barth and Mutzel, "Simple and Efficient Bilayer Cross Counting", Institut für Computergraphik und Algorithmen Technische Universität Wien ([link](https://pdfs.semanticscholar.org/272d/73edce86bcfac3c82945042cf6733ad281a0.pdf))
 - [Sch] Schneider, "An algorithm for automatically fitting digitized curves" in Andrew S. Glassner, editor, Graphics Gems, pages 612–626. Academic Press, Boston, Mass., 1990. (can be found in internet)
