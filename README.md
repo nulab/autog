@@ -49,8 +49,8 @@ func main() {
         {"N1", "N2"}, // edge from node N1 to node N2
         {"N2", "N3"}, // edge from node N2 to node N3
     }
-	// obtain a graph.Source (here by converting the input to EdgeSlice) 
-	src := graph.EdgeSlice(adj)
+    // obtain a graph.Source (here by converting the input to EdgeSlice) 
+    src := graph.EdgeSlice(adj)
     
     // run the default autolayout pipeline
     layout := autog.Layout(src)
