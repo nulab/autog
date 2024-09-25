@@ -3,7 +3,7 @@
 package testfiles
 
 import (
-	"math"
+	"fmt"
 	"testing"
 
 	"github.com/nulab/autog"
@@ -50,29 +50,28 @@ func TestCrashers(t *testing.T) {
 	t.Run("phase4 NetworkSimplex", func(t *testing.T) {
 		g := &ig.DGraph{}
 		graph.EdgeSlice(DotAbstract).Populate(g)
-		for _, n := range g.Nodes {
-			n.W, n.H = 100, 100
-		}
 		assert.NotPanics(t, func() {
 			_ = autog.Layout(
 				g,
 				autog.WithPositioning(autog.PositioningNetworkSimplex),
 				autog.WithEdgeRouting(autog.EdgeRoutingNoop),
+				autog.WithNodeFixedSize(100, 100),
 			)
 		})
 
-		assertNoOverlaps(t, g)
+		assertNoOverlaps(t, g, 1)
 	})
 
 	t.Run("phase4 B&K", func(t *testing.T) {
 		t.Run("no overlaps", func(t *testing.T) {
 			g := &ig.DGraph{}
 			graph.EdgeSlice(bkWrongAlignment).Populate(g)
-			for _, n := range g.Nodes {
-				n.W, n.H = 130, 60
-			}
-			_ = autog.Layout(g, autog.WithPositioning(autog.PositioningBrandesKoepf))
-			assertNoOverlaps(t, g)
+			_ = autog.Layout(g,
+				autog.WithPositioning(autog.PositioningBrandesKoepf),
+				autog.WithNodeFixedSize(130, 60),
+			)
+			
+			assertNoOverlaps(t, g, 0)
 		})
 	})
 
@@ -99,13 +98,22 @@ func TestCrashers(t *testing.T) {
 	})
 }
 
-func assertNoOverlaps(t *testing.T, g *ig.DGraph) {
+func assertNoOverlaps(t *testing.T, g *ig.DGraph, tolerance int) {
+	overlaps := 0
 	for i := 0; i < len(g.Layers); i++ {
 		for j := 1; j < g.Layers[i].Len(); j++ {
 			cur := g.Layers[i].Nodes[j]
 			prv := g.Layers[i].Nodes[j-1]
-			// todo: this isn't a strict inequality bc virtual nodes have size 0x0
-			assert.Truef(t, math.Abs(prv.X+prv.W-cur.X) >= 0, "%s(X:%.2f) overlaps %s(X:%.2f)", cur, cur.X, prv, prv.X)
+
+			if prv.X+prv.W > cur.X {
+				if overlaps >= tolerance {
+					// note: this isn't a strict inequality because virtual nodes have size 0x0
+					assert.Truef(t, prv.X+prv.W <= cur.X, "%s(X:%.2f) overlaps %s(X+W:%.2f)", cur, cur.X, prv, prv.X+prv.W)
+				} else {
+					fmt.Printf("warning: overlap between nodes %v and %v within tolerance\n", cur, prv)
+				}
+				overlaps++
+			}
 		}
 	}
 }
