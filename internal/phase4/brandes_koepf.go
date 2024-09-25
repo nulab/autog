@@ -105,6 +105,7 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 	if forceLayout {
 		finalLayout = xcoords[params.BrandesKoepfLayout]
 	} else {
+		// TODO: with the final step that ensures no overlaps, this verification step might be not needed any more
 		finalLayout = balanceLayouts(xcoords, g.Nodes)
 		if !verifyLayout(finalLayout, g.Layers, params.NodeSpacing) {
 			changed := false
@@ -139,6 +140,21 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 		lmargin = math.Abs(lmargin)
 		for _, n := range g.Nodes {
 			n.X += lmargin
+		}
+	}
+
+	// B&K could produce a positioning with overlaps after averaging
+	// this is a final adjustment step to mitigate the issue
+	for i := 0; i < len(g.Layers); i++ {
+		for j := 1; j < g.Layers[i].Len(); j++ {
+			v := g.Layers[i].Nodes[j-1]
+			w := g.Layers[i].Nodes[j]
+
+			overlaps := w.X > v.X && w.X < v.X+v.W
+			if overlaps {
+				shift := v.X + v.W + p.nodeSpacing - w.X
+				w.X += shift
+			}
 		}
 	}
 }
