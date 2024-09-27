@@ -1,6 +1,7 @@
 package graph
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -20,6 +21,14 @@ type Node struct {
 
 func (n *Node) String() string {
 	return n.ID
+}
+
+func (n *Node) SVG() string {
+	return fmt.Sprintf(
+		`<rect id="%s" x="%f" y="%f" width="%f" height="%f" style="fill: none; stroke: blue;" />`,
+		"autog-node-"+n.ID,
+		n.X, n.Y, n.W, n.H,
+	)
 }
 
 // Indeg returns the number of incoming edges

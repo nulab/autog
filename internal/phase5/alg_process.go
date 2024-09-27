@@ -30,6 +30,8 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 		execPolylineRouting(g, routableEdges)
 	case Ortho:
 		execOrthoRouting(g, routableEdges, params)
+	case Splines:
+		execSplines(g, routableEdges)
 	default:
 		panic("routing: unknown alg value")
 	}

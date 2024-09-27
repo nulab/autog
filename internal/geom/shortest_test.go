@@ -1,10 +1,7 @@
 package geom
 
 import (
-	"fmt"
 	"slices"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -83,20 +80,6 @@ func TestShortest(t *testing.T) {
 	})
 }
 
-func TestShortestEdgeCases(t *testing.T) {
-	rects := []Rect{
-		{P{112, 90}, P{200, 140}},
-		{P{80, 140}, P{150, 300}},
-		{P{140, 300}, P{270, 380}},
-	}
-	start := P{190, 140 - 1}
-	end := P{200, 300 + 1}
-
-	path := Shortest(start, end, rects)
-
-	printall(rects, start, end, path)
-}
-
 func assertPath(t *testing.T, want, got []P) {
 	require.Equal(t, len(want), len(got))
 	for i := 0; i < len(got); i++ {
@@ -105,35 +88,4 @@ func assertPath(t *testing.T, want, got []P) {
 		}
 		assert.Equal(t, want[i], got[i])
 	}
-}
-
-func printpath(path []P) {
-	for i := 1; i < len(path); i++ {
-		u, v := path[i-1], path[i]
-		fmt.Printf(`<path d="M %.2f,%.2f %.2f,%.2f" stroke="black" stroke-width="3" />`+"\n", u.X, u.Y, v.X, v.Y)
-	}
-}
-
-func printall(rects []Rect, start, end P, path []P) {
-	p := MergeRects(rects)
-
-	s := polyline(p.Points, "red")
-	fmt.Println(s)
-
-	fmt.Println(start.String())
-	fmt.Println(end.String())
-	printpath(path)
-}
-
-func polyline(points []P, color string) string {
-	b := strings.Builder{}
-	b.WriteString(`<polyline points="`)
-	for _, p := range points {
-		b.WriteString(strconv.FormatFloat(p.X, 'f', 2, 64))
-		b.WriteRune(',')
-		b.WriteString(strconv.FormatFloat(p.Y, 'f', 2, 64))
-		b.WriteRune(' ')
-	}
-	b.WriteString(`" fill="none" stroke="` + color + `" />`)
-	return b.String()
 }

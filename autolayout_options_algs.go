@@ -88,6 +88,10 @@ const (
 	// Dense graphs look tidier, but it's harder to understand where edges start and finish.
 	// Suitable when there's few sets of edges with the same target node.
 	EdgeRoutingOrtho = phase5.Ortho
+
+	// EdgeRoutingSplines outputs edges as piece-wise cubic Bézier curves. Edges that don't encounter obstacles
+	// are drawn as straight lines.
+	EdgeRoutingSplines = phase5.Splines
 )
 
 func WithCycleBreaking(alg phase1.Alg) Option {
