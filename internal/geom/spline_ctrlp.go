@@ -15,6 +15,15 @@ func (bz ctrlp) String() string {
 		bz.p0.X, bz.p0.Y, bz.p1.X, bz.p1.Y, bz.p2.X, bz.p2.Y, bz.p3.X, bz.p3.Y)
 }
 
+func (bz ctrlp) Float64Slice() [][2]float64 {
+	return [][2]float64{
+		{bz.p0.X, bz.p0.Y},
+		{bz.p1.X, bz.p1.Y},
+		{bz.p2.X, bz.p2.Y},
+		{bz.p3.X, bz.p3.Y},
+	}
+}
+
 // Returns a new set of control points with:
 //   - P0 and P3 unchanged
 //   - P1 and P2 moved along their tangents by thirds of the slide factor
@@ -81,8 +90,4 @@ func (bz ctrlp) maxerr(path []P, t []float64) int {
 		}
 	}
 	return maxi
-}
-
-func (bz ctrlp) slice() []P {
-	return []P{bz.p0, bz.p1, bz.p2, bz.p3}
 }
