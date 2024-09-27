@@ -16,6 +16,8 @@ func (alg Alg) String() (s string) {
 		s = "piecewise"
 	case Ortho:
 		s = "ortho"
+	case Splines:
+		s = "splines"
 	default:
 		s = "<invalid>"
 	}
@@ -27,5 +29,6 @@ const (
 	Straight
 	Polyline
 	Ortho
+	Splines
 	_endAlg
 )

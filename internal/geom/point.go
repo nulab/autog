@@ -10,7 +10,7 @@ type P struct {
 	X, Y float64
 }
 
-func (p P) String() string {
+func (p P) SVG() string {
 	return fmt.Sprintf(`<circle r="4" cx="%.02f" cy="%.02f" fill="black"/>`, p.X, p.Y)
 }
 

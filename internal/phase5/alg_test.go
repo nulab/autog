@@ -7,9 +7,9 @@ import (
 )
 
 func TestAlg(t *testing.T) {
-	assert.EqualValues(t, 4, _endAlg)
+	assert.EqualValues(t, 5, _endAlg)
 
-	strs := []string{"noop", "straight", "piecewise", "ortho"}
+	strs := []string{"noop", "straight", "piecewise", "ortho", "splines"}
 
 	for i := Alg(0); i < _endAlg; i++ {
 		assert.Equal(t, 5, i.Phase())
