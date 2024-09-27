@@ -17,7 +17,6 @@ func Shortest(p1, p2 P, rects []Rect) []P {
 	// find start and end triangles
 	var start, end Tri
 	for _, t := range ts {
-		// fmt.Println(t.String())
 		if t.Contains(p1) {
 			start = t
 		}
