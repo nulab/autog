@@ -32,6 +32,7 @@ var defaultOptions = options{
 	p4: positioning.SinkColoring,
 	p5: routing.Polyline,
 	params: graph.Params{
+		GreedyCycleBreakerRandomNodeChoice:       false,
 		NetworkSimplexThoroughness:               28,
 		NetworkSimplexMaxIterFactor:              0,
 		NetworkSimplexBalance:                    graph.OptionNsBalanceV,

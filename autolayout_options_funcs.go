@@ -6,6 +6,12 @@ import (
 	imonitor "github.com/nulab/autog/internal/monitor"
 )
 
+func WithNonDeterministicGreedyCycleBreaker() Option {
+	return func(o *options) {
+		o.params.GreedyCycleBreakerRandomNodeChoice = true
+	}
+}
+
 func WithNetworkSimplexThoroughness(thoroughness uint) Option {
 	return func(o *options) {
 		o.params.NetworkSimplexThoroughness = thoroughness

@@ -20,6 +20,12 @@ type Params struct {
 	// Sets a width and height to individual non-virtual nodes
 	NodeSizeFunc func(n *Node)
 
+	// ---- phase1 options ---
+
+	// Controls whether the next maximum outflow node in the greedy cycle breaker is picked at random.
+	// When this option is true, the greedy cycle breaker behaves non-deterministically.
+	GreedyCycleBreakerRandomNodeChoice bool
+
 	// ---- phase2 options ---
 
 	// Factor used in to determine the maximum number of iterations.

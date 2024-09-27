@@ -27,7 +27,7 @@ type greedyProcessor struct {
 //
 // The algorithm arranges the nodes of G in an arc diagram, with source nodes to the right and sink nodes to the left.
 // Then it reverses edges that point right.
-func execGreedy(g *graph.DGraph) {
+func execGreedy(g *graph.DGraph, params graph.Params) {
 	p := greedyProcessor{
 		rnd:     rand.New(rand.NewSource(time.Now().UnixNano())),
 		arcdiag: graph.NodeIntMap{},
@@ -97,7 +97,7 @@ func execGreedy(g *graph.DGraph) {
 			}
 
 			// randomly select a node from the ones with maximal outflow and put it left
-			n := p.pickRandom(maxOutflowNodes)
+			n := p.pickNode(maxOutflowNodes, params.GreedyCycleBreakerRandomNodeChoice)
 			p.arcdiag[n] = nextLeft
 			nextLeft++
 			p.updateNeighbors(n, &sources, &sinks)
@@ -123,9 +123,11 @@ func execGreedy(g *graph.DGraph) {
 	}
 }
 
-func (p *greedyProcessor) pickRandom(nodes []*graph.Node) *graph.Node {
-	return nodes[len(nodes)/2] // todo: deterministic for debugging
-	// return nodes[p.rnd.Intn(len(nodes))]
+func (p *greedyProcessor) pickNode(nodes []*graph.Node, random bool) *graph.Node {
+	if random {
+		return nodes[p.rnd.Intn(len(nodes))]
+	}
+	return nodes[len(nodes)/2] // arbitrary deterministic choice
 }
 
 // Updates indegree and outdegree values of the neighbors of the given node,

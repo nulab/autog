@@ -6,7 +6,7 @@ import (
 )
 
 // Process runs this cycle breaking algorithm on the input graph. The graph must be connected.
-func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
+func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	imonitor.PrefixFor(alg)
 
 	// self-loop edges are removed from the edge list in a preprocessing step
@@ -23,7 +23,7 @@ func (alg Alg) Process(g *graph.DGraph, _ graph.Params) {
 	}
 	switch alg {
 	case Greedy:
-		execGreedy(g)
+		execGreedy(g, params)
 	case DepthFirst:
 		execDepthFirst(g)
 	default:
