@@ -160,7 +160,7 @@ It's worth noting that [BK] indeed does not account for node size. Final layouts
 - `Ortho`: This draws edges as orthogonal polylines. The result is similar to edge routing in ELK. ELK actually draws edges that have a common source or target node using the same line segment up until the 
 point where they start diverging. autog simplifies this a bit and computes each edge coordinates independently. Both in ELK and autog, the presence of overlapping or common edge segments makes it harder to 
 see where an edge starts and finishes. Therefore, this routing strategy works best when the graph has few edges with common source/target nodes.
-- `Splines` (Work in Progress): This implements cubic Bezier curves as described in [DGKN]. A spline routing algorithm was originally described in [GKNV] but that has been superseded by [DGKN]. 
+- `Splines` This implements cubic Bezier curves as described in [DGKN]. A spline routing algorithm was originally described in [GKNV] but that has been superseded by [DGKN]. 
 The algorithm in [GVDOT] still computes bounding boxes with some resemblance to [GKNV], however I must admit the C sources are quite hard to read due to the amount of static variables and functions with side-effects. 
 The general idea here does follow [DGKN]: it triangulates the polygon obtained by merging the bounding box rectangles together, finds a shortest path through this polygon using the edge's starting and end points, finally it fits a cubic Bezier spline to 
 the set of points in the shortest path. autog does things a little differently due to the scarcity of details in [DGKN] and in the available literature. 
@@ -169,7 +169,7 @@ More formally, for each point `P[i]` in a y-monotone polygon, O(N) triangulation
 however the details of how the algorithm must change to accomodate for equal Y coordinates are always omitted. My understanding is that strict monotonicity is used to guarantee linear time sorting of the points in the polygon's left-right or upper-lower chains, with a typical
 "merge sorted arrays" strategy. However, in a non-strictly monotone polygon, the two point chains are *not* sorted. An additional sorting step seems to be required, therefore we apparently fall back to O(N log N), which is the same running time of triangulation of arbitrary simple polygons, 
 which includes cutting the polygon in strictly monotone sub-polygons. Therefore, I decided to cut the knot in autog and triangulate the merged rectangles in linear time using a special-cased holistic approach, whose correctness I'm currently unable to prove. But it appears to work well in practice. 
-Bug reports will probably help refine this routine unless a different strategy is employed.
+Bug reports will help refine this routine unless a different strategy is employed.
 Once the polygon is triangulated, autog finds the shortest path using a "funnel" algorithm based on a dequeue. [GVDOT] seems to follow Lee and Preparata, while autog follows [HS]. The implementation is basically the same.
 With the set of points defining the shortest path, both [GVDOT] and autog fit a cubic Bezier spline to it using the method in [Sch]. As [DGKN] mentions, this cubic Bezier is actually piece-wise and not a single cubic spline. As a matter of fact [Sch] is also 
 recursive: [Sch] does this to improve the fit to an arbitrary polygonal path, [GVDOT] instead attempts to fit the spline within the edges of the constraint polygon — [DGKN] calls them "barriers". After a first attempt at fitting the spline, the algorithm computes the maximum square distance
