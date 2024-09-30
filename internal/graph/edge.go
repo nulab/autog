@@ -74,22 +74,30 @@ func (e *Edge) Crosses(f *Edge) bool {
 		(etop.LayerPos > ftop.LayerPos && ebtm.LayerPos < fbtm.LayerPos)
 }
 
-// Type returns the edge type as follows:
-//   - 0: both of e's adjacent nodes are concrete nodes
-//   - 1: exactly one of e's adjacent nodes is virtual
-//   - 2: both of e's adjacent nodes are virtual
-func (e *Edge) Type() int {
-	// todo: might return an enum instead
-	if !e.From.IsVirtual && !e.To.IsVirtual {
-		return 0
+// EdgeType encodes information about the nodes adjacent to an edge,
+type EdgeType uint8
+
+const (
+	// EdgeTypeConcrete indicates a type 0 edge whose adjacent nodes are both non-virtual.
+	EdgeTypeConcrete EdgeType = iota
+	// EdgeTypeHybrid indicates a type 1 edge whose adjacent nodes are one virtual and one non-virtual.
+	EdgeTypeHybrid
+	// EdgeTypeVirtual indicates a type 2 edge whose adjacent nodes are both virtual.
+	EdgeTypeVirtual
+)
+
+// Type returns the edge's EdgeType
+func (e *Edge) Type() EdgeType {
+	switch {
+	case !e.From.IsVirtual && !e.To.IsVirtual:
+		return EdgeTypeConcrete
+	case e.From.IsVirtual != e.To.IsVirtual:
+		return EdgeTypeHybrid
+	case e.From.IsVirtual && e.To.IsVirtual:
+		return EdgeTypeVirtual
+	default:
+		panic("edge type cases aren't exhaustive")
 	}
-	if e.From.IsVirtual != e.To.IsVirtual {
-		return 1
-	}
-	if e.From.IsVirtual && e.To.IsVirtual {
-		return 2
-	}
-	panic("edge type cases aren't exhaustive")
 }
 
 func (e *Edge) String() string {

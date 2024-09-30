@@ -100,14 +100,13 @@ func (p *networkSimplexProcessor) distCenterPoints(a, b *graph.Node) float64 {
 	return (a.W / 2) + (b.W / 2) + p.nodeSpacing
 }
 
-// todo this could be merged with Edge.Type
 func omega(e *graph.Edge) int {
 	switch e.Type() {
-	case 0:
+	case graph.EdgeTypeConcrete:
 		return 1
-	case 1:
+	case graph.EdgeTypeHybrid:
 		return 2
-	case 2:
+	case graph.EdgeTypeVirtual:
 		return 8
 	default:
 		panic("unexpected edge type")
