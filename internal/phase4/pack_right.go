@@ -1,13 +1,16 @@
 package phase4
 
-import "github.com/nulab/autog/internal/graph"
+import (
+	"slices"
+
+	"github.com/nulab/autog/internal/graph"
+)
 
 func execPackRight(g *graph.DGraph, params graph.Params) {
 	leftBound := 0.0
 	for _, l := range g.Layers {
 		x := 0.0
-		iter := nodesIterator(l.Nodes, left)
-		for n := iter(); n != nil; n = iter() {
+		for _, n := range slices.Backward(l.Nodes) {
 			x -= n.W + params.NodeSpacing
 			n.X = x
 		}
