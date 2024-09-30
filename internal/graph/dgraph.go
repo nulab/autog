@@ -40,14 +40,16 @@ func (g *DGraph) Sources() iter.Seq[*Node] {
 }
 
 // Sinks returns a list of nodes with no outgoing edges
-func (g *DGraph) Sinks() []*Node {
-	var sinks []*Node
-	for _, n := range g.Nodes {
-		if len(n.Out) == 0 {
-			sinks = append(sinks, n)
+func (g *DGraph) Sinks() iter.Seq[*Node] {
+	return func(yield func(*Node) bool) {
+		for _, n := range g.Nodes {
+			if n.Outdeg() == 0 {
+				if !yield(n) {
+					return
+				}
+			}
 		}
 	}
-	return sinks
 }
 
 func (g *DGraph) String() string {
