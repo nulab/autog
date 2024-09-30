@@ -70,9 +70,6 @@ func FitSpline(path []P, tanv1, tanv2 P, barriers []Segment) []ctrlp {
 	upperps := FitSpline(path[:k+1], tanv1, tanw, barriers)
 	lowerps := FitSpline(path[k:], tanw, tanv2, barriers)
 
-	// if upperps != nil && lowerps != nil {
-	// 	return append(upperps, lowerps...)
-	// }
 	return append(upperps, lowerps...)
 }
 

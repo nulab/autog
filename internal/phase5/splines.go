@@ -31,10 +31,9 @@ func execSplines(g *graph.DGraph, routes []routableEdge) {
 
 		poly := geom.MergeRects(rects)
 		ctrls := geom.FitSpline(path, geom.P{}, geom.P{}, poly.Sides())
-		slices.Reverse(ctrls)
 
 		e.Points = make([][2]float64, 0, len(ctrls)*4)
-		for _, c := range ctrls {
+		for _, c := range slices.Backward(ctrls) {
 			s := c.Float64Slice()
 			e.Points = append(e.Points, [][2]float64{s[3], s[2], s[1], s[0]}...)
 		}
