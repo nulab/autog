@@ -11,8 +11,6 @@ type networkSimplexProcessor struct {
 	low graph.NodeIntMap // Gansner et al.: lowest postorder traversal number among nodes reachable from the input node
 }
 
-// todo: exec alg on single connected components?
-
 // this implements a graph node layering algorithm, based on:
 //   - "Emden R. Gansner, Eleftherios Koutsofios, Stephen C. North, Kiem-Phong Vo, A technique for
 //     drawing directed graphs. Software Engineering 19(3), pp. 214-230, 1993."
