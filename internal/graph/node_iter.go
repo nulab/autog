@@ -1,26 +1,24 @@
 package graph
 
+import "iter"
+
 func (n *Node) VisitEdges(visit func(*Edge)) {
-	fn, next := n.allEdges()
-	for next {
-		next = fn(visit)
+	for e := range n.allEdges() {
+		visit(e)
 	}
 }
 
-func (n *Node) allEdges() (visitor func(func(*Edge)) bool, next bool) {
-	i := 0
-	visitor = func(yield func(*Edge)) bool {
-		if i >= len(n.In)+len(n.Out) {
-			return false
+func (n *Node) allEdges() iter.Seq[*Edge] {
+	return func(yield func(*Edge) bool) {
+		for i, b := 0, true; i < n.Deg(); i++ {
+			if i < n.Indeg() {
+				b = yield(n.In[i])
+			} else {
+				b = yield(n.Out[i-n.Indeg()])
+			}
+			if !b {
+				return
+			}
 		}
-		if i < len(n.In) {
-			yield(n.In[i])
-		} else {
-			yield(n.Out[i-len(n.In)])
-		}
-		i++
-		return true
 	}
-	next = true
-	return
 }
