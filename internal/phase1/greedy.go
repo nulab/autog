@@ -3,6 +3,7 @@ package phase1
 import (
 	"math"
 	"math/rand"
+	"slices"
 	"time"
 
 	"github.com/nulab/autog/internal/graph"
@@ -37,7 +38,7 @@ func execGreedy(g *graph.DGraph, params graph.Params) {
 
 	nodeCount := len(g.Nodes)
 
-	sources := g.Sources()
+	sources := slices.Collect(g.Sources())
 	sinks := g.Sinks()
 
 	// here ELK accounts for edge priority: particular edges that the user doesn't want to reverse

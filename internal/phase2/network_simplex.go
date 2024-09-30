@@ -2,6 +2,7 @@ package phase2
 
 import (
 	"math"
+	"slices"
 
 	"github.com/nulab/autog/internal/graph"
 )
@@ -127,7 +128,7 @@ func (p *networkSimplexProcessor) initLayers(g *graph.DGraph) {
 	}
 
 	// sources have layer 0
-	sources := g.Sources()
+	sources := slices.Collect(g.Sources())
 
 	for len(sources) > 0 {
 		n := sources[0]
