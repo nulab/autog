@@ -293,31 +293,34 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 			c.xshift[c.sinks[n]] = 0
 		}
 
-		iter2 := layersIterator(g, layout.v)
-		for lj := iter2(); lj != nil; {
-			iter := nodesIterator(lj.Nodes, layout.h)
-			for vk := iter(); vk != nil; vk = iter() {
-				v := vk
-				if c.sinks[v] != c.sinks[vk] {
-					break
-				}
-				for layout.alignment[v] != layout.blockroot[v] {
-					v = layout.alignment[v]
-					lj = iter2()
-					lv := g.Layers[v.Layer]
-					if v != firstNodeInLayer(lv, layout.h) {
-						u := prevNodeInLayer(v, lv.Nodes, layout.h)
-						switch layout.h {
-						case left:
-							s := c.xshift[c.sinks[v]] + c.xcoord[v] + (c.xcoord[u] + u.W + p.nodeSpacing)
-							c.xshift[c.sinks[u]] = max(c.xshift[c.sinks[u]], s)
-						case right:
-							s := c.xshift[c.sinks[v]] + c.xcoord[v] - (c.xcoord[u] + p.nodeSpacing)
-							c.xshift[c.sinks[u]] = min(c.xshift[c.sinks[u]], s)
-						}
+		k := 0
+		j := layer.Index
+		for j < len(g.Layers) && k < g.Layers[j].Len() {
+
+			vjk := g.Layers[j].Nodes[k]
+			v := vjk
+
+			if c.sinks[v] != c.sinks[vjk] {
+				break
+			}
+
+			for layout.alignment[v] != layout.blockroot[v] {
+				v = layout.alignment[v]
+				lv := g.Layers[v.Layer]
+				if v != firstNodeInLayer(lv, layout.h) {
+					u := prevNodeInLayer(v, lv.Nodes, layout.h)
+					switch layout.h {
+					case left:
+						s := c.xshift[c.sinks[v]] + c.xcoord[v] + (c.xcoord[u] + u.W + p.nodeSpacing)
+						c.xshift[c.sinks[u]] = max(c.xshift[c.sinks[u]], s)
+					case right:
+						s := c.xshift[c.sinks[v]] + c.xcoord[v] - (c.xcoord[u] + p.nodeSpacing)
+						c.xshift[c.sinks[u]] = min(c.xshift[c.sinks[u]], s)
 					}
 				}
+				j++
 			}
+			k = v.LayerPos + 1
 		}
 	}
 
