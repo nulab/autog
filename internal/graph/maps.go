@@ -16,8 +16,6 @@ type NodeSet = hashmap[*Node, bool]
 
 type EdgeSet = hashmap[*Edge, bool]
 
-type Layers = hashmap[int, *Layer]
-
 func (m hashmap[K, V]) Clone() hashmap[K, V] {
 	return maps.Clone(m)
 }

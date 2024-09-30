@@ -24,27 +24,28 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 	}
 
 initLayers:
-	m := map[int]*graph.Layer{}
+	size := 0
 	for _, n := range g.Nodes {
-		layer := m[n.Layer]
-		if layer == nil {
-			layer = &graph.Layer{Index: n.Layer}
-		}
-		layer.Nodes = append(layer.Nodes, n)
-		m[n.Layer] = layer
+		size = max(size, n.Layer)
 	}
-	g.Layers = m
-	fillLayers(g)
-}
+	size += 1 // the highest layer index must fit in the slice too
 
-func fillLayers(g *graph.DGraph) {
-	highest := 0
-	for i := range g.Layers {
-		highest = max(highest, i)
+	ls := make([]*graph.Layer, size)
+
+	for _, n := range g.Nodes {
+		l := ls[n.Layer]
+		if l == nil {
+			l = &graph.Layer{Index: n.Layer}
+		}
+		l.Nodes = append(l.Nodes, n)
+		ls[n.Layer] = l
 	}
-	for i := 0; i < highest; i++ {
-		_, ok := g.Layers[i]
-		if !ok {
+	g.Layers = ls
+
+	// fill layers
+	for i := range size {
+		l := g.Layers[i]
+		if l == nil {
 			g.Layers[i] = &graph.Layer{Index: i}
 		}
 	}

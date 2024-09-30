@@ -100,10 +100,10 @@ func TestCrashers(t *testing.T) {
 
 func assertNoOverlaps(t *testing.T, g *ig.DGraph, tolerance int) {
 	overlaps := 0
-	for i := 0; i < len(g.Layers); i++ {
-		for j := 1; j < g.Layers[i].Len(); j++ {
-			cur := g.Layers[i].Nodes[j]
-			prv := g.Layers[i].Nodes[j-1]
+	for _, l := range g.Layers {
+		for j := 1; j < l.Len(); j++ {
+			cur := l.Nodes[j]
+			prv := l.Nodes[j-1]
 
 			if prv.X+prv.W > cur.X {
 				if overlaps >= tolerance {

@@ -37,10 +37,10 @@ func (alg Alg) Process(g *graph.DGraph, params graph.Params) {
 
 func assignYCoords(g *graph.DGraph, layerSpacing float64) {
 	y := 0.0
-	for i := 0; i < len(g.Layers); i++ {
-		for _, n := range g.Layers[i].Nodes {
+	for _, l := range g.Layers {
+		for _, n := range l.Nodes {
 			n.Y = y
 		}
-		y += g.Layers[i].H + layerSpacing
+		y += l.H + layerSpacing
 	}
 }

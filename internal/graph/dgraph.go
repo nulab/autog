@@ -8,7 +8,7 @@ import (
 type DGraph struct {
 	Nodes  []*Node
 	Edges  EdgeList
-	Layers Layers
+	Layers []*Layer
 }
 
 func (g *DGraph) Populate(*DGraph) {
