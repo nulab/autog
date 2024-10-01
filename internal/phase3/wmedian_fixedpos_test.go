@@ -1,7 +1,6 @@
 package phase3
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/nulab/autog/internal/graph"
@@ -73,9 +72,6 @@ func TestInitFlatEdges(t *testing.T) {
 		assert.Equal(t, nodes[4], fpos.mustBefore[nodes[3]])
 		assert.Equal(t, nodes[5], fpos.mustBefore[nodes[4]])
 
-		fmt.Println(fpos.mustAfter)
-		fmt.Println(fpos.mustBefore)
-
 		n, i := fpos.head(nodes[5])
 		assert.Equal(t, nodes[1], n)
 		assert.Equal(t, 3, i)
@@ -89,8 +85,6 @@ func TestInitFlatEdges(t *testing.T) {
 			graph.NewEdge(nodes[4], nodes[5], 0),
 		}
 		fpos := initFixedPositions(edges)
-		fmt.Println(fpos.mustAfter)
-		fmt.Println(fpos.mustBefore)
 
 		assert.Len(t, fpos.mustAfter, 3)
 		assert.Len(t, fpos.mustBefore, 3)
@@ -112,8 +106,6 @@ func TestInitFlatEdges(t *testing.T) {
 			graph.NewEdge(nodes[1], nodes[4], 0), // should be no op
 		}
 		fpos := initFixedPositions(edges)
-		fmt.Println(fpos.mustAfter)
-		fmt.Println(fpos.mustBefore)
 
 		assert.Len(t, fpos.mustAfter, 4)
 		assert.Len(t, fpos.mustBefore, 4)

@@ -21,16 +21,12 @@ func execDepthFirst(g *graph.DGraph) {
 		active:  make(graph.NodeSet),
 	}
 
-	// get list of source nodes (nodes with no incoming edge)
-	sources := g.Sources()
-
-	for _, node := range sources {
+	// process nodes with no incoming edge first
+	for node := range g.Sources() {
 		p.visit(node)
 	}
 
-	nodeCount := len(g.Nodes)
-	for i := 0; i < nodeCount; i++ {
-		node := g.Nodes[i]
+	for _, node := range g.Nodes {
 		if !p.visited[node] {
 			p.visit(node)
 		}
@@ -38,7 +34,6 @@ func execDepthFirst(g *graph.DGraph) {
 
 	for _, e := range p.reversable {
 		e.Reverse()
-		// g.IsCyclic = true
 	}
 }
 

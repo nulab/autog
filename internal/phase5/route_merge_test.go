@@ -33,7 +33,7 @@ func TestMergeLongEdges(t *testing.T) {
 			e.Reverse()
 		}
 	}
-	G.Layers = make(graph.Layers, 5)
+	G.Layers = make([]*graph.Layer, 5)
 	for _, n := range G.Nodes {
 		setLayer(G, n)
 	}

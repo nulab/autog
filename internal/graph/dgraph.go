@@ -1,13 +1,14 @@
 package graph
 
 import (
+	"iter"
 	"strings"
 )
 
 type DGraph struct {
 	Nodes  []*Node
 	Edges  EdgeList
-	Layers Layers
+	Layers []*Layer
 }
 
 func (g *DGraph) Populate(*DGraph) {
@@ -25,28 +26,30 @@ func (g *DGraph) GetEdges() []*Edge {
 	return nil
 }
 
-// todo: sources and sinks don't yet account for isolated nodes with a self-loop
-
-// Sources returns a list of nodes with no incoming edges
-func (g *DGraph) Sources() []*Node {
-	var sources []*Node
-	for _, n := range g.Nodes {
-		if len(n.In) == 0 {
-			sources = append(sources, n)
+// Sources returns a sequence of nodes with no incoming edges
+func (g *DGraph) Sources() iter.Seq[*Node] {
+	return func(yield func(*Node) bool) {
+		for _, n := range g.Nodes {
+			if n.Indeg() == 0 {
+				if !yield(n) {
+					return
+				}
+			}
 		}
 	}
-	return sources
 }
 
 // Sinks returns a list of nodes with no outgoing edges
-func (g *DGraph) Sinks() []*Node {
-	var sinks []*Node
-	for _, n := range g.Nodes {
-		if len(n.Out) == 0 {
-			sinks = append(sinks, n)
+func (g *DGraph) Sinks() iter.Seq[*Node] {
+	return func(yield func(*Node) bool) {
+		for _, n := range g.Nodes {
+			if n.Outdeg() == 0 {
+				if !yield(n) {
+					return
+				}
+			}
 		}
 	}
-	return sinks
 }
 
 func (g *DGraph) String() string {

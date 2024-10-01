@@ -1,6 +1,7 @@
 package phase4
 
 import (
+	"iter"
 	"math"
 	"slices"
 	"sort"
@@ -145,10 +146,10 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 
 	// B&K could produce a positioning with overlaps after averaging
 	// this is a final adjustment step to mitigate the issue
-	for i := 0; i < len(g.Layers); i++ {
-		for j := 1; j < g.Layers[i].Len(); j++ {
-			v := g.Layers[i].Nodes[j-1]
-			w := g.Layers[i].Nodes[j]
+	for _, l := range g.Layers {
+		for j := 1; j < l.Len(); j++ {
+			v := l.Nodes[j-1]
+			w := l.Nodes[j]
 
 			overlaps := w.X > v.X && w.X < v.X+v.W
 			if overlaps {
@@ -229,14 +230,12 @@ func initNeighbors(g *graph.DGraph) neighbors {
 }
 
 func (p *brandesKoepfPositioner) verticalAlign(g *graph.DGraph, layout layout) {
-	iter := layersIterator(g, layout.v)
-	for layer := iter(); layer != nil; layer = iter() {
+	for layer := range iterLayers(g.Layers, layout.v) {
 		// r is the index of the nearest neighbor to which vk can be aligned
 		// by updating r with the most recently aligned neighbor (at the end of the loop)
 		// it's guaranteed that only one alignment is possible
 		r := outermostPos(layout.h)
-		iter := nodesIterator(layer.Nodes, layout.h)
-		for vk := iter(); vk != nil; vk = iter() {
+		for vk := range iterNodes(layer.Nodes, layout.h) {
 			vkneighbors := p.neighbors[vk][layout.v]
 			if d := len(vkneighbors); d > 0 {
 				for _, m := range medianNeighborIndices(d, layout.h) {
@@ -277,18 +276,15 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 		c.xshift[n] = outermostX(layout.h)
 	}
 
-	iter := layersIterator(g, layout.v)
-	for layer := iter(); layer != nil; layer = iter() {
-		iter := nodesIterator(layer.Nodes, layout.h)
-		for n := iter(); n != nil; n = iter() {
+	for layer := range iterLayers(g.Layers, layout.v) {
+		for n := range iterNodes(layer.Nodes, layout.h) {
 			if layout.blockroot[n] == n {
 				p.placeBlock(n, c, layout)
 			}
 		}
 	}
 
-	iter = layersIterator(g, layout.v)
-	for layer := iter(); layer != nil; layer = iter() {
+	for layer := range iterLayers(g.Layers, layout.v) {
 		n := firstNodeInLayer(layer, layout.h)
 		if c.sinks[n] != n {
 			continue
@@ -297,31 +293,34 @@ func (p *brandesKoepfPositioner) horizontalCompaction(g *graph.DGraph, layout la
 			c.xshift[c.sinks[n]] = 0
 		}
 
-		iter2 := layersIterator(g, layout.v)
-		for lj := iter2(); lj != nil; {
-			iter := nodesIterator(lj.Nodes, layout.h)
-			for vk := iter(); vk != nil; vk = iter() {
-				v := vk
-				if c.sinks[v] != c.sinks[vk] {
-					break
-				}
-				for layout.alignment[v] != layout.blockroot[v] {
-					v = layout.alignment[v]
-					lj = iter2()
-					lv := g.Layers[v.Layer]
-					if v != firstNodeInLayer(lv, layout.h) {
-						u := prevNodeInLayer(v, lv.Nodes, layout.h)
-						switch layout.h {
-						case left:
-							s := c.xshift[c.sinks[v]] + c.xcoord[v] + (c.xcoord[u] + u.W + p.nodeSpacing)
-							c.xshift[c.sinks[u]] = max(c.xshift[c.sinks[u]], s)
-						case right:
-							s := c.xshift[c.sinks[v]] + c.xcoord[v] - (c.xcoord[u] + p.nodeSpacing)
-							c.xshift[c.sinks[u]] = min(c.xshift[c.sinks[u]], s)
-						}
+		k := 0
+		j := layer.Index
+		for j < len(g.Layers) && k < g.Layers[j].Len() {
+
+			vjk := g.Layers[j].Nodes[k]
+			v := vjk
+
+			if c.sinks[v] != c.sinks[vjk] {
+				break
+			}
+
+			for layout.alignment[v] != layout.blockroot[v] {
+				v = layout.alignment[v]
+				lv := g.Layers[v.Layer]
+				if v != firstNodeInLayer(lv, layout.h) {
+					u := prevNodeInLayer(v, lv.Nodes, layout.h)
+					switch layout.h {
+					case left:
+						s := c.xshift[c.sinks[v]] + c.xcoord[v] + (c.xcoord[u] + u.W + p.nodeSpacing)
+						c.xshift[c.sinks[u]] = max(c.xshift[c.sinks[u]], s)
+					case right:
+						s := c.xshift[c.sinks[v]] + c.xcoord[v] - (c.xcoord[u] + p.nodeSpacing)
+						c.xshift[c.sinks[u]] = min(c.xshift[c.sinks[u]], s)
 					}
 				}
+				j++
 			}
+			k = v.LayerPos + 1
 		}
 	}
 
@@ -394,49 +393,37 @@ func incidentToInner(n *graph.Node) int {
 	return -1
 }
 
-func layersIterator(g *graph.DGraph, dir direction) func() *graph.Layer {
-	ks := g.Layers.Keys()
+func iterLayers(layers []*graph.Layer, dir direction) iter.Seq[*graph.Layer] {
 	switch dir {
 	case bottom:
-		sort.Ints(ks)
+		return slices.Values(layers)
 	case top:
-		sort.Sort(sort.Reverse(sort.IntSlice(ks)))
-	default:
-		panic("BK positioner: invalid layer iteration direction")
-	}
-	i := 0
-	return func() *graph.Layer {
-		if i >= len(ks) {
-			return nil
+		return func(yield func(*graph.Layer) bool) {
+			for _, n := range slices.Backward(layers) {
+				if !yield(n) {
+					return
+				}
+			}
 		}
-		layer := g.Layers[ks[i]]
-		i++
-		return layer
+	default:
+		panic("autog: B&K: invalid layer iteration direction")
 	}
 }
 
-func nodesIterator(nodes []*graph.Node, dir direction) func() *graph.Node {
-	var i int
+func iterNodes(nodes []*graph.Node, dir direction) iter.Seq[*graph.Node] {
 	switch dir {
 	case right:
-		i = 0
+		return slices.Values(nodes)
 	case left:
-		i = len(nodes) - 1
+		return func(yield func(*graph.Node) bool) {
+			for _, n := range slices.Backward(nodes) {
+				if !yield(n) {
+					return
+				}
+			}
+		}
 	default:
-		panic("BK positioner: invalid node iteration direction")
-	}
-	return func() *graph.Node {
-		if (dir == right && i >= len(nodes)) || (dir == left && i < 0) {
-			return nil
-		}
-		node := nodes[i]
-		switch dir {
-		case right:
-			i++
-		case left:
-			i--
-		}
-		return node
+		panic("autog: B&K: invalid node iteration direction")
 	}
 }
 
@@ -586,7 +573,7 @@ func balanceLayouts(layoutXCoords [4]xcoordinates, nodes []*graph.Node) xcoordin
 // it could be worth it to allow for some slack here by considering valid layouts where the nodes
 // don't overlap with a fraction of the spacing between them, instead of mandating full spacing
 // however on failure ELK returns the first layout, we still return the average.
-func verifyLayout(layout xcoordinates, layers map[int]*graph.Layer, nodeSpacing float64) bool {
+func verifyLayout(layout xcoordinates, layers []*graph.Layer, nodeSpacing float64) bool {
 	for _, layer := range layers {
 		pos := math.Inf(-1)
 		for _, n := range layer.Nodes {

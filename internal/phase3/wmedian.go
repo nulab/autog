@@ -191,7 +191,7 @@ func (p *wmedianProcessor) initPositionsFlatEdges(n *graph.Node, visited graph.N
 // The weighted median routine assigns an order to each vertex in layer L(i) based on the current order
 // of adjacent nodes in the next rank. Next is L(i)-1 in top-bottom sweep, or L(i)+1 in bottom-top sweep.
 // Nodes with no adjacent nodes in the next layer are kept in place.
-func (p *wmedianProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
+func (p *wmedianProcessor) wmedianTopBottom(layers []*graph.Layer) {
 	medians := graph.NodeFloatMap{}
 	for r := 1; r < len(layers); r++ {
 		for _, v := range layers[r].Nodes {
@@ -201,7 +201,7 @@ func (p *wmedianProcessor) wmedianTopBottom(layers map[int]*graph.Layer) {
 	}
 }
 
-func (p *wmedianProcessor) wmedianBottomTop(layers map[int]*graph.Layer) {
+func (p *wmedianProcessor) wmedianBottomTop(layers []*graph.Layer) {
 	medians := graph.NodeFloatMap{}
 	for r := len(layers) - 1; r >= 0; r-- {
 		for _, v := range layers[r].Nodes {
@@ -308,14 +308,14 @@ func (p *wmedianProcessor) sortLayer(nodes []*graph.Node, medians graph.NodeFloa
 // transpose sweeps through layers in order and swaps pairs of adjacent nodes in the same layer;
 // it counts the number of crossings between L, L-1 and L+1, if there's an improvement it keeps looping
 // until no improvement is found.
-func (p *wmedianProcessor) transpose(layers map[int]*graph.Layer) {
+func (p *wmedianProcessor) transpose(layers []*graph.Layer) {
 	improved := true
 	for improved {
 		improved = false
-		for L := 0; L < len(layers); L++ {
-			for i := 0; i < len(layers[L].Nodes)-2; i++ {
-				v := layers[L].Nodes[i]
-				w := layers[L].Nodes[i+1]
+		for _, layer := range layers {
+			for i := 0; i < len(layer.Nodes)-2; i++ {
+				v := layer.Nodes[i]
+				w := layer.Nodes[i+1]
 
 				if p.fixedPositions.mustBefore[v] == w {
 					continue
@@ -334,16 +334,16 @@ func (p *wmedianProcessor) transpose(layers map[int]*graph.Layer) {
 					continue
 				}
 
-				curX := crossingsAround(L, layers)
+				curX := crossingsAround(layer.Index, layers)
 				p.swap(v, w)
-				newX := crossingsAround(L, layers)
+				newX := crossingsAround(layer.Index, layers)
 
 				switch {
 				case newX < curX:
 					// improved and keep new order
 					improved = true
-					layers[L].Nodes[i] = w
-					layers[L].Nodes[i+1] = v
+					layer.Nodes[i] = w
+					layer.Nodes[i+1] = v
 
 				default:
 					// no improvement, restore order
@@ -354,7 +354,7 @@ func (p *wmedianProcessor) transpose(layers map[int]*graph.Layer) {
 	}
 }
 
-func crossings(layers map[int]*graph.Layer) int {
+func crossings(layers []*graph.Layer) int {
 	crossings := 0
 	for l := 1; l < len(layers); l++ {
 		crossings += countCrossings(layers[l-1], layers[l])
@@ -362,7 +362,7 @@ func crossings(layers map[int]*graph.Layer) int {
 	return crossings
 }
 
-func crossingsAround(l int, layers map[int]*graph.Layer) int {
+func crossingsAround(l int, layers []*graph.Layer) int {
 	if l == 0 {
 		return countCrossings(layers[l], layers[l+1])
 	}

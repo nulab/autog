@@ -8,22 +8,27 @@ import (
 )
 
 func TestVisitEdges(t *testing.T) {
-	t.Skip()
-	ids := strings.Split("abcde", "")
-	es := []*Edge{}
-	for i := range ids {
-		es = append(es, &Edge{edge: edge{Delta: i}})
+	n := &Node{ID: "N"}
+	n.In = []*Edge{
+		{edge: edge{From: &Node{ID: "A1"}, To: n}},
+		{edge: edge{From: &Node{ID: "A2"}, To: n}},
+		{edge: edge{From: &Node{ID: "A3"}, To: n}},
 	}
-
-	n := &Node{
-		In:  es[:3],
-		Out: es[3:],
+	n.Out = []*Edge{
+		{edge: edge{From: n, To: &Node{ID: "B1"}}},
+		{edge: edge{From: n, To: &Node{ID: "B2"}}},
+		{edge: edge{From: n, To: &Node{ID: "B3"}}},
+		{edge: edge{From: n, To: &Node{ID: "B4"}}},
 	}
 
 	i := 0
 	n.VisitEdges(func(e *Edge) {
-		assert.Equal(t, ids[i], i)
+		if i < 3 {
+			assert.True(t, strings.HasPrefix(e.From.ID, "A"))
+		} else {
+			assert.True(t, strings.HasPrefix(e.To.ID, "B"))
+		}
 		i++
 	})
-	assert.Equal(t, 5, i)
+	assert.Equal(t, 7, i)
 }

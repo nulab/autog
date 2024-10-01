@@ -6,31 +6,25 @@ import (
 	"github.com/nulab/autog/internal/graph"
 )
 
-const (
-	edgeTypeNoneVirtual = iota
-	edgeTypeOneVirtual
-	edgeTypeBothVirtual
-)
-
 // merge long edges and at the same time collect route information;
 // merged edges are removed from the graph edge list
 func mergeLongEdges(g *graph.DGraph) []routableEdge {
 	routes := make([]routableEdge, 0, len(g.Edges))
 	for _, e := range g.Edges {
 		switch e.Type() {
-		case edgeTypeNoneVirtual:
+		case graph.EdgeTypeConcrete:
 			u, v := orderedNodes(e)
 			e.ArrowHeadStart = e.IsReversed
 			routes = append(routes, routableEdge{e, route{[]*graph.Node{u, v}}})
 
-		case edgeTypeOneVirtual:
+		case graph.EdgeTypeHybrid:
 			// process each chain of virtual nodes only in the direction of the edge
 			if e.From.IsVirtual {
 				continue
 			}
 			routes = append(routes, routableEdge{e, route{reduceForward(g, e)}})
 
-		case edgeTypeBothVirtual:
+		case graph.EdgeTypeVirtual:
 			// skip, eventually it will be processed when encountering a type 1 edge
 		}
 	}

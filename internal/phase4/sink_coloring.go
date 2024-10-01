@@ -1,6 +1,8 @@
 package phase4
 
 import (
+	"slices"
+
 	"github.com/nulab/autog/internal/graph"
 )
 
@@ -25,8 +27,7 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 	// paint nodes, and remember the maximum same-color block width, O(n)
 	blockwidth := graph.NodeFloatMap{}
 
-	iter := layersIterator(g, top)
-	for layer := iter(); layer != nil; layer = iter() {
+	for _, layer := range slices.Backward(g.Layers) {
 		for _, n := range layer.Nodes {
 			_, w := setColor(n, colors, roots, edgePriority)
 			blockwidth[roots[n]] = max(blockwidth[roots[n]], w)
@@ -35,8 +36,7 @@ func execSinkColoring(g *graph.DGraph, params graph.Params) {
 
 	// init coordinates by packing nodes to the left, O(n)
 	xcoord := graph.NodeFloatMap{}
-	iter = layersIterator(g, bottom)
-	for layer := iter(); layer != nil; layer = iter() {
+	for _, layer := range g.Layers {
 		x := 0.0
 		for _, n := range layer.Nodes {
 			xcoord[n] = x
