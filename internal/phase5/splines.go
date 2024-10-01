@@ -10,7 +10,9 @@ import (
 
 func execSplines(g *graph.DGraph, routes []routableEdge) {
 	for _, e := range routes {
-		imonitor.Log("spline", e)
+		if e.From.ID == "a" && e.To.ID == "m" {
+			imonitor.Log("spline", e)
+		}
 
 		rects := buildRects(g, e)
 
@@ -72,11 +74,11 @@ func buildRects(g *graph.DGraph, r routableEdge) (rects []geom.Rect) {
 }
 
 func rectBetweenLayers(l1, l2 *graph.Layer) geom.Rect {
-	h := l1.Head()
-	t := l2.Tail()
+	h1, h2 := l1.Head(), l2.Head()
+	t1, t2 := l2.Tail(), l2.Tail()
 	return geom.Rect{
-		TL: geom.P{h.X, h.Y + h.H},
-		BR: geom.P{t.X + t.W, t.Y},
+		TL: geom.P{min(h1.X, h2.X), h1.Y + h1.H},
+		BR: geom.P{max(t1.X+t1.W, t2.X+t2.W), t2.Y},
 	}
 }
 
