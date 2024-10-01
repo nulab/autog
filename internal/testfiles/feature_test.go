@@ -19,7 +19,7 @@ func TestOutputVirtualNodes(t *testing.T) {
 			g,
 			autog.WithPositioning(autog.PositioningVAlign),
 			autog.WithEdgeRouting(autog.EdgeRoutingNoop),
-			autog.WithKeepVirtualNodes(true),
+			autog.WithOutputVirtualNodes(true),
 		)
 		assert.Len(t, layout.Nodes, 4)
 		assert.Len(t, layout.Edges, 3)
@@ -32,7 +32,7 @@ func TestOutputVirtualNodes(t *testing.T) {
 			g,
 			autog.WithPositioning(autog.PositioningVAlign),
 			autog.WithEdgeRouting(autog.EdgeRoutingNoop),
-			autog.WithKeepVirtualNodes(false),
+			autog.WithOutputVirtualNodes(false),
 		)
 		assert.Equal(t, 3, len(layout.Nodes))
 		assert.Equal(t, 3, cap(layout.Nodes))

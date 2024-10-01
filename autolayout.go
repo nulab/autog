@@ -77,7 +77,7 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 
 		// collect nodes
 		for _, n := range g.Nodes {
-			if n.IsVirtual && !layoutOpts.output.keepVirtualNodes {
+			if n.IsVirtual && !layoutOpts.output.includeVirtual {
 				continue
 			}
 
@@ -121,7 +121,7 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		shift += rightmostX + layoutOpts.params.NodeSpacing
 	}
 
-	if !layoutOpts.output.keepVirtualNodes {
+	if !layoutOpts.output.includeVirtual {
 		out.Nodes = slices.Clip(out.Nodes)
 	}
 	return out

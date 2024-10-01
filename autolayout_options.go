@@ -22,7 +22,7 @@ type options struct {
 }
 
 type output struct {
-	keepVirtualNodes bool
+	includeVirtual bool
 }
 
 var defaultOptions = options{
@@ -47,7 +47,7 @@ var defaultOptions = options{
 }
 
 var defaultOutputOptions = output{
-	keepVirtualNodes: false,
+	includeVirtual: false,
 }
 
 type Option func(*options)
