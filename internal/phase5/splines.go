@@ -10,9 +10,7 @@ import (
 
 func execSplines(g *graph.DGraph, routes []routableEdge) {
 	for _, e := range routes {
-		if e.From.ID == "a" && e.To.ID == "m" {
-			imonitor.Log("spline", e)
-		}
+		imonitor.Log("spline", e)
 
 		rects := buildRects(g, e)
 
@@ -30,6 +28,16 @@ func execSplines(g *graph.DGraph, routes []routableEdge) {
 		}
 
 		path := geom.Shortest(start, end, rects)
+		// remember the order of the elements in the path slice is from end to start
+
+		// with only two points the path is a straight line
+		// in this case we can skip spline fitting because it would result in a straight segment
+		// instead apply a heuristic to slide the control points just a little
+		// to draw the edge as a gentle curve
+		if len(path) == 2 {
+			e.Points = geom.MakeSpline(start, end).Float64Slice()
+			continue
+		}
 
 		poly := geom.MergeRects(rects)
 		ctrls := geom.FitSpline(path, geom.P{}, geom.P{}, poly.Sides())

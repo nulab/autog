@@ -68,3 +68,11 @@ func norm(p P) P {
 	}
 	return p
 }
+
+func rotate(p P, theta float64) P {
+	cs, sn := math.Cos(theta), math.Sin(theta)
+	return P{
+		X: p.X*cs - p.Y*sn,
+		Y: p.X*sn + p.Y*cs, // invert sin e cos to rotate in the SVG plane
+	}
+}
