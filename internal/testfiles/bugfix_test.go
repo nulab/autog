@@ -14,10 +14,14 @@ import (
 )
 
 func TestCrashers(t *testing.T) {
-	t.Run("phase4 SinkColoring", func(t *testing.T) {
-		t.Run("program hangs", func(t *testing.T) {
-			src := graph.EdgeSlice(issues1and4)
-			assert.NotPanics(t, func() { _ = autog.Layout(src, autog.WithPositioning(autog.PositioningSinkColoring)) })
+	t.Run("phase1", func(t *testing.T) {
+		t.Run("greedy cycle breaker fails to break cycles", func(t *testing.T) {
+			assert.NotPanics(t, func() {
+				_ = autog.Layout(
+					graph.EdgeSlice(issue9),
+					autog.WithNonDeterministicGreedyCycleBreaker(),
+				)
+			})
 		})
 	})
 
@@ -44,6 +48,13 @@ func TestCrashers(t *testing.T) {
 			})
 
 			assert.Equal(t, 46, <-c)
+		})
+	})
+
+	t.Run("phase4 SinkColoring", func(t *testing.T) {
+		t.Run("program hangs", func(t *testing.T) {
+			src := graph.EdgeSlice(issues1and4)
+			assert.NotPanics(t, func() { _ = autog.Layout(src, autog.WithPositioning(autog.PositioningSinkColoring)) })
 		})
 	})
 
