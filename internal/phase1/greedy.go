@@ -36,10 +36,24 @@ func execGreedy(g *graph.DGraph, params graph.Params) {
 		indeg:   graph.NodeIntMap{},
 	}
 
-	nodeCount := len(g.Nodes)
+	var (
+		nodeCount = len(g.Nodes)
+		sources   []*graph.Node
+		sinks     []*graph.Node
+	)
 
-	sources := slices.Collect(g.Sources())
-	sinks := slices.Collect(g.Sinks())
+	for _, n := range g.Nodes {
+		p.indeg[n] = n.Indeg()
+		if n.Indeg() == 0 {
+			sources = append(sources, n)
+		}
+		p.outdeg[n] = n.Outdeg()
+		if n.Outdeg() == 0 {
+			sinks = append(sinks, n)
+		}
+	}
+	sources = slices.Clip(sources)
+	sinks = slices.Clip(sinks)
 
 	// here ELK accounts for edge priority: particular edges that the user doesn't want to reverse
 	// can be assigned a non-zero priority; this will artificially increase the node's in-/out-degrees.
