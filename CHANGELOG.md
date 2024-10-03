@@ -1,4 +1,41 @@
 
+v0.9.0 / 2024-10-03
+==================
+
+  * [p5-splines] Always draw splines with a slight curve except for vertical segments
+  * [p5-splines] Fix rect between layers when upper layer's head is to the right of the lower layer's head
+  * Rename option WithKeepVirtualNodes to WithOutputVirtualNodes to reflect its relation to the output layout
+  * [p4-b&k] Fix main loop logic of the errata'ed horizontal compaction
+  * [p4] Rewrite layer and node iterators using iter.Seq
+  * [graph] Change DGraph.Layers to slice
+  * [graph] Use constants to represent edge type
+  * [geom] Change slices.Reverse to slices.Backward for use in reverse-order loop
+  * [graph] Rewrite Node.VisitEdges as iterator
+  * [graph] Convert DGraph.Sinks to an iterator provider
+  * [graph] Convert DGraph.Sources to an iterator provider
+  * [p2-ns] Remove todo about supporting connected components: already supported since v0.7.0
+  * Upgrade Go to 1.23.1
+  * Remove todo about sinks/sources not accounting for isolated nodes
+  * [p1-greedy] Add option to control determinism of greedy cycle breaker (fixes #12)
+  * [docs] Update README with latest spline routing development
+  * [p5-splines] Complete implementation of spline routing (fixes #11)
+  * [geom] Split shapes into individual files; includes a fix to Tri.Contains
+  * [geom] Add method to obtain bezier ctrl points as a float64 slice
+  * Temporarily skip test for overlaps in network simplex positioning due to non-determinism
+  * Add functional option to set individual node sizes (fixes #6)
+  * Add manual trigger to github action
+  * Run unit test via github action also when pushing to main branch
+  * Fix condition to check for node overlaps in unit tests
+  * [p4-b&k] Ensure no node overlaps in the final layout
+  * [docs] Fix indentation of example code in README
+  * [docs] Mention B&K erratum in README
+  * [p4-b&k] Implement erratum as per Brandes, Walter and Zink, 2020
+  * [graph] Use stdlib maps.Clone to clone hashmap[K,V]
+  * [graph] Add Head() method to Layer
+  * [p4-bk] Skip balancing and verifcation steps when user chooses a specific layout via options
+  * [docs] Add pkg.go.dev badge to README
+  * Add Run Unit Tests workflow badge to README.md (#26)
+
 v0.8.0 / 2024-09-20
 ==================
 
