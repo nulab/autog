@@ -128,8 +128,9 @@ See the [References](#references) section for citations and links.
 
 - `Greedy`: This is a solution to the feedback arc set ported from [ELK] source code, which in turn builds on the work of Eades et al. and Di Battista et al.
 It may get stuck in local optima. I found it useful to break two-node cycles such as edge pairs A->B and B->A  before running this algorithm. 
-**NOTE:** The algorithm is non-deterministic; it arranges non-sink non-source nodes in the arc diagram randomly before reversing edges. Indeed this produces variable results. 
-This isn't great for testing/debugging, so as of v0 the random selection is disabled and replaced with `nodes[len(nodes)/2]`.
+**NOTE:** The algorithm is non-deterministic; it arranges non-sink non-source nodes in the arc diagram randomly before reversing edges. Indeed, this may produce variable results. 
+This isn't great for testing/debugging, so as of v0 the algorithm defaults to `nodes[len(nodes)/2]`. 
+To force the original behavior, call `autog.Layout` with `autog.WithNonDeterministicGreedyCycleBreaker()` option.
 
 ### Layering
 
@@ -191,7 +192,7 @@ The result is indeed a set of cubic Bezier control points.
 
 ## Status
 
-This project is actively under development, but it is currently in version 0. 
+This project is being actively developed. It's still in version 0. 
 Please be aware that the public API and exported methods may undergo changes.
 
 - Self-loops don't break the program any more ([issue #23](https://github.com/nulab/autog/issues/23)) but are not supported. The final layout includes self-loop edges but those edges are not routed (`e.Points` is `nil`)
