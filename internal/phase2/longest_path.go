@@ -1,47 +1,34 @@
 package phase2
 
 import (
-	"sort"
-
 	"github.com/nulab/autog/internal/graph"
 )
 
 func execLongestPath(g *graph.DGraph) {
-	height := graph.NodeIntMap{}
-
 	for _, n := range g.Nodes {
-		height[n] = -1
+		n.Layer = -1
 	}
-	nodes := make([]*graph.Node, len(g.Nodes))
-	copy(nodes, g.Nodes)
-
-	sort.Slice(nodes, func(i, j int) bool {
-		return nodes[i].Outdeg() > nodes[j].Outdeg() ||
-			(nodes[i].Outdeg() == nodes[j].Outdeg() && nodes[i].Indeg() < nodes[j].Indeg())
-	})
-
-	nlayers := 0
-	for _, n := range nodes {
-		followLongestPath(n, height, &nlayers)
+	maxh := 0
+	for _, n := range g.Nodes {
+		h := followLongestPath(n)
+		maxh = max(maxh, h)
 	}
 }
 
-func followLongestPath(n *graph.Node, height graph.NodeIntMap, nlayers *int) int {
-	if height[n] >= 0 {
-		return height[n]
+func followLongestPath(n *graph.Node) int {
+	if n.Layer >= 0 {
+		return n.Layer
 	}
-	nodeh := 1
-	// sinks have no out-edges, so will yield 1
-	for _, e := range n.Out {
+	maxh := 0
+	for _, e := range n.In {
 		if e.SelfLoops() {
 			continue
 		}
 
-		h := followLongestPath(e.ConnectedNode(n), height, nlayers)
-		nodeh = max(nodeh, h+e.Delta)
+		h := followLongestPath(e.ConnectedNode(n))
+		maxh = max(maxh, h+1)
 	}
-	*nlayers = max(*nlayers, nodeh)
-	n.Layer = *nlayers - nodeh
-	height[n] = nodeh
-	return nodeh
+
+	n.Layer = maxh
+	return maxh
 }
