@@ -74,14 +74,6 @@ func initFixedPositions(edges []*graph.Edge) fixedPositions {
 	return fixedPositions{mustAfter, mustBefore}
 }
 
-func walkFlat(n *graph.Node, visited graph.EdgeSet) {
-	for _, f := range n.Out {
-		if visited[f] {
-			continue
-		}
-	}
-}
-
 // head returns the first element in a same-layer transitive closure to which k belongs, and the number of edges
 // that separate k and the head;
 // or returns k itself and 0 if k doesn't belong to any such closure

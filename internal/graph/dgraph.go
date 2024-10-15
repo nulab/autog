@@ -2,7 +2,6 @@ package graph
 
 import (
 	"iter"
-	"strings"
 )
 
 type DGraph struct {
@@ -50,39 +49,4 @@ func (g *DGraph) Sinks() iter.Seq[*Node] {
 			}
 		}
 	}
-}
-
-func (g *DGraph) String() string {
-	bld := strings.Builder{}
-	for _, n := range g.Nodes {
-		bld.WriteString(n.ID)
-		bld.WriteRune('\n')
-		bld.WriteString("-IN:")
-		if len(n.In) == 0 {
-			bld.WriteRune('\t')
-			bld.WriteString("none")
-			bld.WriteRune('\n')
-		}
-		for _, e := range n.In {
-			bld.WriteRune('\t')
-			bld.WriteString(e.From.ID)
-			bld.WriteString(" -> ")
-			bld.WriteString(n.ID)
-			bld.WriteRune('\n')
-		}
-		bld.WriteString("-OUT:")
-		if len(n.Out) == 0 {
-			bld.WriteRune('\t')
-			bld.WriteString("none")
-			bld.WriteRune('\n')
-		}
-		for _, e := range n.Out {
-			bld.WriteRune('\t')
-			bld.WriteString(n.ID)
-			bld.WriteString(" -> ")
-			bld.WriteString(e.To.ID)
-			bld.WriteRune('\n')
-		}
-	}
-	return bld.String()
 }

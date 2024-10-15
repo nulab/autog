@@ -21,8 +21,8 @@ func MakeSpline(a, b P) ctrlp {
 	theta2 := sign(-v.X) * math.Pi * (9.0 / 10.0)
 
 	// rotate the vector
-	r := rotate(v, theta1)
-	q := rotate(v, theta2)
+	r := rotatep(v, theta1)
+	q := rotatep(v, theta2)
 	// slide the control points along the rotated vector
 	p1 := P{a.X + k*r.X, a.Y + k*r.Y}
 	p2 := P{b.X + k*q.X, b.Y + k*q.Y}

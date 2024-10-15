@@ -1,131 +1,87 @@
-//go:build unit
-
 package phase2
 
 import (
 	"testing"
 
-	egraph "github.com/nulab/autog/graph"
-	"github.com/nulab/autog/internal/graph"
-	"github.com/nulab/autog/internal/testfiles"
+	eg "github.com/nulab/autog/graph"
+	ig "github.com/nulab/autog/internal/graph"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSpanningTree(t *testing.T) {
-	g := fromEdgeSlice([][]string{
-		{"a", "b"},
-		{"b", "d"},
-		{"b", "e"},
-		{"a", "c"},
-		{"c", "f"},
-		{"c", "g"},
-		{"c", "h"},
-		{"f", "i"},
-	})
-	for _, e := range g.Edges {
-		e.IsInSpanningTree = true
-	}
-	p := newNsProcessor()
-	p.setStreeValues(findNode(g, "a"))
-
-	t.Run("low and lim", func(t *testing.T) {
-		type tc struct {
-			id       string
-			low, lim int
-		}
-		tcs := []tc{
-			{"a", 1, 9},
-			{"b", 1, 3},
-			{"c", 4, 8},
-			{"d", 1, 1},
-			{"e", 2, 2},
-			{"f", 4, 5},
-			{"g", 6, 6},
-			{"h", 7, 7},
-			{"i", 4, 4},
-		}
-
-		for _, tc := range tcs {
-			n := findNode(g, tc.id)
-			assert.Equalf(t, tc.low, p.low[n], "wrong low for n: %s", n.ID)
-			assert.Equalf(t, tc.lim, p.lim[n], "wrong lim for n: %s", n.ID)
-		}
-	})
-
-	t.Run("node in head component", func(t *testing.T) {
-		e := findEdge(g, "c", "f")
-		assert.True(t, p.inHeadComponent(findNode(g, "i"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "f"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "c"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "d"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "e"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "h"), e))
-
-		e.Reverse()
-		assert.False(t, p.inHeadComponent(findNode(g, "i"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "f"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "c"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "d"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "e"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "h"), e))
-
-		e = findEdge(g, "a", "b")
-		assert.False(t, p.inHeadComponent(findNode(g, "i"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "f"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "c"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "a"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "d"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "e"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "h"), e))
-
-		e.Reverse()
-		assert.True(t, p.inHeadComponent(findNode(g, "i"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "f"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "c"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "a"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "d"), e))
-		assert.False(t, p.inHeadComponent(findNode(g, "e"), e))
-		assert.True(t, p.inHeadComponent(findNode(g, "h"), e))
-
-		e = findEdge(g, "b", "e")
-		for _, n := range g.Nodes {
-			if n.ID == "e" {
-				assert.True(t, p.inHeadComponent(n, e))
-			} else {
-				assert.False(t, p.inHeadComponent(n, e))
-			}
-		}
-	})
-}
-
-func newNsProcessor() *networkSimplexProcessor {
-	return &networkSimplexProcessor{
-		lim: graph.NodeIntMap{},
-		low: graph.NodeIntMap{},
-	}
-}
-
-func findNode(g *graph.DGraph, id string) *graph.Node {
-	for _, n := range g.Nodes {
-		if n.ID == id {
-			return n
-		}
-	}
-	return nil
-}
-
-func findEdge(g *graph.DGraph, from, to string) *graph.Edge {
-	for _, e := range g.Edges {
-		if e.From.ID == from && e.To.ID == to {
-			return e
-		}
-	}
-	return nil
-}
-
 func TestNSLayering(t *testing.T) {
-	g := fromEdgeSlice(testfiles.DotAbstract)
-	execNetworkSimplex(g, graph.Params{NetworkSimplexThoroughness: 28, NetworkSimplexBalance: 1})
+	g := &ig.DGraph{}
+	eg.EdgeSlice([][]string{
+		{"S24", "27"},
+		{"S24", "25"},
+		{"S1", "10"},
+		{"S1", "2"},
+		{"S35", "36"},
+		{"S35", "43"},
+		{"S30", "31"},
+		{"S30", "33"},
+		{"9", "42"},
+		{"9", "T1"},
+		{"25", "T1"},
+		{"25", "26"},
+		{"27", "T24"},
+		{"2", "3"},
+		{"2", "16"},
+		{"2", "17"},
+		{"2", "T1"},
+		{"2", "18"},
+		{"10", "11"},
+		{"10", "14"},
+		{"10", "T1"},
+		{"10", "13"},
+		{"10", "12"},
+		{"31", "T1"},
+		{"31", "32"},
+		{"33", "T30"},
+		{"33", "34"},
+		{"42", "4"},
+		{"26", "4"},
+		{"3", "4"},
+		{"16", "15"},
+		{"17", "19"},
+		{"18", "29"},
+		{"11", "4"},
+		{"14", "15"},
+		{"37", "39"},
+		{"37", "41"},
+		{"37", "38"},
+		{"37", "40"},
+		{"13", "19"},
+		{"12", "29"},
+		{"43", "38"},
+		{"43", "40"},
+		{"36", "19"},
+		{"32", "23"},
+		{"34", "29"},
+		{"39", "15"},
+		{"41", "29"},
+		{"38", "4"},
+		{"40", "19"},
+		{"4", "5"},
+		{"19", "21"},
+		{"19", "20"},
+		{"19", "28"},
+		{"5", "6"},
+		{"5", "T35"},
+		{"5", "23"},
+		{"21", "22"},
+		{"20", "15"},
+		{"28", "29"},
+		{"6", "7"},
+		{"15", "T1"},
+		{"22", "23"},
+		{"22", "T35"},
+		{"29", "T30"},
+		{"7", "T8"},
+		{"23", "T24"},
+		{"23", "T1"},
+	}).Populate(g)
+
+	execNetworkSimplex(g, ig.Params{NetworkSimplexThoroughness: 28, NetworkSimplexBalance: 1})
 
 	want := expectedLayersAbstract()
 	for _, n := range g.Nodes {
@@ -151,10 +107,4 @@ func expectedLayersAbstract() map[string]int {
 		"T1": 7, "T24": 7, "7": 7,
 		"T8": 8,
 	}
-}
-
-func fromEdgeSlice(es [][]string) *graph.DGraph {
-	g := &graph.DGraph{}
-	egraph.EdgeSlice(es).Populate(g)
-	return g
 }

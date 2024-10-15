@@ -16,6 +16,7 @@ func TestOptions(t *testing.T) {
 	// set some random options that are different from the defaults
 	opts := testOptions(
 		WithCycleBreaking(CycleBreakingDepthFirst),
+		WithLayering(LayeringLongestPath),
 		WithOrdering(OrderingNoop),
 		WithPositioning(PositioningVAlign),
 		WithEdgeRouting(EdgeRoutingStraight),
@@ -29,6 +30,7 @@ func TestOptions(t *testing.T) {
 	)
 
 	assert.Equal(t, phase1.DepthFirst, opts.p1)
+	assert.Equal(t, phase2.LongestPath, opts.p2)
 	assert.Equal(t, phase3.NoOrdering, opts.p3)
 	assert.Equal(t, phase4.VerticalAlign, opts.p4)
 	assert.Equal(t, phase5.Straight, opts.p5)

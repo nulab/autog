@@ -15,4 +15,5 @@ func TestAlg(t *testing.T) {
 		assert.Equal(t, 3, i.Phase())
 		assert.Equal(t, strs[i], i.String())
 	}
+	assert.Equal(t, "<invalid>", _endAlg.String())
 }

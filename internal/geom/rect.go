@@ -15,7 +15,7 @@ func (r Rect) String() string {
 func (r Rect) SVG() string {
 	width := r.BR.X - r.TL.X
 	height := r.BR.Y - r.TL.Y
-	return fmt.Sprintf(`<rect class="rect" x="%f" y="%f" width="%f" height="%f" style="fill: lightgrey; stroke: black;" />`, r.TL.X, r.TL.Y, width, height)
+	return fmt.Sprintf(`<rect class="rect" x="%.2f" y="%.2f" width="%.2f" height="%.2f" style="fill: lightgrey; stroke: black;" />`, r.TL.X, r.TL.Y, width, height)
 }
 
 func (r Rect) Width() float64 {
