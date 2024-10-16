@@ -3,14 +3,13 @@ package ns
 import (
 	"testing"
 
-	egraph "github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/graph"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSpanningTree(t *testing.T) {
 	g := &graph.DGraph{}
-	egraph.EdgeSlice([][]string{
+	graph.EdgeSlice([][]string{
 		{"a", "b"},
 		{"b", "d"},
 		{"b", "e"},

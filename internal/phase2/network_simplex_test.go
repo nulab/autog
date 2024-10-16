@@ -3,14 +3,13 @@ package phase2
 import (
 	"testing"
 
-	eg "github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNSLayering(t *testing.T) {
 	g := &ig.DGraph{}
-	eg.EdgeSlice([][]string{
+	ig.EdgeSlice([][]string{
 		{"S24", "27"},
 		{"S24", "25"},
 		{"S1", "10"},
