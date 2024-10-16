@@ -5,7 +5,6 @@ import (
 
 	"github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
-	"github.com/nulab/autog/internal/graph/connected"
 	imonitor "github.com/nulab/autog/internal/monitor"
 	"github.com/nulab/autog/internal/processor"
 	"github.com/nulab/autog/internal/processor/postprocessor"
@@ -55,7 +54,7 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 	shift := 0.0
 
 	// process each connected components and collect results into the same layout output
-	for _, g := range connected.Components(G) {
+	for _, g := range G.ConnectedComponents() {
 		if len(g.Nodes) == 0 {
 			panic("autog: connected sub-graph node set is empty: this might be a bug")
 		}

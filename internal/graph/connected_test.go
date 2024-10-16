@@ -1,10 +1,8 @@
-package connected
+package graph
 
 import (
 	"testing"
 
-	"github.com/nulab/autog/graph"
-	ig "github.com/nulab/autog/internal/graph"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,10 +12,10 @@ func TestComponents(t *testing.T) {
 			{"a", "b"},
 			{"b", "c"},
 		}
-		g := &ig.DGraph{}
-		graph.EdgeSlice(es).Populate(g)
+		g := &DGraph{}
+		EdgeSlice(es).Populate(g)
 
-		comp := Components(g)
+		comp := g.ConnectedComponents()
 		assert.Len(t, comp, 1)
 		assert.True(t, comp[0] == g)
 	})
@@ -28,10 +26,10 @@ func TestComponents(t *testing.T) {
 			{"b", "c"},
 			{"f", "g"},
 		}
-		g := &ig.DGraph{}
-		graph.EdgeSlice(es).Populate(g)
+		g := &DGraph{}
+		EdgeSlice(es).Populate(g)
 
-		comp := Components(g)
+		comp := g.ConnectedComponents()
 		assert.Len(t, comp, 2)
 		assert.ElementsMatch(t, []string{"a", "b", "c"}, ids(comp[0].Nodes))
 		assert.ElementsMatch(t, []string{"f", "g"}, ids(comp[1].Nodes))
@@ -46,10 +44,10 @@ func TestComponents(t *testing.T) {
 			{"l", "j"},
 			{"z", "f"},
 		}
-		g := &ig.DGraph{}
-		graph.EdgeSlice(es).Populate(g)
+		g := &DGraph{}
+		EdgeSlice(es).Populate(g)
 
-		comp := Components(g)
+		comp := g.ConnectedComponents()
 		assert.Len(t, comp, 4)
 		assert.ElementsMatch(t, []string{"a", "b", "c"}, ids(comp[0].Nodes))
 		assert.ElementsMatch(t, []string{"f", "g", "h", "i", "z"}, ids(comp[1].Nodes))
@@ -59,7 +57,7 @@ func TestComponents(t *testing.T) {
 
 }
 
-func ids(ns []*ig.Node) (ids []string) {
+func ids(ns []*Node) (ids []string) {
 	for _, n := range ns {
 		ids = append(ids, n.ID)
 	}
