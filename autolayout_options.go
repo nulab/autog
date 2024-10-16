@@ -36,6 +36,7 @@ var defaultOptions = options{
 		NetworkSimplexThoroughness:               28,
 		NetworkSimplexMaxIterFactor:              0,
 		NetworkSimplexBalance:                    graph.OptionNsBalanceV,
+		VirtualNodeFixedSize:                     0.0,
 		WMedianMaxIter:                           24,
 		NetworkSimplexAuxiliaryGraphWeightFactor: 4,
 		LayerSpacing:                             150.0,

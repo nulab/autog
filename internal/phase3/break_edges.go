@@ -35,7 +35,6 @@ func breakEdge(g *graph.DGraph, e *graph.Edge, v int) (*graph.Edge, *graph.Edge)
 		ID:        "V" + strconv.Itoa(v),
 		Layer:     from.Layer + 1,
 		IsVirtual: true,
-		Size:      graph.Size{W: 20, H: 20},
 	}
 	// set e's target to the virtual node
 	e.To = virtualNode

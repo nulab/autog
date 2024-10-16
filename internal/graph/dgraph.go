@@ -50,3 +50,15 @@ func (g *DGraph) Sinks() iter.Seq[*Node] {
 		}
 	}
 }
+
+func (g *DGraph) VirtualNodes() iter.Seq[*Node] {
+	return func(yield func(*Node) bool) {
+		for _, n := range g.Nodes {
+			if n.IsVirtual {
+				if !yield(n) {
+					return
+				}
+			}
+		}
+	}
+}

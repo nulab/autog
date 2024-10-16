@@ -50,6 +50,12 @@ func WithNodeFixedSize(w, h float64) Option {
 	}
 }
 
+func WithVirtualNodeFixedSize(n float64) Option {
+	return func(o *options) {
+		o.params.VirtualNodeFixedSize = n
+	}
+}
+
 func WithBrandesKoepfLayout(i int) Option {
 	return func(o *options) {
 		o.params.BrandesKoepfLayout = i

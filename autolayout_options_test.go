@@ -26,6 +26,7 @@ func TestOptions(t *testing.T) {
 		WithBrandesKoepfLayout(2),
 		WithNodeFixedSize(100.0, 100.0),
 		WithNodeSize(map[string]graph.Size{"N1": {W: 20, H: 20}}),
+		WithVirtualNodeFixedSize(50.0),
 		WithNonDeterministicGreedyCycleBreaker(),
 	)
 
@@ -42,6 +43,7 @@ func TestOptions(t *testing.T) {
 	assert.Nil(t, opts.monitor)
 	assert.NotNil(t, opts.params.NodeFixedSizeFunc)
 	assert.NotNil(t, opts.params.NodeSizeFunc)
+	assert.Equal(t, 50.0, opts.params.VirtualNodeFixedSize)
 	assert.True(t, opts.params.GreedyCycleBreakerRandomNodeChoice)
 
 	assert.Equal(t, CycleBreakingGreedy, phase1.Greedy)
