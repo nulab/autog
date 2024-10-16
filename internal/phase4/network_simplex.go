@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/nulab/autog/internal/graph"
-	"github.com/nulab/autog/internal/phase2"
+	"github.com/nulab/autog/internal/ns"
 )
 
 type networkSimplexProcessor struct {
@@ -30,7 +30,7 @@ func execNetworkSimplex(g *graph.DGraph, params graph.Params) {
 	// todo: if there are flat edges, dot adds auxiliary edges
 	aux := p.auxiliaryGraph(g)
 
-	phase2.NetworkSimplex.Process(
+	new(ns.Processor).Exec(
 		aux,
 		graph.Params{
 			NetworkSimplexThoroughness:  params.NetworkSimplexThoroughness,

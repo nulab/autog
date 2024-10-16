@@ -35,6 +35,13 @@ func execWeightedMedian(g *graph.DGraph, params graph.Params) {
 
 	// insert virtual nodes so that edges with length >1 have length 1
 	breakLongEdges(g)
+	// set size to virtual nodes if needed
+	if s := params.VirtualNodeFixedSize; s > 0.0 {
+		for n := range g.VirtualNodes() {
+			n.W = s
+			n.H = s
+		}
+	}
 
 	maxiter := int(params.WMedianMaxIter)
 	fixedPositions := initFixedPositions(g.Edges)

@@ -16,6 +16,7 @@ func TestOptions(t *testing.T) {
 	// set some random options that are different from the defaults
 	opts := testOptions(
 		WithCycleBreaking(CycleBreakingDepthFirst),
+		WithLayering(LayeringLongestPath),
 		WithOrdering(OrderingNoop),
 		WithPositioning(PositioningVAlign),
 		WithEdgeRouting(EdgeRoutingStraight),
@@ -25,10 +26,12 @@ func TestOptions(t *testing.T) {
 		WithBrandesKoepfLayout(2),
 		WithNodeFixedSize(100.0, 100.0),
 		WithNodeSize(map[string]graph.Size{"N1": {W: 20, H: 20}}),
+		WithVirtualNodeFixedSize(50.0),
 		WithNonDeterministicGreedyCycleBreaker(),
 	)
 
 	assert.Equal(t, phase1.DepthFirst, opts.p1)
+	assert.Equal(t, phase2.LongestPath, opts.p2)
 	assert.Equal(t, phase3.NoOrdering, opts.p3)
 	assert.Equal(t, phase4.VerticalAlign, opts.p4)
 	assert.Equal(t, phase5.Straight, opts.p5)
@@ -40,6 +43,7 @@ func TestOptions(t *testing.T) {
 	assert.Nil(t, opts.monitor)
 	assert.NotNil(t, opts.params.NodeFixedSizeFunc)
 	assert.NotNil(t, opts.params.NodeSizeFunc)
+	assert.Equal(t, 50.0, opts.params.VirtualNodeFixedSize)
 	assert.True(t, opts.params.GreedyCycleBreakerRandomNodeChoice)
 
 	assert.Equal(t, CycleBreakingGreedy, phase1.Greedy)

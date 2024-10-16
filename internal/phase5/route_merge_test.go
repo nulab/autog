@@ -4,7 +4,6 @@ import (
 	"sort"
 	"testing"
 
-	egraph "github.com/nulab/autog/graph"
 	"github.com/nulab/autog/internal/graph"
 	"github.com/stretchr/testify/assert"
 )
@@ -151,6 +150,6 @@ func inIds(n *graph.Node) []string {
 
 func fromEdgeSlice(es [][]string) *graph.DGraph {
 	g := &graph.DGraph{}
-	egraph.EdgeSlice(es).Populate(g)
+	graph.EdgeSlice(es).Populate(g)
 	return g
 }

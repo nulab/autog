@@ -38,6 +38,9 @@ type Params struct {
 
 	// ---- phase3 options ---
 
+	// Size of virtual nodes (NxN). Defaults to zero, i.e. virtual nodes are treated as points.
+	VirtualNodeFixedSize float64
+
 	// Maximum number of iterations of the WMedian orderer.
 	WMedianMaxIter uint
 

@@ -85,7 +85,7 @@ func rectBetweenLayers(l1, l2 *graph.Layer) geom.Rect {
 	h1, h2 := l1.Head(), l2.Head()
 	t1, t2 := l2.Tail(), l2.Tail()
 	return geom.Rect{
-		TL: geom.P{min(h1.X, h2.X), h1.Y + h1.H},
+		TL: geom.P{min(h1.X, h2.X), h1.Y + max(h1.H, l1.H)},
 		BR: geom.P{max(t1.X+t1.W, t2.X+t2.W), t2.Y},
 	}
 }
@@ -104,8 +104,8 @@ func rectVirtualNode(vn *graph.Node, vl *graph.Layer) geom.Rect {
 		// this p-1 access is safe: a layer cannot contain only one virtual node
 		n := vl.Nodes[p-1]
 		return geom.Rect{
-			TL: geom.P{n.X + n.W, n.Y},
-			BR: geom.P{vn.X + 10, n.Y + n.H},
+			TL: geom.P{n.X + n.W + 10, n.Y},
+			BR: geom.P{vn.X, n.Y + n.H},
 		}
 
 	default:
