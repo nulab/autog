@@ -1,4 +1,16 @@
 
+v0.10.0 / 2024-10-16
+==================
+
+  * Add option to control size of virtual nodes
+  * [graph] Change connected components routine to a method of DGraph
+  * [graph] Move graph Source and EdgeSlice to internal package and expose via alias
+  * Improve test coverage and simplify package import graph
+  * [p2-longest] Fix longest-path layerer
+  * [geom] Delete unused Stack type
+  * [docs] Update greedy cycle breaker description in README to reflect actual behavior with autog.WithNonDeterministicGreedyCycleBreaker
+  * [p1-greedy] Properly initialize degree maps (fixes #9)
+
 v0.9.0 / 2024-10-03
 ==================
 
