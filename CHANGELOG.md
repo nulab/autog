@@ -1,4 +1,12 @@
 
+v0.11.0 / 2025-08-21
+==================
+
+  * Return empty result instead of panicking if the input graph contains no nodes (fixes #33)
+  * [docs] Minor README grammar fix
+  * Upgrade to Go 1.25
+  * [p3] Change string representation of WMedian algorithm into wmedian
+
 v0.10.0 / 2024-10-16
 ==================
 
