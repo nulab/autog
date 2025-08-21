@@ -14,7 +14,7 @@ func (alg Alg) String() (s string) {
 	case NoOrdering:
 		s = "noop"
 	case WMedian:
-		s = "gvdot"
+		s = "wmedian"
 	default:
 		s = "<invalid>"
 	}
