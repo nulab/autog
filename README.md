@@ -195,7 +195,7 @@ The result is indeed a set of cubic Bezier control points.
 This project is being actively developed. It's still in version 0. 
 Please be aware that the public API and exported methods may undergo changes.
 
-- Self-loops don't break the program any more ([issue #23](https://github.com/nulab/autog/issues/23)) but are not supported. The final layout includes self-loop edges but those edges are not routed (`e.Points` is `nil`)
+- Self-loops don't break the program any longer ([issue #23](https://github.com/nulab/autog/issues/23)) but are not supported. The final layout includes self-loop edges but those edges are not routed (`e.Points` is `nil`)
 
 ## Commit guidelines
 
@@ -211,7 +211,6 @@ The prefixes are:
 - `[monitor]`: the `monitor` package
 - `[geom]`: the `geom` package
 - `[docs]`: documentation, within the code (e.g. comments for godocs) or README
-- 
 
 ## Bug reporting
 
