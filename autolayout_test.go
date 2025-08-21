@@ -209,7 +209,7 @@ func TestLayoutBugfix(t *testing.T) {
 					graph.EdgeSlice(dotAbstract),
 					WithPositioning(PositioningNoop),
 					WithEdgeRouting(EdgeRoutingNoop),
-					WithMonitor(imonitor.NewFilteredChan(c, imonitor.MatchAll(3, "gvdot", "crossings"))),
+					WithMonitor(imonitor.NewFilteredChan(c, imonitor.MatchAll(3, "wmedian", "crossings"))),
 				)
 			})
 

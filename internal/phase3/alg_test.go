@@ -9,7 +9,7 @@ import (
 func TestAlg(t *testing.T) {
 	assert.EqualValues(t, 2, _endAlg)
 
-	strs := []string{"noop", "gvdot"}
+	strs := []string{"noop", "wmedian"}
 
 	for i := Alg(0); i < _endAlg; i++ {
 		assert.Equal(t, 3, i.Phase())
