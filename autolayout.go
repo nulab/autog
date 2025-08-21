@@ -33,7 +33,7 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 	G := from(source)
 
 	if len(G.Nodes) == 0 {
-		panic("autog: node set is empty")
+		return graph.Layout{}
 	}
 
 	if layoutOpts.params.NodeFixedSizeFunc != nil {
