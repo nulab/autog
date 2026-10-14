@@ -1,8 +1,10 @@
 
-n.n.n / 2026-10-14
+v0.12.0 / 2026-10-14
 ==================
 
-
+  * Merge pull request #35 from sbtlocalization/main
+  * [p3] fix crash in layer index comparison (when graph has >64 layers)
+  * [p4-coloring] Fix overlapping nodes
 
 v0.11.0 / 2025-08-21
 ==================
