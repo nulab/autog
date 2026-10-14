@@ -215,6 +215,23 @@ func TestLayoutBugfix(t *testing.T) {
 
 			assert.Equal(t, 46, <-c)
 		})
+
+		t.Run("layer index overflow in cross counting", func(t *testing.T) {
+			id := func(prefix string, i int) string { return fmt.Sprintf("%s%d", prefix, i) }
+			var edges [][]string
+			for i := range 70 {
+				// long spine to get past 64 layers, with a leaf at each layer so
+				// that every bilayer pair qualifies for cross counting
+				edges = append(edges, []string{id("s", i), id("s", i+1)})
+				edges = append(edges, []string{id("s", i), id("t", i)})
+			}
+			for i := range 5 {
+				// widen one deep layer so that stray edge endpoints fall outside
+				// the radix sort matrix of thinner colliding layer pairs
+				edges = append(edges, []string{id("s", 65), id("c", i)})
+			}
+			assert.NotPanics(t, func() { _ = Layout(graph.EdgeSlice(edges)) })
+		})
 	})
 
 	t.Run("network simplex positioner no panic", func(t *testing.T) {
@@ -261,6 +278,34 @@ func TestLayoutBugfix(t *testing.T) {
 					}
 					overlaps++
 				}
+			}
+		}
+	})
+
+	t.Run("sink coloring no overlaps", func(t *testing.T) {
+		g := &ig.DGraph{}
+		graph.EdgeSlice([][]string{
+			{"S0", "T0"}, {"T0", "S5"}, {"S5", "T12"},
+			{"S0", "T1"}, {"T1", "S4"}, {"S4", "T11"},
+			{"S0", "T2"}, {"T2", "S2"},
+			{"S2", "T6"},
+			{"S2", "T7"},
+			{"S2", "T8"}, {"T8", "S6"},
+			{"S6", "T13"},
+			{"S6", "T14"},
+			{"S2", "T9"}, {"T9", "S7"}, {"S7", "T15"},
+		}).Populate(g)
+		_ = Layout(g,
+			WithPositioning(PositioningSinkColoring),
+			WithEdgeRouting(EdgeRoutingNoop),
+			WithNodeFixedSize(400, 300),
+		)
+
+		for _, l := range g.Layers {
+			for j := 1; j < l.Len(); j++ {
+				prv, cur := l.Nodes[j-1], l.Nodes[j]
+				// note: this isn't a strict inequality because virtual nodes have size 0x0
+				assert.Truef(t, prv.X+prv.W <= cur.X, "%s(X+W:%.2f) overlaps %s(X:%.2f)", prv, prv.X+prv.W, cur, cur.X)
 			}
 		}
 	})

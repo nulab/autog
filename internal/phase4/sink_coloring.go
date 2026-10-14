@@ -142,7 +142,7 @@ func placeBlock(g *graph.DGraph, layerMaxLen int, spacing float64, blockmax, blo
 				// consider current and successive nodes
 				cur, suc := l.Nodes[k], l.Nodes[k+1]
 				// shift if there is an overlap
-				if xcoord[cur] > xcoord[suc] {
+				if xcoord[suc] < xcoord[cur]+blockwidth[roots[cur]]+spacing {
 					xcoord[suc] = xcoord[cur] + blockwidth[roots[cur]] + spacing
 					shift = true
 					blockmax[roots[l.Nodes[k+1]]] = max(blockmax[roots[l.Nodes[k+1]]], xcoord[l.Nodes[k+1]])

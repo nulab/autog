@@ -86,18 +86,14 @@ func inLayerEdges(upper, lower *graph.Layer) []*graph.Edge {
 	es := []*graph.Edge{}
 	for _, n := range upper.Nodes {
 		n.VisitEdges(func(e *graph.Edge) {
-			// compare regardless of order
-			if bit(e.From.Layer, e.To.Layer) == bit(upper.Index, lower.Index) {
+			if (e.From.Layer == upper.Index && e.To.Layer == lower.Index) ||
+				(e.From.Layer == lower.Index && e.To.Layer == upper.Index) {
 				es = append(es, e)
 			}
 		})
 
 	}
 	return es
-}
-
-func bit(a, b int) uint64 {
-	return (1 << a) | (1 << b)
 }
 
 // returns the layers as a tuple ordered by number of nodes
