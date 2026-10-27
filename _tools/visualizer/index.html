@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>autog visualizer</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; font: 13px system-ui, sans-serif; color: #222; background: #fff; }
+  #app { display: flex; height: 100%; }
+  #left { display: flex; flex-direction: column; width: 30%; min-width: 120px; }
+  #right { flex: 1; min-width: 120px; position: relative; overflow: hidden; background: #fafafa; }
+  #splitter { width: 6px; cursor: col-resize; background: #ddd; flex: none; }
+  #splitter:hover, #splitter.dragging { background: #9ab; }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 1px solid #ddd; background: #f3f3f3; }
+  .bar .grow { flex: 1; }
+  #source { flex: 1; width: 100%; border: 0; padding: 8px; resize: none; outline: none; font: 13px ui-monospace, Menlo, monospace; line-height: 1.5; tab-size: 4; }
+  #status { padding: 4px 8px; border-top: 1px solid #ddd; font-size: 12px; color: #555; white-space: pre-wrap; max-height: 30%; overflow: auto; }
+  #renderBar { border-top: 1px solid #ddd; border-bottom: 0; }
+  #render { font-weight: 600; }
+  kbd { font: 11px ui-monospace, Menlo, monospace; color: #666; }
+  #status.error { color: #b00020; background: #fff0f0; }
+  #canvas { width: 100%; height: 100%; display: block; cursor: grab; user-select: none; }
+  #canvas.panning { cursor: grabbing; }
+  #toolbar { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; }
+  button { font: inherit; padding: 4px 10px; border: 1px solid #bbb; border-radius: 4px; background: #fff; cursor: pointer; }
+  button:hover { background: #eee; }
+  #settings { position: absolute; top: 44px; right: 8px; width: 290px; max-height: calc(100% - 56px); overflow: auto;
+              background: #fff; border: 1px solid #bbb; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,.15); padding: 10px 12px; }
+  #settings[hidden] { display: none; }
+  #settings h3 { margin: 10px 0 6px; font-size: 12px; text-transform: uppercase; color: #666; }
+  #settings h3:first-child { margin-top: 0; }
+  #settings label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 4px 0; }
+  #settings input[type=number] { width: 80px; }
+  #settings select { width: 140px; }
+  .node rect { fill: #fff; stroke: #345; stroke-width: 1.2; }
+  .node text { font: 12px system-ui, sans-serif; fill: #222; dominant-baseline: central; text-anchor: middle; pointer-events: none; }
+  .virtual rect { fill: #fff8e0; stroke: #c90; stroke-dasharray: 3 2; }
+  .virtual circle { fill: #c90; }
+  .virtual text { font-size: 9px; fill: #a70; }
+  .edge { fill: none; stroke: #567; stroke-width: 1.4; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="left">
+    <div class="bar"><strong>Graph</strong><span class="grow"></span><span style="color:#777">one edge per line: <code>a -&gt; b</code></span></div>
+    <textarea id="source" spellcheck="false"></textarea>
+    <div id="status">Press Render to lay out the graph</div>
+    <div class="bar" id="renderBar">
+      <button id="render" title="Render the graph (Shift+Enter)">Render</button>
+      <kbd>Shift+Enter</kbd>
+    </div>
+  </div>
+  <div id="splitter" title="Drag to resize"></div>
+  <div id="right">
+    <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#567"/>
+        </marker>
+      </defs>
+      <g id="scene"></g>
+    </svg>
+    <div id="toolbar">
+      <button id="fit" title="Fit graph to view">Fit</button>
+      <button id="toggleSettings">Settings</button>
+    </div>
+    <form id="settings" hidden>
+      <h3>Algorithms</h3>
+      <label>Cycle breaking
+        <select name="cycleBreaking">
+          <option value="greedy">Greedy</option>
+          <option value="dfs">Depth first</option>
+        </select></label>
+      <label>Layering
+        <select name="layering">
+          <option value="networksimplex">Network simplex</option>
+          <option value="longestpath">Longest path</option>
+        </select></label>
+      <label>Ordering
+        <select name="ordering">
+          <option value="wmedian">Weighted median</option>
+          <option value="noop">None</option>
+        </select></label>
+      <label>Positioning
+        <select name="positioning">
+          <option value="sinkcoloring">Sink coloring</option>
+          <option value="brandeskoepf">Brandes-Köpf</option>
+          <option value="networksimplex">Network simplex</option>
+          <option value="valign">Vertical align</option>
+          <option value="packright">Pack right</option>
+          <option value="noop">None</option>
+        </select></label>
+      <label>Edge routing
+        <select name="edgeRouting">
+          <option value="polyline">Polyline</option>
+          <option value="straight">Straight</option>
+          <option value="ortho">Orthogonal</option>
+          <option value="splines">Splines</option>
+          <option value="noop">None</option>
+        </select></label>
+
+      <h3>Sizes and spacing</h3>
+      <label>Node width <input type="number" name="nodeWidth" min="0" step="1"></label>
+      <label>Node height <input type="number" name="nodeHeight" min="0" step="1"></label>
+      <label>Layer spacing <input type="number" name="layerSpacing" min="0" step="1"></label>
+      <label>Node spacing <input type="number" name="nodeSpacing" min="0" step="1"></label>
+      <label>Virtual node size <input type="number" name="virtualNodeSize" min="0" step="1"></label>
+
+      <h3>Tuning</h3>
+      <label>Network simplex thoroughness <input type="number" name="networkSimplexThoroughness" min="0" step="1"></label>
+      <label>Brandes-Köpf layout
+        <select name="brandesKoepfLayout">
+          <option value="-1">Balanced</option>
+          <option value="0">Bottom-right</option>
+          <option value="1">Bottom-left</option>
+          <option value="2">Top-right</option>
+          <option value="3">Top-left</option>
+        </select></label>
+      <label>Random greedy node choice <input type="checkbox" name="nonDeterministicGreedy"></label>
+
+      <h3>Display</h3>
+      <label>Show virtual nodes <input type="checkbox" name="showVirtualNodes"></label>
+      <label>Show node labels <input type="checkbox" name="showLabels"></label>
+
+      <p><button type="button" id="resetSettings">Reset to defaults</button></p>
+    </form>
+  </div>
+</div>
+
+<script>
+const DEFAULTS = {
+  cycleBreaking: "greedy", layering: "networksimplex", ordering: "wmedian",
+  positioning: "sinkcoloring", edgeRouting: "polyline",
+  nodeWidth: 80, nodeHeight: 36, layerSpacing: 150, nodeSpacing: 60, virtualNodeSize: 0,
+  networkSimplexThoroughness: 28, brandesKoepfLayout: -1,
+  nonDeterministicGreedy: false, showVirtualNodes: false, showLabels: true,
+};
+const SAMPLE = `# edit me: one edge per line
+a -> b
+a -> c
+b -> d
+c -> d
+d -> e
+a -> e
+e -> b
+`;
+
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("autog-vis:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("autog-vis:" + k, JSON.stringify(v)); } catch {} },
+};
+
+// ---- settings form ----
+const form = $("settings");
+let settings = { ...DEFAULTS, ...store.get("settings", {}) };
+
+function writeForm() {
+  for (const el of form.elements) {
+    if (!el.name) continue;
+    if (el.type === "checkbox") el.checked = !!settings[el.name];
+    else el.value = settings[el.name];
+  }
+}
+function readForm() {
+  for (const el of form.elements) {
+    if (!el.name) continue;
+    if (el.type === "checkbox") settings[el.name] = el.checked;
+    else if (el.type === "number" || el.name === "brandesKoepfLayout") settings[el.name] = Number(el.value) || 0;
+    else settings[el.name] = el.value;
+  }
+  store.set("settings", settings);
+}
+writeForm();
+form.addEventListener("input", readForm);
+$("resetSettings").onclick = () => { settings = { ...DEFAULTS }; writeForm(); readForm(); };
+$("toggleSettings").onclick = () => { form.hidden = !form.hidden; };
+
+// ---- source editor ----
+const source = $("source");
+source.value = store.get("source", SAMPLE);
+source.addEventListener("input", () => store.set("source", source.value));
+source.addEventListener("keydown", (e) => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    source.setRangeText("\t", source.selectionStart, source.selectionEnd, "end");
+    source.dispatchEvent(new Event("input"));
+  }
+});
+
+// ---- splitter ----
+const left = $("left"), splitter = $("splitter");
+left.style.width = store.get("leftWidth", "30%");
+splitter.addEventListener("pointerdown", (e) => {
+  splitter.setPointerCapture(e.pointerId);
+  splitter.classList.add("dragging");
+  const appW = $("app").clientWidth;
+  const move = (ev) => {
+    const w = Math.min(Math.max(ev.clientX, 120), appW - 126);
+    left.style.width = (w / appW * 100).toFixed(2) + "%";
+  };
+  const up = () => {
+    splitter.classList.remove("dragging");
+    splitter.removeEventListener("pointermove", move);
+    store.set("leftWidth", left.style.width);
+  };
+  splitter.addEventListener("pointermove", move);
+  splitter.addEventListener("pointerup", up, { once: true });
+  e.preventDefault();
+});
+
+// ---- zoom and pan (viewBox based) ----
+const svg = $("canvas"), scene = $("scene");
+let view = null; // {x, y, w, h} in graph coordinates
+let bounds = null;
+let pendingFit = false; // set when fit() is called while the svg has no size yet
+
+function applyView() {
+  const r = svg.getBoundingClientRect();
+  if (!view || !r.width || !r.height) return;
+  // keep the aspect ratio of the element so that zoom is uniform
+  view.h = view.w * (r.height / r.width);
+  svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
+}
+function fit() {
+  if (!bounds) return;
+  const r = svg.getBoundingClientRect();
+  if (!r.width || !r.height) {
+    pendingFit = true;
+    return;
+  }
+  pendingFit = false;
+  const pad = 40;
+  const bw = Math.max(bounds.w, 1) + pad * 2, bh = Math.max(bounds.h, 1) + pad * 2;
+  const scale = Math.max(bw / r.width, bh / r.height);
+  const w = r.width * scale, h = r.height * scale;
+  view = { x: bounds.x - pad - (w - bw) / 2, y: bounds.y - pad - (h - bh) / 2, w, h };
+  applyView();
+}
+$("fit").onclick = fit;
+new ResizeObserver(() => (pendingFit ? fit() : applyView())).observe(svg);
+
+function toGraph(clientX, clientY) {
+  const r = svg.getBoundingClientRect();
+  return { x: view.x + (clientX - r.left) / r.width * view.w, y: view.y + (clientY - r.top) / r.height * view.h };
+}
+svg.addEventListener("wheel", (e) => {
+  if (!view) return;
+  e.preventDefault();
+  const p = toGraph(e.clientX, e.clientY);
+  const k = Math.exp(e.deltaY * (e.ctrlKey ? 0.01 : 0.0015));
+  view.x = p.x - (p.x - view.x) * k;
+  view.y = p.y - (p.y - view.y) * k;
+  view.w *= k;
+  applyView();
+}, { passive: false });
+svg.addEventListener("pointerdown", (e) => {
+  if (!view || e.button !== 0) return;
+  svg.setPointerCapture(e.pointerId);
+  svg.classList.add("panning");
+  const start = toGraph(e.clientX, e.clientY);
+  const move = (ev) => {
+    const p = toGraph(ev.clientX, ev.clientY);
+    view.x -= p.x - start.x;
+    view.y -= p.y - start.y;
+    applyView();
+  };
+  svg.addEventListener("pointermove", move);
+  svg.addEventListener("pointerup", () => {
+    svg.classList.remove("panning");
+    svg.removeEventListener("pointermove", move);
+  }, { once: true });
+});
+
+// ---- layout requests ----
+// the graph is rendered only on explicit request: the Render button or Shift+Enter
+let seq = 0;
+$("render").onclick = requestLayout;
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+    e.preventDefault(); // don't insert a newline in the editor
+    requestLayout();
+  }
+});
+function setStatus(text, isError) {
+  const s = $("status");
+  s.textContent = text;
+  s.classList.toggle("error", !!isError);
+}
+async function requestLayout() {
+  const id = ++seq;
+  setStatus("Computing layout…");
+  let res;
+  try {
+    const r = await fetch("/layout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ source: source.value, settings }),
+    });
+    res = await r.json();
+  } catch (err) {
+    if (id === seq) setStatus("Request failed: " + err, true);
+    return;
+  }
+  if (id !== seq) return; // a newer request is in flight
+  if (res.error) {
+    setStatus(res.error + (res.took ? `  (${res.took})` : ""), true);
+    return;
+  }
+  render(res);
+  const nv = res.nodes.filter(n => n.virtual).length;
+  setStatus(`${res.nodes.length - nv} nodes${nv ? ` + ${nv} virtual` : ""}, ${res.edges.length} edges · ${res.took}`);
+}
+
+// ---- rendering ----
+const NS = "http://www.w3.org/2000/svg";
+function el(name, attrs, parent) {
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function pathData(points, splines) {
+  const p = (q) => `${q[0]},${q[1]}`;
+  if (splines && points.length >= 4 && points.length % 4 === 0) {
+    // piece-wise cubic bezier: chunks of 4 control points, each chunk starts where the previous one ended
+    let d = `M${p(points[0])}`;
+    for (let i = 0; i < points.length; i += 4) d += ` C${p(points[i + 1])} ${p(points[i + 2])} ${p(points[i + 3])}`;
+    return d;
+  }
+  return "M" + points.map(p).join(" L");
+}
+function render(res) {
+  scene.replaceChildren();
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const grow = (x, y) => { minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y); };
+
+  const edges = el("g", {}, scene);
+  for (const e of res.edges) {
+    if (!e.points || e.points.length < 2) continue; // e.g. self-loops are not routed
+    const path = el("path", { class: "edge", d: pathData(e.points, settings.edgeRouting === "splines") }, edges);
+    path.setAttribute(e.arrowHeadStart ? "marker-start" : "marker-end", "url(#arrow)");
+    el("title", {}, path).textContent = `${e.from} → ${e.to}`;
+    for (const q of e.points) grow(q[0], q[1]);
+  }
+
+  const nodes = el("g", {}, scene);
+  for (const n of res.nodes) {
+    const g = el("g", { class: n.virtual ? "node virtual" : "node" }, nodes);
+    el("title", {}, g).textContent = `${n.id}  x=${n.x} y=${n.y} w=${n.w} h=${n.h}`;
+    if (n.virtual && n.w === 0 && n.h === 0) {
+      el("circle", { cx: n.x, cy: n.y, r: 3 }, g);
+    } else {
+      el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: n.virtual ? 0 : 4 }, g);
+    }
+    if (settings.showLabels) {
+      el("text", { x: n.x + n.w / 2, y: n.virtual && n.h === 0 ? n.y - 8 : n.y + n.h / 2 }, g).textContent = n.id;
+    }
+    grow(n.x, n.y);
+    grow(n.x + n.w, n.y + n.h);
+  }
+
+  const first = !bounds;
+  bounds = isFinite(minX) ? { x: minX, y: minY, w: maxX - minX, h: maxY - minY } : null;
+  if (first || !view) fit();
+}
+</script>
+</body>
+</html>
