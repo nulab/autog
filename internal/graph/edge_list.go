@@ -13,9 +13,14 @@ func (list *EdgeList) Remove(e *Edge) {
 	if list == nil {
 		return
 	}
-	for i, f := range *list {
-		if f == e {
-			*list = append((*list)[:i], (*list)[i+1:]...)
+	// compact in place instead of re-slicing inside the range loop, which
+	// would skip the element after each match and revisit a stale last element
+	n := 0
+	for _, f := range *list {
+		if f != e {
+			(*list)[n] = f
+			n++
 		}
 	}
+	*list = (*list)[:n]
 }
