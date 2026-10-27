@@ -16,13 +16,14 @@ Unlike many similar projects that only provide a frontend in their language of c
 # Table of Contents
 - [Usage](#usage)
 - [Overview](#overview)
-- [Imlementation Details](#implementation-details)
+- [Implementation Details](#implementation-details)
   - [Cycle breaking](#cycle-breaking)
   - [Layering](#layering)
   - [Ordering](#ordering)
   - [Positioning](#positioning)
   - [Edge routing](#edge-routing)
   - [References](#references)
+- [Rendering](#rendering)
 - [Status](#status)
 
 ## Usage
@@ -189,6 +190,21 @@ The result is indeed a set of cubic Bezier control points.
 - [BM] Barth and Mutzel, "Simple and Efficient Bilayer Cross Counting", Institut für Computergraphik und Algorithmen Technische Universität Wien ([link](https://pdfs.semanticscholar.org/272d/73edce86bcfac3c82945042cf6733ad281a0.pdf))
 - [Sch] Schneider, "An algorithm for automatically fitting digitized curves" in Andrew S. Glassner, editor, Graphics Gems, pages 612–626. Academic Press, Boston, Mass., 1990. (can be found in internet)
 - [HS] Hershberger and Snoeyink, "Computing minimum length paths of a given homotopy class", Computational Geometry Volume 4, Issue 2, June 1994, Pages 63-97 (can be found in internet)
+
+## Rendering
+
+The library's public API doesn't offer any output rendering facilities out of the box, however for testing and demonstration purposes
+I have added an internal tool to render the layouts. The tool is in `_tools/visualizer`. Launch it with:
+```
+make view
+```
+This serves a very basic html page with a text area, where you can input the graph text, 
+and an SVG canvas, where the final rendered layout is displayed. 
+
+The visualizer includes an options pane that allows selecting different algorithms and rendering parameters. 
+These are the same parameters supported by the library's `Option` type.
+
+The web page is served at `localhost:8080`. The port can be configured by setting the `make` argument `VIEW_PORT`. 
 
 ## Status
 
