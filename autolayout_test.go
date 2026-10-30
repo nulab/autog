@@ -83,6 +83,26 @@ var dotAbstract = [][]string{
 }
 
 func TestLayoutBugfix(t *testing.T) {
+	t.Run("node size overridden", func(t *testing.T) {
+		out := Layout(graph.EdgeSlice{{"a", "b"}},
+			WithNodeFixedSize(100, 50),
+			WithNodeSize(map[string]graph.Size{"a": {W: 10, H: 10}}),
+		)
+		var a, b graph.Node
+		for _, n := range out.Nodes {
+			switch n.ID {
+			case "a":
+				a = n
+			case "b":
+				b = n
+			}
+		}
+		assert.InDelta(t, 10.0, a.W, 0.000001)
+		assert.InDelta(t, 10.0, a.H, 0.000001)
+		assert.InDelta(t, 100.0, b.W, 0.000001)
+		assert.InDelta(t, 50.0, b.H, 0.000001)
+	})
+
 	t.Run("output layout empty nodes", func(t *testing.T) {
 		src := graph.EdgeSlice([][]string{
 			{"N1", "N2"},
