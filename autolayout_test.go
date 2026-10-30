@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
-	"github.com/stretchr/testify/assert"
 )
 
 var dotAbstract = [][]string{
@@ -138,6 +139,21 @@ func TestLayoutBugfix(t *testing.T) {
 			{"N16", "N2"},
 			{"N16", "N12"},
 			{"N16", "N13"},
+		})
+		assert.NotPanics(t, func() {
+			_ = Layout(
+				g,
+				WithNonDeterministicGreedyCycleBreaker(),
+			)
+		})
+	})
+
+	t.Run("greedy cycle breaker fails to break cycles 2", func(t *testing.T) {
+		// github issue #37
+		g := graph.EdgeSlice([][]string{
+			{"n6", "n5"}, {"n6", "n0"}, {"n2", "n0"},
+			{"n0", "n3"}, {"n6", "n5"}, {"n4", "n5"},
+			{"n6", "n0"}, {"n0", "n4"}, {"n6", "n3"},
 		})
 		assert.NotPanics(t, func() {
 			_ = Layout(

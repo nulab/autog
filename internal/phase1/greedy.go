@@ -129,12 +129,16 @@ func execGreedy(g *graph.DGraph, params graph.Params) {
 	}
 
 	// reverse edges that point right
+	rev := make([]*graph.Edge, 0)
 	for _, n := range g.Nodes {
 		for _, e := range n.Out {
 			if p.arcdiag[n] > p.arcdiag[e.To] {
-				e.Reverse()
+				rev = append(rev, e)
 			}
 		}
+	}
+	for _, e := range rev {
+		e.Reverse()
 	}
 }
 
