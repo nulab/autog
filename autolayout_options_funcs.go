@@ -35,7 +35,10 @@ func WithNodeSpacing(spacing float64) Option {
 func WithNodeSize(sizes map[string]graph.Size) Option {
 	return func(o *options) {
 		o.params.NodeSizeFunc = func(n *ig.Node) {
-			n.Size = sizes[n.ID]
+			s, ok := sizes[n.ID]
+			if ok {
+				n.Size = s
+			}
 		}
 	}
 }
