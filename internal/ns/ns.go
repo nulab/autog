@@ -276,7 +276,7 @@ func (p *Processor) setCutValues(g *graph.DGraph) {
 		if !e.IsInSpanningTree {
 			continue
 		}
-		e.CutValue += e.Weight // e itself goes from tail to head by definition
+		e.CutValue = e.Weight // e itself goes from tail to head by definition
 
 		for _, f := range g.Edges {
 			// no other tree edge connects different components, otherwise we'd have two paths to e's target
