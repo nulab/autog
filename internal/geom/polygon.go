@@ -44,21 +44,20 @@ func MergeRects(rects []Rect) Polygon {
 		}
 
 		prev = r
-		i += 2
 	}
 	lps = append(lps, P{prev.TL.X, prev.BR.Y})
 	rps = append(rps, prev.BR)
 
-	points := make([]P, np*2)
+	points := make([]P, 0, len(lps)+len(rps))
 	i := 0
 	for i < len(lps) {
-		points[i] = lps[i]
+		points = append(points, lps[i])
 		i++
 	}
 	r := i
 	j := len(rps) - 1
 	for j >= 0 {
-		points[i] = rps[j]
+		points = append(points, rps[j])
 		i++
 		j--
 	}

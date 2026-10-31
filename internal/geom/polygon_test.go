@@ -32,3 +32,17 @@ func TestMergeRects(t *testing.T) {
 		assert.Equal(t, want[i], poly.Points[i])
 	}
 }
+
+func TestMergeRectsShareSide(t *testing.T) {
+	rects := []Rect{
+		{TL: P{0, 0}, BR: P{10, 10}},
+		{TL: P{0, 10}, BR: P{10, 20}},
+	}
+	poly := MergeRects(rects)
+	want := []P{
+		{0, 0}, {0, 10}, {0, 20}, {10, 20}, {10, 10}, {10, 0},
+	}
+	for i := range poly.Points {
+		assert.Equal(t, want[i], poly.Points[i])
+	}
+}
