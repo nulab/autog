@@ -359,6 +359,22 @@ func TestLayoutBugfix(t *testing.T) {
 		})
 		assert.NotPanics(t, func() { _ = Layout(src, WithPositioning(PositioningSinkColoring)) })
 	})
+
+	t.Run("splines", func(t *testing.T) {
+		t.Run("wrong shortest rects polygon due to >1 virtual nodes adjacency", func(t *testing.T) {
+			src := graph.EdgeSlice{{"n0", "n1"}, {"n2", "n0"}, {"n0", "n2"}, {"n1", "n2"}}
+			assert.NotPanics(t, func() {
+				Layout(
+					src,
+					WithCycleBreaking(CycleBreakingDepthFirst),
+					WithEdgeRouting(EdgeRoutingSplines),
+					WithNodeFixedSize(80, 36),
+					WithLayerSpacing(150),
+					WithNodeSpacing(60),
+				)
+			})
+		})
+	})
 }
 
 func TestOutputVirtualNodes(t *testing.T) {

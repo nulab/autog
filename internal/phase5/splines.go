@@ -97,7 +97,7 @@ func rectVirtualNode(vn *graph.Node, vl *graph.Layer) geom.Rect {
 		n := vl.Nodes[p+1]
 		return geom.Rect{
 			TL: geom.P{vn.X - 10, n.Y},
-			BR: geom.P{n.X, n.Y + n.H},
+			BR: geom.P{n.X, n.Y + vl.H},
 		}
 
 	case p == vl.Len()-1:
@@ -105,20 +105,17 @@ func rectVirtualNode(vn *graph.Node, vl *graph.Layer) geom.Rect {
 		n := vl.Nodes[p-1]
 		return geom.Rect{
 			TL: geom.P{n.X + n.W + 10, n.Y},
-			BR: geom.P{vn.X, n.Y + n.H},
+			BR: geom.P{vn.X, n.Y + vl.H},
 		}
 
 	default:
 		n1 := vl.Nodes[p-1]
 		n2 := vl.Nodes[p+1]
-		return rectBetweenNodes(n1, n2)
-	}
-}
-
-func rectBetweenNodes(n1, n2 *graph.Node) geom.Rect {
-	d := n2.X - (n1.X + n1.W)
-	return geom.Rect{
-		TL: geom.P{n1.X + n1.W + d/3, n1.Y},
-		BR: geom.P{n2.X - d/3, n2.Y + n2.H},
+		// add rect between two nodes
+		d := n2.X - (n1.X + n1.W)
+		return geom.Rect{
+			TL: geom.P{n1.X + n1.W + d/3, n1.Y},
+			BR: geom.P{n2.X - d/3, n2.Y + vl.H},
+		}
 	}
 }
