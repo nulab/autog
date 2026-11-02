@@ -21,7 +21,7 @@ func execOrthoRouting(g *graph.DGraph, routes []routableEdge, params graph.Param
 			sp := startPoint(r.ns[i-1])
 			// virtual nodes have 0 size; another solution here is to consider the layer Y instead of the node Y
 			if r.ns[i-1].IsVirtual {
-				sp[1] += layerh
+				sp[1] += g.Layers[r.ns[i-1].Layer].H
 			}
 			r.Points = append(r.Points, sp)
 			r.Points = append(r.Points, [2]float64{sp[0], sp[1] + halfLayerSpacing})
