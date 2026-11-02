@@ -11,7 +11,8 @@ import (
 	"github.com/nulab/autog/internal/processor/preprocessor"
 )
 
-// Layout executes the layout algorithm on the graph G obtained from source. It panics if G contains no nodes.
+// Layout executes the layout algorithm on the graph G obtained from source.
+// If G contains no nodes, it returns an empty layout.
 func Layout(source graph.Source, opts ...Option) graph.Layout {
 	layoutOpts := defaultOptions
 	for _, opt := range opts {
