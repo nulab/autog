@@ -82,6 +82,11 @@ var dotAbstract = [][]string{
 	{"23", "T1"},
 }
 
+func TestEmptyLayout(t *testing.T) {
+	out := Layout(graph.EdgeSlice{})
+	assert.Zero(t, out)
+}
+
 func TestLayoutBugfix(t *testing.T) {
 	t.Run("node size overridden", func(t *testing.T) {
 		out := Layout(graph.EdgeSlice{{"a", "b"}},
