@@ -358,7 +358,7 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 					s := c.xcoord[uroot] + p.space(u)
 					c.xcoord[v] = max(c.xcoord[v], s)
 				case right:
-					s := c.xcoord[uroot] - p.space(v)
+					s := c.xcoord[uroot] - p.space(w)
 					c.xcoord[v] = min(c.xcoord[v], s)
 				}
 			}
