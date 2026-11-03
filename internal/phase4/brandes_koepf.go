@@ -151,10 +151,9 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 			v := l.Nodes[j-1]
 			w := l.Nodes[j]
 
-			overlaps := w.X > v.X && w.X < v.X+v.W
+			overlaps := w.X < v.X+v.W+p.nodeSpacing
 			if overlaps {
-				shift := v.X + v.W + p.nodeSpacing - w.X
-				w.X += shift
+				w.X = v.X + v.W + p.nodeSpacing
 			}
 		}
 	}
@@ -358,7 +357,7 @@ func (p *brandesKoepfPositioner) placeBlock(v *graph.Node, c *classes, layout la
 					s := c.xcoord[uroot] + p.space(u)
 					c.xcoord[v] = max(c.xcoord[v], s)
 				case right:
-					s := c.xcoord[uroot] - p.space(v)
+					s := c.xcoord[uroot] - p.space(w)
 					c.xcoord[v] = min(c.xcoord[v], s)
 				}
 			}
