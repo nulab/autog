@@ -151,10 +151,9 @@ func execBrandesKoepf(g *graph.DGraph, params graph.Params) {
 			v := l.Nodes[j-1]
 			w := l.Nodes[j]
 
-			overlaps := w.X > v.X && w.X < v.X+v.W
+			overlaps := w.X < v.X+v.W+p.nodeSpacing
 			if overlaps {
-				shift := v.X + v.W + p.nodeSpacing - w.X
-				w.X += shift
+				w.X = v.X + v.W + p.nodeSpacing
 			}
 		}
 	}
