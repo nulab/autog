@@ -42,6 +42,12 @@ var defaultOptions = options{
 		LayerSpacing:                             150.0,
 		NodeSpacing:                              60.0,
 		BrandesKoepfLayout:                       -1,
+		// without a fixed default size, spline routing may fail.
+		// the layer height is computed at the end of phase 4 based on the nodes height;
+		// if the node size wasn't set and remains zero, the layer height is also zero
+		// and that breaks the shortest path router
+		NodeFixedH: 50.0,
+		NodeFixedW: 50.0,
 	},
 	monitor: nil,
 	output:  defaultOutputOptions,

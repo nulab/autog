@@ -37,14 +37,15 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		return graph.Layout{}
 	}
 
-	if layoutOpts.params.NodeFixedSizeFunc != nil {
-		for _, n := range G.Nodes {
-			layoutOpts.params.NodeFixedSizeFunc(n)
-		}
+	for _, n := range G.Nodes {
+		n.W = layoutOpts.params.NodeFixedW
+		n.H = layoutOpts.params.NodeFixedH
 	}
-	if layoutOpts.params.NodeSizeFunc != nil {
-		for _, n := range G.Nodes {
-			layoutOpts.params.NodeSizeFunc(n)
+
+	for _, n := range G.Nodes {
+		if s, ok := layoutOpts.params.NodeSizeMap[n.ID]; ok {
+			n.W = s.W
+			n.H = s.H
 		}
 	}
 

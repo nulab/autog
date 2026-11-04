@@ -9,6 +9,7 @@ import (
 	"github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
+	"github.com/nulab/autog/internal/phase4"
 )
 
 var dotAbstract = [][]string{
@@ -367,10 +368,9 @@ func TestLayoutBugfix(t *testing.T) {
 
 	t.Run("splines", func(t *testing.T) {
 		t.Run("wrong shortest rects polygon due to >1 virtual nodes adjacency", func(t *testing.T) {
-			src := graph.EdgeSlice{{"n0", "n1"}, {"n2", "n0"}, {"n0", "n2"}, {"n1", "n2"}}
 			assert.NotPanics(t, func() {
 				Layout(
-					src,
+					graph.EdgeSlice{{"n0", "n1"}, {"n2", "n0"}, {"n0", "n2"}, {"n1", "n2"}},
 					WithCycleBreaking(CycleBreakingDepthFirst),
 					WithEdgeRouting(EdgeRoutingSplines),
 					WithNodeFixedSize(80, 36),
@@ -378,6 +378,20 @@ func TestLayoutBugfix(t *testing.T) {
 					WithNodeSpacing(60),
 				)
 			})
+		})
+
+		t.Run("virtual node size breaks shortest path rect", func(t *testing.T) {
+			// this reproducer was likely caused by the shortest path polygon being discontinuous
+			// same as the previous unit test, but different cause
+			out := Layout(graph.EdgeSlice{
+				{"n3", "n3"}, {"n1", "n2"}, {"n1", "n0"}, {"n0", "n0"}, {"n2", "n3"}, {"n2", "n1"},
+				{"n0", "n2"}, {"n3", "n1"}, {"n1", "n2"}, {"n3", "n2"}, {"n0", "n2"}, {"n3", "n3"},
+				{"n3", "n0"}, {"n2", "n3"}, {"n1", "n0"}, {"n3", "n3"}, {"n1", "n0"}, {"n1", "n3"},
+			},
+				WithCycleBreaking(CycleBreakingDepthFirst),
+				WithEdgeRouting(EdgeRoutingSplines),
+			)
+			assert.NotZero(t, out)
 		})
 	})
 }
@@ -488,7 +502,8 @@ func TestNoRegression(t *testing.T) {
 
 	t.Run("Dot abstract with default options", func(t *testing.T) {
 		assert.NotPanics(t, func() {
-			Layout(graph.EdgeSlice(dotAbstract))
+			Layout(graph.EdgeSlice(dotAbstract),
+				WithPositioning(phase4.BrandesKoepf))
 		})
 	})
 }
