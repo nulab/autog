@@ -43,7 +43,7 @@ func removeTwoNodeCycles(g *graph.DGraph) {
 
 	for _, e := range g.Edges {
 		a, b := e.From, e.To
-		if seen[pair{a, b}] || seen[pair{b, a}] {
+		if seen[pair{b, a}] {
 			rev[e] = true
 		} else {
 			seen[pair{a, b}] = true
