@@ -13,12 +13,14 @@ const (
 // Params holds parameters and options that are used by the layout algorithms
 // and don't strictly belong to the graph itself
 type Params struct {
+	// Sets the same width to all non-virtual nodes
+	NodeFixedW float64
 
-	// Sets the same width and height to all non-virtual nodes
-	NodeFixedSizeFunc func(n *Node)
+	// Sets the same height to all non-virtual nodes
+	NodeFixedH float64
 
-	// Sets a width and height to individual non-virtual nodes
-	NodeSizeFunc func(n *Node)
+	// Sets a specific width and height to individual non-virtual nodes
+	NodeSizeMap map[string]Size
 
 	// ---- phase1 options ---
 

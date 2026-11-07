@@ -9,6 +9,7 @@ import (
 	"github.com/nulab/autog/internal/phase3"
 	"github.com/nulab/autog/internal/phase4"
 	"github.com/nulab/autog/internal/phase5"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,8 +42,9 @@ func TestOptions(t *testing.T) {
 	assert.Equal(t, 10.0, opts.params.NodeSpacing)
 	assert.Equal(t, 2, opts.params.BrandesKoepfLayout)
 	assert.Nil(t, opts.monitor)
-	assert.NotNil(t, opts.params.NodeFixedSizeFunc)
-	assert.NotNil(t, opts.params.NodeSizeFunc)
+	assert.NotNil(t, opts.params.NodeSizeMap)
+	assert.Equal(t, 100.0, opts.params.NodeFixedW)
+	assert.Equal(t, 100.0, opts.params.NodeFixedH)
 	assert.Equal(t, 50.0, opts.params.VirtualNodeFixedSize)
 	assert.True(t, opts.params.GreedyCycleBreakerRandomNodeChoice)
 

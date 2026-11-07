@@ -5,10 +5,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
 	imonitor "github.com/nulab/autog/internal/monitor"
+	"github.com/nulab/autog/internal/phase4"
 )
 
 var dotAbstract = [][]string{
@@ -85,6 +87,23 @@ var dotAbstract = [][]string{
 func TestEmptyLayout(t *testing.T) {
 	out := Layout(graph.EdgeSlice{})
 	assert.Zero(t, out)
+}
+
+func TestCappedVirtualNodeSize(t *testing.T) {
+	out := Layout(
+		graph.EdgeSlice{{"a", "b"}, {"b", "c"}, {"a", "c"}},
+		WithNodeFixedSize(20, 20),
+		WithVirtualNodeFixedSize(25),
+		WithOutputVirtualNodes(true),
+	)
+	var v graph.Node
+	for _, n := range out.Nodes {
+		if n.ID == "V1" {
+			v = n
+		}
+	}
+	require.NotZero(t, v)
+	assert.InDelta(t, 20.0, v.H, 1e-8)
 }
 
 func TestLayoutBugfix(t *testing.T) {
@@ -367,10 +386,9 @@ func TestLayoutBugfix(t *testing.T) {
 
 	t.Run("splines", func(t *testing.T) {
 		t.Run("wrong shortest rects polygon due to >1 virtual nodes adjacency", func(t *testing.T) {
-			src := graph.EdgeSlice{{"n0", "n1"}, {"n2", "n0"}, {"n0", "n2"}, {"n1", "n2"}}
 			assert.NotPanics(t, func() {
 				Layout(
-					src,
+					graph.EdgeSlice{{"n0", "n1"}, {"n2", "n0"}, {"n0", "n2"}, {"n1", "n2"}},
 					WithCycleBreaking(CycleBreakingDepthFirst),
 					WithEdgeRouting(EdgeRoutingSplines),
 					WithNodeFixedSize(80, 36),
@@ -378,6 +396,20 @@ func TestLayoutBugfix(t *testing.T) {
 					WithNodeSpacing(60),
 				)
 			})
+		})
+
+		t.Run("virtual node size breaks shortest path rect", func(t *testing.T) {
+			// this reproducer was likely caused by the shortest path polygon being discontinuous
+			// same as the previous unit test, but different cause
+			out := Layout(graph.EdgeSlice{
+				{"n3", "n3"}, {"n1", "n2"}, {"n1", "n0"}, {"n0", "n0"}, {"n2", "n3"}, {"n2", "n1"},
+				{"n0", "n2"}, {"n3", "n1"}, {"n1", "n2"}, {"n3", "n2"}, {"n0", "n2"}, {"n3", "n3"},
+				{"n3", "n0"}, {"n2", "n3"}, {"n1", "n0"}, {"n3", "n3"}, {"n1", "n0"}, {"n1", "n3"},
+			},
+				WithCycleBreaking(CycleBreakingDepthFirst),
+				WithEdgeRouting(EdgeRoutingSplines),
+			)
+			assert.NotZero(t, out)
 		})
 	})
 }
@@ -488,7 +520,8 @@ func TestNoRegression(t *testing.T) {
 
 	t.Run("Dot abstract with default options", func(t *testing.T) {
 		assert.NotPanics(t, func() {
-			Layout(graph.EdgeSlice(dotAbstract))
+			Layout(graph.EdgeSlice(dotAbstract),
+				WithPositioning(phase4.BrandesKoepf))
 		})
 	})
 }
