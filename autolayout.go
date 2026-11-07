@@ -37,16 +37,26 @@ func Layout(source graph.Source, opts ...Option) graph.Layout {
 		return graph.Layout{}
 	}
 
+	// record max node height while applying opts and use it to cap virtual node size
+	maxNodeH := 0.0
 	for _, n := range G.Nodes {
 		n.W = layoutOpts.params.NodeFixedW
 		n.H = layoutOpts.params.NodeFixedH
+		maxNodeH = max(maxNodeH, n.H)
 	}
 
 	for _, n := range G.Nodes {
 		if s, ok := layoutOpts.params.NodeSizeMap[n.ID]; ok {
 			n.W = s.W
 			n.H = s.H
+			maxNodeH = max(maxNodeH, n.H)
 		}
+	}
+
+	// cap virtual node height; the height can affect the shortest path algo in phase 5
+	if layoutOpts.params.VirtualNodeFixedSize > maxNodeH {
+		// TODO: log a warning here
+		layoutOpts.params.VirtualNodeFixedSize = maxNodeH
 	}
 
 	// return only relevant data to the caller

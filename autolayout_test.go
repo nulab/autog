@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/nulab/autog/graph"
 	ig "github.com/nulab/autog/internal/graph"
@@ -86,6 +87,23 @@ var dotAbstract = [][]string{
 func TestEmptyLayout(t *testing.T) {
 	out := Layout(graph.EdgeSlice{})
 	assert.Zero(t, out)
+}
+
+func TestCappedVirtualNodeSize(t *testing.T) {
+	out := Layout(
+		graph.EdgeSlice{{"a", "b"}, {"b", "c"}, {"a", "c"}},
+		WithNodeFixedSize(20, 20),
+		WithVirtualNodeFixedSize(25),
+		WithOutputVirtualNodes(true),
+	)
+	var v graph.Node
+	for _, n := range out.Nodes {
+		if n.ID == "V1" {
+			v = n
+		}
+	}
+	require.NotZero(t, v)
+	assert.InDelta(t, 20.0, v.H, 1e-8)
 }
 
 func TestLayoutBugfix(t *testing.T) {
