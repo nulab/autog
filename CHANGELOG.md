@@ -1,4 +1,22 @@
 
+v0.13.0 / 2026-11-07
+==================
+
+  * [preprocess] Cap virtual node height to maximum non-virtual node height
+  * [opts] Set a default node fixed size
+  * [p1] Do not consider parallel edges as two-node cycles
+  * [p4-b&k] Fix overlap adjustment at the end of algorithm
+  * [p4-b&k] Use next node in the block to assign X to blockroot
+  * Fix doc of autog.Layout incorrectly stating the function panics on an empty input
+  * [p5-ortho] Use node's own layer as height offset
+  * [geom] MergeRects no longer keeps zero-value points in polygon when rects share a side
+  * [p5-splines] Fix wrong rect corridor produced by rectVirtualNode caused by adjacent zero-size virtual nodes
+  * [p5-splines] Fix t1 incorrectly coming from lower layer
+  * [opts] Prevent named node sizes from overriding fixed size of nodes not named
+  * [p1-greedy] Collect edges before reversing them
+  * Add make recipe to start visualizer; update README
+  * Add browser-based visualizer
+
 v0.12.0 / 2026-10-14
 ==================
 
